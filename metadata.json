@@ -1,0 +1,6 @@
+{
+  "name": "MOEI Autonomous Rescheduling Engine",
+  "description": "AI Agent for instant assessment of housing arrears rescheduling requests — MOEI x 42 Abu Dhabi Hackathon",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
