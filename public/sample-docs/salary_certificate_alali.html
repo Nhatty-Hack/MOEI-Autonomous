@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pension Certificate — Fatima Hassan Al-Ali</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', 'Arial', sans-serif;
+      background: #1C2B22;
+      min-height: 100vh;
+      padding: 30px 20px;
+      print-color-adjust: exact;
+      -webkit-print-color-adjust: exact;
+    }
+    .print-tip {
+      text-align: center;
+      background: #00523B;
+      color: white;
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      margin-bottom: 20px;
+      max-width: 794px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .page {
+      width: 794px;
+      min-height: 1123px;
+      background: #FFFFFF;
+      margin: 0 auto;
+      position: relative;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.35);
+      overflow: hidden;
+    }
+
+    /* Green top bar */
+    .page::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 7px;
+      background: linear-gradient(90deg, #00523B, #007A58, #00523B);
+    }
+
+    /* Decorative side bars */
+    .page::after {
+      content: '';
+      position: absolute;
+      top: 7px; left: 0; bottom: 0;
+      width: 5px;
+      background: linear-gradient(180deg, #C8922A 0%, #E8B84A 50%, #C8922A 100%);
+    }
+
+    /* Watermark */
+    .watermark {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-35deg);
+      font-size: 75px;
+      font-weight: 900;
+      color: rgba(0,82,59,0.035);
+      letter-spacing: 5px;
+      font-family: 'Cairo', sans-serif;
+      pointer-events: none;
+      white-space: nowrap;
+      z-index: 0;
+    }
+
+    /* Decorative border */
+    .border-frame {
+      position: absolute;
+      top: 18px; left: 18px; right: 18px; bottom: 18px;
+      border: 1px solid rgba(0,82,59,0.15);
+      pointer-events: none;
+    }
+    .border-frame::before {
+      content: '';
+      position: absolute;
+      top: 4px; left: 4px; right: 4px; bottom: 4px;
+      border: 0.5px solid rgba(200,146,42,0.1);
+    }
+
+    .content { padding: 32px 44px 32px 52px; position: relative; z-index: 1; }
+
+    /* ── UAE Government Top Banner ── */
+    .uae-banner {
+      text-align: center;
+      padding-bottom: 14px;
+      border-bottom: 1px solid #E0E8E4;
+      margin-bottom: 18px;
+    }
+    .uae-banner-text-ar {
+      font-family: 'Cairo', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      color: #00523B;
+      direction: rtl;
+      letter-spacing: 1px;
+    }
+    .uae-banner-text-en {
+      font-size: 10px;
+      font-weight: 600;
+      color: #00523B;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    /* ── Header ── */
+    .doc-header {
+      display: grid;
+      grid-template-columns: 90px 1fr 90px;
+      align-items: center;
+      gap: 16px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid #00523B;
+      margin-bottom: 4px;
+    }
+    .org-name-en { font-size: 15px; font-weight: 700; color: #00523B; letter-spacing: 0.5px; text-align: center; }
+    .org-name-ar { font-family: 'Cairo', sans-serif; font-size: 14px; font-weight: 700; color: #00523B; direction: rtl; text-align: center; margin-top: 4px; }
+    .org-sub { font-size: 8.5px; color: #777; text-align: center; margin-top: 5px; letter-spacing: 0.3px; }
+
+    .doc-ref-area { text-align: right; }
+    .doc-ref-label { font-size: 8px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+    .doc-ref-value { font-size: 10.5px; font-weight: 600; color: #00523B; font-family: monospace; }
+
+    /* ── Gold divider ── */
+    .gold-bar { height: 3px; background: linear-gradient(90deg, #C8922A 0%, #E8B84A 50%, #C8922A 100%); margin: 0 -52px 0 -52px; }
+
+    /* ── Title block ── */
+    .doc-title-block {
+      background: #00523B;
+      padding: 16px;
+      text-align: center;
+      margin: 0 -44px 0 -52px;
+    }
+    .doc-title-en { font-size: 18px; font-weight: 700; color: #FFFFFF; letter-spacing: 3px; text-transform: uppercase; }
+    .doc-title-ar { font-family: 'Cairo', sans-serif; font-size: 16px; font-weight: 700; color: #E8B84A; direction: rtl; margin-top: 3px; }
+
+    /* ── Date row ── */
+    .date-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 11px 0;
+      border-bottom: 1px solid #E8E0D0;
+      font-size: 11px;
+      color: #555;
+    }
+    .date-row span { font-weight: 600; color: #00523B; }
+
+    /* ── Details ── */
+    .details-section {
+      margin: 14px 0;
+      border: 1px solid #D8E8E0;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .details-header {
+      background: #F0F8F4;
+      padding: 8px 14px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #00523B;
+      border-bottom: 1px solid #D8E8E0;
+    }
+    .details-grid { display: grid; grid-template-columns: 1fr 1fr; }
+    .detail-row {
+      padding: 10px 14px;
+      border-bottom: 1px solid #F0EBE0;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .detail-row:nth-child(even) { background: #FAFDF9; }
+    .detail-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; color: #888; font-weight: 600; }
+    .detail-value { font-size: 12.5px; font-weight: 600; color: #1A1A1A; }
+    .detail-value.mono { font-family: monospace; }
+
+    /* ── Pension amount feature ── */
+    .pension-feature {
+      background: #00523B;
+      border-radius: 8px;
+      padding: 22px 28px;
+      text-align: center;
+      margin: 18px 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .pension-feature::before {
+      content: '';
+      position: absolute;
+      top: 0; right: 0;
+      width: 120px; height: 120px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 50%;
+      transform: translate(40px, -40px);
+    }
+    .pension-label-en { font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 2px; }
+    .pension-label-ar { font-family: 'Cairo', sans-serif; font-size: 12px; color: rgba(255,255,255,0.7); direction: rtl; margin-top: 3px; }
+    .pension-amount { font-size: 36px; font-weight: 700; color: #E8B84A; font-family: monospace; margin: 10px 0; letter-spacing: 2px; }
+    .pension-amount-words { font-size: 11px; color: rgba(255,255,255,0.6); }
+    .pension-amount-words-ar { font-family: 'Cairo', sans-serif; font-size: 11px; color: rgba(255,255,255,0.6); direction: rtl; margin-top: 3px; }
+
+    /* ── Payment info ── */
+    .payment-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      margin: 14px 0;
+    }
+    .payment-card {
+      border: 1px solid #D8E8E0;
+      border-radius: 6px;
+      padding: 10px 12px;
+      border-top: 3px solid #00523B;
+    }
+    .pay-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; color: #888; font-weight: 600; }
+    .pay-value { font-size: 12px; font-weight: 700; color: #00523B; margin-top: 3px; }
+    .pay-value-ar { font-family: 'Cairo', sans-serif; font-size: 10px; color: #888; direction: rtl; margin-top: 2px; }
+
+    /* ── Certification ── */
+    .certification {
+      margin: 14px 0;
+      padding: 14px;
+      background: #F4FAF6;
+      border-left: 3px solid #00523B;
+      border-radius: 0 4px 4px 0;
+    }
+    .certification p { font-size: 11.5px; color: #333; line-height: 1.7; }
+    .certification .ar { font-family: 'Cairo', sans-serif; direction: rtl; font-size: 12px; color: #222; margin-top: 8px; }
+
+    /* ── Validity notice ── */
+    .validity-notice {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 14px;
+      background: #FFF9E8;
+      border: 1px solid #E8C870;
+      border-radius: 4px;
+      margin: 10px 0;
+      font-size: 11px;
+      color: #7A5A10;
+    }
+
+    /* ── Signature + stamp ── */
+    .sign-stamp-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-top: 24px;
+      padding-top: 18px;
+      border-top: 1px solid #E8E0D0;
+    }
+    .sig-line { width: 180px; height: 1px; background: #333; margin-bottom: 6px; }
+    .sig-name { font-size: 12px; font-weight: 700; color: #1A1A1A; }
+    .sig-title { font-size: 10px; color: #666; margin-top: 2px; }
+
+    /* ── Footer ── */
+    .doc-footer {
+      text-align: center;
+      padding-top: 16px;
+      margin-top: 10px;
+      border-top: 1px solid #F0EBE0;
+      font-size: 9px;
+      color: #AAA;
+      line-height: 1.6;
+    }
+
+    /* ── Security strip ── */
+    .security-strip {
+      background: repeating-linear-gradient(
+        45deg, #00523B 0px, #00523B 4px, #007A58 4px, #007A58 8px
+      );
+      height: 7px;
+      margin: 0 -44px 0 -52px;
+      opacity: 0.8;
+    }
+
+    @media print {
+      body { background: white; padding: 0; }
+      .print-tip { display: none; }
+      .page { box-shadow: none; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="print-tip">
+  📄 Press <strong>Ctrl+P</strong> → Save as PDF to generate the document file
+</div>
+
+<div class="page">
+  <div class="border-frame"></div>
+  <div class="watermark">معتمد</div>
+
+  <div class="content">
+
+    <!-- ═══ UAE GOVERNMENT BANNER ═══ -->
+    <div class="uae-banner">
+      <div class="uae-banner-text-ar">دولة الإمارات العربية المتحدة</div>
+      <div class="uae-banner-text-en">United Arab Emirates — Government of Abu Dhabi</div>
+    </div>
+
+    <!-- ═══ HEADER ═══ -->
+    <div class="doc-header">
+      <!-- UAE Coat of Arms -->
+      <div style="text-align:center">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 95" width="70" height="67">
+          <text x="50" y="9" text-anchor="middle" font-size="8" fill="#C8922A" letter-spacing="3" font-family="serif">★★★★★★★</text>
+          <path d="M50 30 C43 26 32 22 14 28 C25 35 42 39 50 42" fill="#00523B"/>
+          <path d="M50 30 C57 26 68 22 86 28 C75 35 58 39 50 42" fill="#00523B"/>
+          <ellipse cx="50" cy="56" rx="8" ry="15" fill="#00523B"/>
+          <circle cx="50" cy="33" r="10" fill="#00523B"/>
+          <path d="M50 23 C47 18 44 19 47 23" fill="#00523B"/>
+          <path d="M50 23 C53 18 56 19 53 23" fill="#00523B"/>
+          <path d="M45 37 Q42 40 44 42 L48 41 L50 38 Z" fill="#003322"/>
+          <circle cx="47" cy="32" r="2.2" fill="#1A0A02"/>
+          <circle cx="46.5" cy="31.5" r="0.7" fill="white"/>
+          <rect x="44" y="50" width="12" height="14" rx="1" fill="white"/>
+          <rect x="44" y="50" width="2.8" height="14" fill="#009944"/>
+          <rect x="44" y="50" width="12" height="3.5" fill="#EE1111"/>
+          <rect x="44" y="60.5" width="12" height="3.5" fill="#111111"/>
+          <path d="M45 70 L43 82" stroke="#C8922A" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M50 71 L50 83" stroke="#C8922A" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M55 70 L57 82" stroke="#C8922A" stroke-width="2.5" stroke-linecap="round"/>
+          <rect x="20" y="87" width="60" height="7" rx="3.5" fill="#C8922A" opacity="0.7"/>
+          <text x="50" y="93" text-anchor="middle" font-size="4.5" fill="white" font-family="Arial" font-weight="bold" letter-spacing="0.3">UNITED ARAB EMIRATES</text>
+        </svg>
+      </div>
+
+      <!-- Org Name -->
+      <div>
+        <div class="org-name-en">Abu Dhabi Retirement Pensions<br>and Benefits Fund</div>
+        <div class="org-name-ar">صندوق أبوظبي للتقاعد والمزايا</div>
+        <div class="org-sub">Government of Abu Dhabi · P.O. Box 3100 · Abu Dhabi, UAE · Tel: +971 2 679 0000</div>
+      </div>
+
+      <!-- Ref -->
+      <div class="doc-ref-area">
+        <div class="doc-ref-label">Certificate No.</div>
+        <div class="doc-ref-value">ADRPBF-PC-2026-04821</div>
+        <div style="margin-top:8px">
+          <div class="doc-ref-label">Date of Issue</div>
+          <div class="doc-ref-value">01 June 2026</div>
+          <div class="doc-ref-value" style="font-family:'Cairo',sans-serif;direction:rtl;font-size:10px;color:#888;margin-top:2px">5 ذو الحجة 1447هـ</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="gold-bar"></div>
+
+    <!-- ═══ TITLE ═══ -->
+    <div class="doc-title-block">
+      <div class="doc-title-en">Pension Certificate</div>
+      <div class="doc-title-ar">شهادة صرف المعاش التقاعدي</div>
+    </div>
+
+    <div class="date-row">
+      <div>Ref: <span>MSZHP_100302 / EDB_CUS_002305</span></div>
+      <div style="font-family:'Cairo',sans-serif;direction:rtl">تاريخ الإصدار: <span>1 يونيو 2026</span></div>
+    </div>
+
+    <!-- ═══ ADDRESSES ═══ -->
+    <div style="padding: 14px 0 10px; font-size: 12px; color: #333; line-height: 1.7;">
+      <strong>TO WHOM IT MAY CONCERN,</strong><br>
+      This is to certify that the following individual is a registered pensioner with the Abu Dhabi Retirement Pensions and Benefits Fund, and is currently receiving a monthly pension as detailed below:
+    </div>
+    <div style="font-family:'Cairo',sans-serif;direction:rtl;font-size:12px;color:#333;line-height:1.7;margin-bottom:14px">
+      <strong>إلى من يهمه الأمر،</strong><br>
+      يُشهد بموجب هذه الوثيقة أن صاحبة المعاش المذكورة أدناه مسجلة لدى صندوق أبوظبي للتقاعد والمزايا وتتلقى معاشاً شهرياً تقاعدياً على النحو المبين أدناه:
+    </div>
+
+    <!-- ═══ PENSIONER DETAILS ═══ -->
+    <div class="details-section">
+      <div class="details-header">Pensioner Particulars — بيانات صاحبة المعاش</div>
+      <div class="details-grid">
+        <div class="detail-row">
+          <div class="detail-label">Full Name (English)</div>
+          <div class="detail-value">Fatima Hassan Al-Ali</div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-label">الاسم الكامل (بالعربية)</div>
+          <div class="detail-value" style="font-family:'Cairo',sans-serif;direction:rtl">فاطمة حسن العلي</div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-label">Emirates ID</div>
+          <div class="detail-value mono">784-1968-1234567-5</div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-label">Pension File Number</div>
+          <div class="detail-value mono">ADRPBF-PF-004821</div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-label">Marital Status</div>
+          <div class="detail-value">Widowed — أرملة</div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-label">Retirement Date</div>
+          <div class="detail-value">15 March 2010</div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-label">Previous Employer</div>
+          <div class="detail-value">Abu Dhabi Education Council</div>
+          <div class="detail-label" style="font-family:'Cairo',sans-serif;direction:rtl;margin-top:2px">مجلس أبوظبي للتعليم</div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-label">Service Years</div>
+          <div class="detail-value">25 Years (1985 — 2010)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ PENSION AMOUNT FEATURE ═══ -->
+    <div class="pension-feature">
+      <div class="pension-label-en">Monthly Pension Amount</div>
+      <div class="pension-label-ar">مبلغ المعاش التقاعدي الشهري</div>
+      <div class="pension-amount">AED 18,000.00</div>
+      <div class="pension-amount-words">Eighteen Thousand UAE Dirhams Only</div>
+      <div class="pension-amount-words-ar">ثمانية عشر ألف درهم إماراتي فقط لا غير</div>
+    </div>
+
+    <!-- ═══ PAYMENT DETAILS ═══ -->
+    <div class="payment-grid">
+      <div class="payment-card">
+        <div class="pay-label">Payment Method</div>
+        <div class="pay-value">Bank Transfer</div>
+        <div class="pay-value-ar">حوالة بنكية</div>
+      </div>
+      <div class="payment-card">
+        <div class="pay-label">Bank Account</div>
+        <div class="pay-value" style="font-family:monospace;font-size:11px">ENBD-7721-XXX-XXXX</div>
+        <div class="pay-value-ar">بنك الإمارات دبي الوطني</div>
+      </div>
+      <div class="payment-card">
+        <div class="pay-label">Payment Frequency</div>
+        <div class="pay-value">Monthly — 1st</div>
+        <div class="pay-value-ar">شهرياً — أول كل شهر</div>
+      </div>
+    </div>
+
+    <!-- ═══ CERTIFICATION TEXT ═══ -->
+    <div class="certification">
+      <p>We hereby certify that the above-mentioned information is accurate and reflects the current pension entitlement of the beneficiary as maintained in our official records. This certificate is issued for official use at government agencies and financial institutions.</p>
+      <p class="ar">يُشهد بموجب هذه الوثيقة أن المعلومات الواردة أعلاه صحيحة ودقيقة وتعكس استحقاق المعاش الحالي لصاحبة المعاش وفقاً لسجلاتنا الرسمية. تصدر هذه الشهادة للاستخدام الرسمي لدى الجهات الحكومية والمؤسسات المالية.</p>
+    </div>
+
+    <!-- ═══ VALIDITY ═══ -->
+    <div class="validity-notice">
+      <svg width="16" height="16" fill="none" stroke="#C8922A" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+      <div>
+        <strong>Valid for 30 days from date of issue (01 June 2026 — 01 July 2026).</strong>
+        <div style="font-family:'Cairo',sans-serif;direction:rtl;margin-top:2px;font-size:10.5px">صالحة لمدة 30 يوماً من تاريخ الإصدار (1 يونيو 2026 — 1 يوليو 2026)</div>
+      </div>
+    </div>
+
+    <!-- ═══ SIGNATURE + STAMP ═══ -->
+    <div class="sign-stamp-row">
+      <div>
+        <div style="height:40px;display:flex;align-items:flex-end">
+          <div style="font-size:24px;color:#00523B;font-family:'Cairo',sans-serif;opacity:0.55;transform:rotate(-4deg);letter-spacing:-1px">Salem</div>
+        </div>
+        <div class="sig-line"></div>
+        <div class="sig-name">Salem Ahmed Al-Mazrouei</div>
+        <div style="font-family:'Cairo',sans-serif;direction:rtl;font-size:12px;color:#444;margin-top:2px">سالم أحمد المزروعي</div>
+        <div class="sig-title">Director, Pension Disbursement — مدير صرف المعاشات</div>
+        <div class="sig-title" style="margin-top:3px">Abu Dhabi Retirement Pensions and Benefits Fund</div>
+      </div>
+
+      <!-- Official Stamp -->
+      <svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" style="transform:rotate(-10deg);opacity:0.70">
+        <defs>
+          <path id="arc-out" d="M 64,10 A 54,54 0 1,1 63.99,10"/>
+          <path id="arc-in"  d="M 64,24 A 40,40 0 1,0 63.99,24"/>
+        </defs>
+        <circle cx="64" cy="64" r="57" fill="none" stroke="#00523B" stroke-width="2.5"/>
+        <circle cx="64" cy="64" r="49" fill="none" stroke="#00523B" stroke-width="1"/>
+        <circle cx="64" cy="64" r="42" fill="none" stroke="#C8922A" stroke-width="0.7"/>
+        <text font-size="7" fill="#00523B" font-family="Arial" font-weight="bold">
+          <textPath href="#arc-out" startOffset="3%">ABU DHABI RETIREMENT PENSIONS · صندوق أبوظبي للتقاعد ·</textPath>
+        </text>
+        <text font-size="6.5" fill="#00523B" font-family="Arial">
+          <textPath href="#arc-in" startOffset="8%">GOVERNMENT OF ABU DHABI · حكومة أبوظبي ·</textPath>
+        </text>
+        <text x="64" y="56" text-anchor="middle" font-size="9" fill="#00523B" font-weight="bold" font-family="Arial">ADRPBF</text>
+        <text x="64" y="68" text-anchor="middle" font-size="7" fill="#00523B" font-family="Arial">OFFICIAL</text>
+        <text x="64" y="78" text-anchor="middle" font-size="7" fill="#C8922A" font-family="Arial">مُعتمد</text>
+        <text x="64" y="90" text-anchor="middle" font-size="6" fill="#00523B" font-family="Arial">2026</text>
+      </svg>
+    </div>
+
+    <!-- ═══ FOOTER ═══ -->
+    <div class="doc-footer">
+      <div>Abu Dhabi Retirement Pensions and Benefits Fund · Abu Dhabi, UAE · www.adrpbf.gov.ae · +971 2 679 0000</div>
+      <div style="font-family:'Cairo',sans-serif;direction:rtl;margin-top:3px">صندوق أبوظبي للتقاعد والمزايا · أبوظبي، الإمارات العربية المتحدة · للتحقق: 0000 679 2 971+</div>
+    </div>
+
+  </div><!-- end .content -->
+
+  <div class="security-strip"></div>
+
+</div><!-- end .page -->
+
+</body>
+</html>

@@ -1,3 +1,4 @@
+import { useState, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import { ReschedulingApplication, AgentRecommendation } from '../types';
 import { motion } from 'motion/react';
@@ -12,6 +13,7 @@ import {
   Activity,
   LogOut,
 } from 'lucide-react';
+import DocumentValidator, { type DocValidationState } from './DocumentValidator';
 
 interface BeneficiaryViewProps {
   application: ReschedulingApplication;
@@ -89,6 +91,10 @@ export default function BeneficiaryView({
   onSubmitForAssessment,
   onLogout,
 }: BeneficiaryViewProps) {
+  const [consentChecked, setConsentChecked] = useState(false);
+  const [docState, setDocState] = useState<DocValidationState>({ allRequiredUploaded: false, hasRequiresReview: false });
+  const handleDocChange = useCallback((s: DocValidationState) => setDocState(s), []);
+
   return (
     <div style={{ maxWidth: '680px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
@@ -448,28 +454,62 @@ export default function BeneficiaryView({
             </ul>
           </div>
 
+          {/* AI Document Upload & Validation */}
+          <DocumentValidator onChange={handleDocChange} />
+
+          {/* Consent checkbox */}
+          <div
+            style={{
+              backgroundColor: '#FFFFFF',
+              border: `1px solid ${docState.hasRequiresReview ? '#F0C888' : '#E8E0D0'}`,
+              borderTop: `3px solid ${docState.hasRequiresReview ? '#C8922A' : '#E8E0D0'}`,
+              borderRadius: '10px',
+              padding: '16px 18px',
+            }}
+          >
+            <label style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                checked={consentChecked}
+                onChange={e => setConsentChecked(e.target.checked)}
+                style={{ marginTop: '3px', width: '14px', height: '14px', cursor: 'pointer', accentColor: '#C8922A', flexShrink: 0 }}
+              />
+              <div>
+                <p dir="rtl" className="arabic" style={{ fontSize: '12.5px', color: '#1A1A1A', lineHeight: 1.8, margin: '0 0 6px' }}>
+                  أقر بأن جميع المستندات المقدمة صحيحة وأصلية ولم يتم تعديلها أو تزويرها
+                </p>
+                <p style={{ fontSize: '11.5px', color: '#666666', lineHeight: 1.6, margin: 0 }}>
+                  I confirm all submitted documents are authentic and have not been altered or fabricated
+                </p>
+              </div>
+            </label>
+          </div>
+
           {/* Submit CTA */}
           <button
-            onClick={onSubmitForAssessment}
+            onClick={consentChecked ? onSubmitForAssessment : undefined}
+            disabled={!consentChecked}
             style={{
               width: '100%',
               height: '52px',
-              backgroundColor: '#C8922A',
+              backgroundColor: consentChecked ? '#C8922A' : '#D8D0C8',
               color: '#FFFFFF',
               border: 'none',
               borderRadius: '8px',
               fontSize: '16px',
               fontWeight: 700,
               fontFamily: 'inherit',
-              cursor: 'pointer',
+              cursor: consentChecked ? 'pointer' : 'not-allowed',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               gap: '10px',
-              boxShadow: '0 4px 14px rgba(200,146,42,0.25)',
+              boxShadow: consentChecked ? '0 4px 14px rgba(200,146,42,0.25)' : 'none',
+              opacity: consentChecked ? 1 : 0.6,
+              transition: 'background-color 0.15s, opacity 0.15s',
             }}
-            onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#A67420')}
-            onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#C8922A')}
+            onMouseEnter={e => { if (consentChecked) e.currentTarget.style.backgroundColor = '#A67420'; }}
+            onMouseLeave={e => { e.currentTarget.style.backgroundColor = consentChecked ? '#C8922A' : '#D8D0C8'; }}
           >
             <Zap size={18} />
             تقديم للتقييم | Submit for Assessment

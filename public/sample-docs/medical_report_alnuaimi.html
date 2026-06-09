@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Medical Report — Hamad Abdullah Al-Nuaimi</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', 'Arial', sans-serif;
+      background: #0D2030;
+      min-height: 100vh;
+      padding: 30px 20px;
+      print-color-adjust: exact;
+      -webkit-print-color-adjust: exact;
+    }
+    .print-tip {
+      text-align: center;
+      background: #005A78;
+      color: white;
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      margin-bottom: 20px;
+      max-width: 794px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .page {
+      width: 794px;
+      min-height: 1123px;
+      background: #FFFFFF;
+      margin: 0 auto;
+      position: relative;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.45);
+      overflow: hidden;
+    }
+
+    /* Teal top bar + cross */
+    .page::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 7px;
+      background: linear-gradient(90deg, #006E8A, #00A0BE, #006E8A);
+    }
+
+    /* Watermark */
+    .watermark {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-35deg);
+      font-size: 72px;
+      font-weight: 900;
+      color: rgba(0,110,138,0.03);
+      letter-spacing: 4px;
+      font-family: 'Inter', sans-serif;
+      pointer-events: none;
+      white-space: nowrap;
+      z-index: 0;
+    }
+
+    /* Decorative border */
+    .border-frame {
+      position: absolute;
+      top: 18px; left: 18px; right: 18px; bottom: 18px;
+      border: 1px solid rgba(0,110,138,0.12);
+      pointer-events: none;
+    }
+
+    .content { padding: 30px 44px; position: relative; z-index: 1; }
+
+    /* ── UAE Health Authority Banner ── */
+    .health-banner {
+      text-align: center;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #E0EEF2;
+      margin-bottom: 16px;
+    }
+    .health-banner-ar { font-family: 'Cairo', sans-serif; font-size: 11px; font-weight: 700; color: #006E8A; direction: rtl; letter-spacing: 0.5px; }
+    .health-banner-en { font-size: 9.5px; font-weight: 600; color: #006E8A; letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; }
+
+    /* ── Hospital Header ── */
+    .doc-header {
+      display: grid;
+      grid-template-columns: 80px 1fr 80px;
+      align-items: center;
+      gap: 14px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid #006E8A;
+      margin-bottom: 4px;
+    }
+    .hospital-name-en { font-size: 16px; font-weight: 700; color: #006E8A; letter-spacing: 0.5px; text-align: center; }
+    .hospital-name-ar { font-family: 'Cairo', sans-serif; font-size: 14px; font-weight: 700; color: #006E8A; direction: rtl; text-align: center; margin-top: 4px; }
+    .hospital-sub { font-size: 8.5px; color: #777; text-align: center; margin-top: 5px; letter-spacing: 0.3px; }
+    .doc-ref-area { text-align: right; }
+    .doc-ref-label { font-size: 8px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+    .doc-ref-value { font-size: 10.5px; font-weight: 600; color: #006E8A; font-family: monospace; }
+
+    /* ── Teal divider ── */
+    .teal-bar { height: 3px; background: linear-gradient(90deg, #006E8A, #00A0BE, #006E8A); margin: 0 -44px; }
+
+    /* ── Title ── */
+    .doc-title-block {
+      background: #006E8A;
+      padding: 14px;
+      text-align: center;
+      margin: 0 -44px;
+    }
+    .doc-title-en { font-size: 17px; font-weight: 700; color: #FFFFFF; letter-spacing: 3px; text-transform: uppercase; }
+    .doc-title-ar { font-family: 'Cairo', sans-serif; font-size: 15px; font-weight: 700; color: #A0E8FF; direction: rtl; margin-top: 3px; }
+
+    .date-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #E0EEF2;
+      font-size: 11px;
+      color: #555;
+    }
+    .date-row span { font-weight: 600; color: #006E8A; }
+
+    /* ── Sections ── */
+    .section { margin: 14px 0; }
+    .section-header {
+      background: #F0F8FC;
+      border-left: 3px solid #006E8A;
+      border-bottom: 1px solid #D0E8F0;
+      padding: 7px 12px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #006E8A;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .section-header-ar { font-family: 'Cairo', sans-serif; font-size: 11px; direction: rtl; }
+    .section-body { border: 1px solid #D0E8F0; border-top: none; padding: 12px 14px; }
+
+    .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .field-item {}
+    .field-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; color: #888; font-weight: 600; }
+    .field-value { font-size: 12px; font-weight: 600; color: #1A1A1A; margin-top: 2px; }
+    .field-value.mono { font-family: monospace; }
+
+    /* ── Diagnosis block ── */
+    .diagnosis-block {
+      background: #F8FBFF;
+      border: 1px solid #C0D8E8;
+      border-top: 3px solid #006E8A;
+      border-radius: 4px;
+      padding: 16px;
+      margin: 14px 0;
+    }
+    .diag-header { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #006E8A; margin-bottom: 10px; }
+    .diag-icd { display: inline-block; background: #006E8A; color: white; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 3px; font-family: monospace; margin-bottom: 8px; }
+    .diag-title { font-size: 14px; font-weight: 700; color: #1A1A1A; margin-bottom: 6px; }
+    .diag-title-ar { font-family: 'Cairo', sans-serif; font-size: 13px; font-weight: 700; color: #1A1A1A; direction: rtl; margin-bottom: 10px; }
+    .diag-text { font-size: 12px; color: #333; line-height: 1.75; }
+    .diag-text-ar { font-family: 'Cairo', sans-serif; font-size: 12px; color: #444; line-height: 1.8; direction: rtl; margin-top: 10px; }
+
+    /* ── Treatment plan ── */
+    .treatment-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
+    .treatment-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 7px 10px;
+      background: #FAFCFF;
+      border: 1px solid #E0EEF2;
+      border-radius: 4px;
+      font-size: 11.5px;
+      color: #333;
+      line-height: 1.5;
+    }
+    .treatment-item::before { content: '▸'; color: #006E8A; font-size: 10px; margin-top: 1px; flex-shrink: 0; }
+    .treatment-item-ar { font-family: 'Cairo', sans-serif; direction: rtl; font-size: 11px; color: #555; }
+
+    /* ── Important notice ── */
+    .medical-notice {
+      background: #FFF5F0;
+      border: 1px solid #F5C0B0;
+      border-left: 3px solid #CC4400;
+      border-radius: 0 4px 4px 0;
+      padding: 10px 14px;
+      margin: 14px 0;
+      font-size: 11px;
+      color: #6A2000;
+      line-height: 1.6;
+    }
+    .medical-notice .ar { font-family: 'Cairo', sans-serif; direction: rtl; margin-top: 5px; }
+
+    /* ── Doctor info ── */
+    .doctors-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 0; }
+    .doctor-card {
+      border: 1px solid #D0E8F0;
+      border-radius: 4px;
+      padding: 12px 14px;
+      border-top: 3px solid #006E8A;
+    }
+    .dr-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; color: #888; font-weight: 600; }
+    .dr-name { font-size: 13px; font-weight: 700; color: #1A1A1A; margin-top: 4px; }
+    .dr-name-ar { font-family: 'Cairo', sans-serif; font-size: 12px; direction: rtl; color: #444; margin-top: 2px; }
+    .dr-specialty { font-size: 11px; color: #006E8A; margin-top: 3px; }
+    .dr-reg { font-size: 9px; color: #888; font-family: monospace; margin-top: 3px; }
+
+    /* ── QR Code + signatures ── */
+    .qr-sig-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-top: 22px;
+      padding-top: 16px;
+      border-top: 1px solid #E0EEF2;
+    }
+    .sig-block { min-width: 180px; }
+    .sig-line { width: 170px; height: 1px; background: #333; margin-bottom: 6px; }
+    .sig-name { font-size: 12px; font-weight: 700; color: #1A1A1A; }
+    .sig-title { font-size: 10px; color: #666; margin-top: 2px; }
+
+    /* ── Footer ── */
+    .doc-footer {
+      text-align: center;
+      padding-top: 14px;
+      margin-top: 10px;
+      border-top: 1px solid #E0EEF2;
+      font-size: 9px;
+      color: #AAA;
+      line-height: 1.6;
+    }
+
+    /* Security strip */
+    .security-strip {
+      background: repeating-linear-gradient(
+        45deg, #006E8A 0px, #006E8A 4px, #00A0BE 4px, #00A0BE 8px
+      );
+      height: 6px;
+      margin: 10px -44px 0;
+      opacity: 0.8;
+    }
+
+    @media print {
+      body { background: white; padding: 0; }
+      .print-tip { display: none; }
+      .page { box-shadow: none; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="print-tip">
+  📄 Press <strong>Ctrl+P</strong> → Save as PDF to generate the document file
+</div>
+
+<div class="page">
+  <div class="border-frame"></div>
+  <div class="watermark">CONFIDENTIAL</div>
+
+  <div class="content">
+
+    <!-- ═══ UAE HEALTH AUTHORITY BANNER ═══ -->
+    <div class="health-banner">
+      <div class="health-banner-ar">وزارة الصحة ووقاية المجتمع — الإمارات العربية المتحدة</div>
+      <div class="health-banner-en">Ministry of Health &amp; Prevention · United Arab Emirates</div>
+    </div>
+
+    <!-- ═══ HOSPITAL HEADER ═══ -->
+    <div class="doc-header">
+      <!-- UAE + SEHA Emblem area -->
+      <div style="text-align:center">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 95" width="68" height="65">
+          <text x="50" y="9" text-anchor="middle" font-size="8" fill="#006E8A" letter-spacing="3" font-family="serif">★★★★★★★</text>
+          <path d="M50 30 C43 26 32 22 14 28 C25 35 42 39 50 42" fill="#006E8A"/>
+          <path d="M50 30 C57 26 68 22 86 28 C75 35 58 39 50 42" fill="#006E8A"/>
+          <ellipse cx="50" cy="56" rx="8" ry="15" fill="#006E8A"/>
+          <circle cx="50" cy="33" r="10" fill="#006E8A"/>
+          <path d="M50 23 C47 18 44 19 47 23" fill="#006E8A"/>
+          <path d="M50 23 C53 18 56 19 53 23" fill="#006E8A"/>
+          <path d="M45 37 Q42 40 44 42 L48 41 L50 38 Z" fill="#004455"/>
+          <circle cx="47" cy="32" r="2.2" fill="#1A0A02"/>
+          <circle cx="46.5" cy="31.5" r="0.7" fill="white"/>
+          <rect x="44" y="50" width="12" height="14" rx="1" fill="white"/>
+          <rect x="44" y="50" width="2.8" height="14" fill="#009944"/>
+          <rect x="44" y="50" width="12" height="3.5" fill="#EE1111"/>
+          <rect x="44" y="60.5" width="12" height="3.5" fill="#111111"/>
+          <path d="M45 70 L43 82" stroke="#006E8A" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M50 71 L50 83" stroke="#006E8A" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M55 70 L57 82" stroke="#006E8A" stroke-width="2.5" stroke-linecap="round"/>
+          <rect x="20" y="87" width="60" height="7" rx="3.5" fill="#006E8A" opacity="0.7"/>
+          <text x="50" y="93" text-anchor="middle" font-size="4.5" fill="white" font-family="Arial" font-weight="bold" letter-spacing="0.3">UNITED ARAB EMIRATES</text>
+        </svg>
+      </div>
+
+      <!-- Hospital Name -->
+      <div>
+        <div class="hospital-name-en">Sheikh Khalifa Medical City</div>
+        <div class="hospital-name-ar">مدينة الشيخ خليفة الطبية</div>
+        <div class="hospital-sub">Abu Dhabi Health Services Co. (SEHA) · P.O. Box 51900, Abu Dhabi · Tel: +971 2 819 0000<br>
+          A Joint Commission International (JCI) Accredited Healthcare Institution</div>
+      </div>
+
+      <!-- Ref -->
+      <div class="doc-ref-area">
+        <div class="doc-ref-label">Report No.</div>
+        <div class="doc-ref-value">SKMC-MR-2026-018847</div>
+        <div style="margin-top:8px">
+          <div class="doc-ref-label">Report Date</div>
+          <div class="doc-ref-value">01 June 2026</div>
+          <div class="doc-ref-value" style="font-family:'Cairo',sans-serif;direction:rtl;font-size:10px;color:#888;margin-top:2px">5 ذو الحجة 1447هـ</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="teal-bar"></div>
+
+    <!-- ═══ TITLE ═══ -->
+    <div class="doc-title-block">
+      <div class="doc-title-en">Medical Report</div>
+      <div class="doc-title-ar">التقرير الطبي الرسمي</div>
+    </div>
+
+    <div class="date-row">
+      <div>Patient File: <span style="font-family:monospace">SKMC-PAT-082341</span> &nbsp;·&nbsp; Visit: <span>28 May 2026</span></div>
+      <div style="font-family:'Cairo',sans-serif;direction:rtl">ملف المريض: <span style="font-family:monospace">SKMC-PAT-082341</span></div>
+    </div>
+
+    <!-- ═══ PATIENT DETAILS ═══ -->
+    <div class="section">
+      <div class="section-header">
+        <span>Patient Information</span>
+        <span class="section-header-ar">بيانات المريض</span>
+      </div>
+      <div class="section-body">
+        <div class="field-grid">
+          <div class="field-item">
+            <div class="field-label">Full Name (English)</div>
+            <div class="field-value">Hamad Abdullah Al-Nuaimi</div>
+          </div>
+          <div class="field-item">
+            <div class="field-label">الاسم الكامل (بالعربية)</div>
+            <div class="field-value" style="font-family:'Cairo',sans-serif;direction:rtl">حمد عبدالله النعيمي</div>
+          </div>
+          <div class="field-item">
+            <div class="field-label">Emirates ID</div>
+            <div class="field-value mono">784-1982-4567890-2</div>
+          </div>
+          <div class="field-item">
+            <div class="field-label">Date of Birth</div>
+            <div class="field-value">14 March 1982 (Age: 44)</div>
+          </div>
+          <div class="field-item">
+            <div class="field-label">Nationality</div>
+            <div class="field-value">United Arab Emirates</div>
+          </div>
+          <div class="field-item">
+            <div class="field-label">Gender / Blood Group</div>
+            <div class="field-value">Male &nbsp;·&nbsp; O+</div>
+          </div>
+          <div class="field-item">
+            <div class="field-label">Contact Number</div>
+            <div class="field-value mono">+971 55 482 7234</div>
+          </div>
+          <div class="field-item">
+            <div class="field-label">Insurance</div>
+            <div class="field-value">Government Health Insurance — Fujairah</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ DIAGNOSIS ═══ -->
+    <div class="diagnosis-block">
+      <div class="diag-header">Clinical Diagnosis — التشخيص السريري</div>
+      <div class="diag-icd">ICD-10: M47.816 / G89.29 / M54.5</div>
+      <div class="diag-title">Chronic Lumbar Degenerative Disc Disease with Radiculopathy</div>
+      <div class="diag-title-ar">انزلاق غضروفي قطني مزمن مع اعتلال الجذر العصبي</div>
+      <div class="diag-text">
+        Patient presents with a confirmed diagnosis of advanced lumbar degenerative disc disease affecting levels L4-L5 and L5-S1, with associated bilateral radiculopathy causing significant functional impairment. MRI imaging conducted on 15 April 2026 confirms multi-level disc herniation with moderate-to-severe neural foraminal stenosis. The condition has progressively worsened over the past 24 months, significantly limiting the patient's ability to perform sustained physical activities and extended periods of standing or sitting.
+      </div>
+      <div class="diag-text-ar">
+        يعاني المريض من تشخيص مؤكد لمرض انهيار القرص القطني المتقدم على مستويي L4-L5 وL5-S1، مع اعتلال جذر عصبي ثنائي يسبب ضعفاً وظيفياً ملحوظاً. أكدت صور الرنين المغناطيسي بتاريخ 15 أبريل 2026 وجود انزلاق غضروفي متعدد المستويات مع تضيق معتدل إلى شديد في الثقبة العصبية. تفاقمت الحالة تدريجياً خلال الأشهر الأربعة والعشرين الماضية، مما أعاق بشكل كبير قدرة المريض على أداء الأنشطة البدنية المستمرة.
+      </div>
+    </div>
+
+    <!-- ═══ TREATMENT PLAN ═══ -->
+    <div class="section">
+      <div class="section-header">
+        <span>Treatment Plan &amp; Medical Recommendations</span>
+        <span class="section-header-ar">خطة العلاج والتوصيات الطبية</span>
+      </div>
+      <div class="section-body">
+        <ul class="treatment-list">
+          <li class="treatment-item">
+            <div>
+              <strong>Extended physiotherapy program</strong> (minimum 6 months) — 3 sessions per week at SKMC Rehabilitation Center, including spinal decompression therapy and targeted core strengthening exercises.
+              <div class="treatment-item-ar">برنامج علاج طبيعي ممتد (6 أشهر على الأقل) - 3 جلسات أسبوعياً في مركز إعادة التأهيل</div>
+            </div>
+          </li>
+          <li class="treatment-item">
+            <div>
+              <strong>Surgical evaluation</strong> — Patient has been referred to the Neurosurgery Department (Consultant: Dr. Ahmed Al-Qasimi) for assessment of L4-L5 microdiscectomy. Surgery may be required within 3–6 months if conservative management does not yield improvement.
+              <div class="treatment-item-ar">تم إحالة المريض إلى قسم جراحة الأعصاب للتقييم. قد تكون الجراحة ضرورية خلال 3-6 أشهر</div>
+            </div>
+          </li>
+          <li class="treatment-item">
+            <div>
+              <strong>Chronic pain management protocol</strong> — Prescribed combination pharmacotherapy including NSAIDs, muscle relaxants, and neuropathic pain medication (Pregabalin 75mg twice daily). Patient to follow up at Pain Management Clinic monthly.
+              <div class="treatment-item-ar">بروتوكول إدارة الألم المزمن — وصف علاج دوائي مركّب مع متابعة شهرية في عيادة إدارة الألم</div>
+            </div>
+          </li>
+          <li class="treatment-item">
+            <div>
+              <strong>Work restriction advisory:</strong> Patient is medically advised to <strong>avoid prolonged physical exertion, heavy lifting (&gt;5kg), and extended periods of standing beyond 30 minutes</strong> until further medical assessment. This condition significantly impacts occupational capacity.
+              <div class="treatment-item-ar">توصية بتقييد العمل: يُنصح طبياً بتجنب المجهود البدني المطوّل والرفع الثقيل وفترات الوقوف المطوّلة</div>
+            </div>
+          </li>
+          <li class="treatment-item">
+            <div>
+              <strong>Estimated treatment duration:</strong> 12–18 months of active treatment, followed by ongoing monitoring. Full functional recovery is uncertain and conditional upon surgical outcomes.
+              <div class="treatment-item-ar">المدة التقديرية للعلاج: 12-18 شهراً من العلاج النشط، يعقبها مراقبة مستمرة</div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ═══ IMPORTANT NOTICE ═══ -->
+    <div class="medical-notice">
+      <strong>⚕ MEDICAL ADVISORY:</strong> This patient requires extended medical treatment and ongoing specialist care. The condition described above has a direct impact on the patient's functional capacity and may affect their employment situation. This report is issued for official purposes including financial hardship assessments and government housing programme applications.
+      <div class="ar" style="font-family:'Cairo',sans-serif;direction:rtl">تنبيه طبي: يحتاج هذا المريض إلى علاج طبي ممتد ورعاية متخصصة مستمرة. تؤثر الحالة المذكورة أعلاه مباشرةً على القدرة الوظيفية للمريض وقد تنعكس على وضعه الوظيفي. يُصدر هذا التقرير للأغراض الرسمية بما فيها تقييمات الضائقة المالية وطلبات برامج الإسكان الحكومية.</div>
+    </div>
+
+    <!-- ═══ DOCTORS ═══ -->
+    <div class="doctors-grid">
+      <div class="doctor-card">
+        <div class="dr-label">Attending Physician</div>
+        <div class="dr-name">Dr. Khalid M. Al-Hashemi</div>
+        <div class="dr-name-ar">د. خالد محمد الهاشمي</div>
+        <div class="dr-specialty">Specialist in Orthopedics &amp; Spine Surgery</div>
+        <div class="dr-reg">DHA License: DHA-DEN-00349812 | MOH Reg: 22847-UAE</div>
+      </div>
+      <div class="doctor-card">
+        <div class="dr-label">Department Head — Neurosurgery</div>
+        <div class="dr-name">Dr. Ahmed Saif Al-Qasimi</div>
+        <div class="dr-name-ar">د. أحمد سيف القاسمي</div>
+        <div class="dr-specialty">Consultant Neurosurgeon, SKMC</div>
+        <div class="dr-reg">DHA License: DHA-CON-00112345 | MOH Reg: 18921-UAE</div>
+      </div>
+    </div>
+
+    <!-- ═══ QR + SIGNATURES ═══ -->
+    <div class="qr-sig-row">
+      <!-- QR Code SVG placeholder -->
+      <div style="text-align:center">
+        <svg width="90" height="90" xmlns="http://www.w3.org/2000/svg">
+          <!-- Finder TL -->
+          <rect x="0" y="0" width="24" height="24" fill="#006E8A"/>
+          <rect x="3" y="3" width="18" height="18" fill="white"/>
+          <rect x="6" y="6" width="12" height="12" fill="#006E8A"/>
+          <!-- Finder TR -->
+          <rect x="66" y="0" width="24" height="24" fill="#006E8A"/>
+          <rect x="69" y="3" width="18" height="18" fill="white"/>
+          <rect x="72" y="6" width="12" height="12" fill="#006E8A"/>
+          <!-- Finder BL -->
+          <rect x="0" y="66" width="24" height="24" fill="#006E8A"/>
+          <rect x="3" y="69" width="18" height="18" fill="white"/>
+          <rect x="6" y="72" width="12" height="12" fill="#006E8A"/>
+          <!-- Data modules (dense pattern for authenticity) -->
+          <rect x="27" y="0" width="3" height="3" fill="#006E8A"/>
+          <rect x="33" y="0" width="3" height="3" fill="#006E8A"/>
+          <rect x="39" y="0" width="6" height="3" fill="#006E8A"/>
+          <rect x="51" y="0" width="3" height="3" fill="#006E8A"/>
+          <rect x="57" y="0" width="3" height="3" fill="#006E8A"/>
+          <rect x="27" y="6" width="6" height="3" fill="#006E8A"/>
+          <rect x="39" y="6" width="3" height="3" fill="#006E8A"/>
+          <rect x="48" y="6" width="6" height="3" fill="#006E8A"/>
+          <rect x="57" y="6" width="6" height="3" fill="#006E8A"/>
+          <rect x="27" y="12" width="3" height="3" fill="#006E8A"/>
+          <rect x="33" y="12" width="6" height="3" fill="#006E8A"/>
+          <rect x="45" y="12" width="3" height="3" fill="#006E8A"/>
+          <rect x="51" y="12" width="6" height="3" fill="#006E8A"/>
+          <rect x="27" y="18" width="6" height="3" fill="#006E8A"/>
+          <rect x="36" y="18" width="3" height="3" fill="#006E8A"/>
+          <rect x="42" y="18" width="6" height="3" fill="#006E8A"/>
+          <rect x="54" y="18" width="3" height="3" fill="#006E8A"/>
+          <rect x="60" y="18" width="3" height="3" fill="#006E8A"/>
+          <rect x="0" y="27" width="6" height="3" fill="#006E8A"/>
+          <rect x="9" y="27" width="3" height="3" fill="#006E8A"/>
+          <rect x="15" y="27" width="6" height="3" fill="#006E8A"/>
+          <rect x="27" y="27" width="12" height="3" fill="#006E8A"/>
+          <rect x="42" y="27" width="3" height="3" fill="#006E8A"/>
+          <rect x="48" y="27" width="9" height="3" fill="#006E8A"/>
+          <rect x="60" y="27" width="3" height="3" fill="#006E8A"/>
+          <rect x="66" y="27" width="9" height="3" fill="#006E8A"/>
+          <rect x="0" y="33" width="3" height="3" fill="#006E8A"/>
+          <rect x="6" y="33" width="9" height="3" fill="#006E8A"/>
+          <rect x="18" y="33" width="3" height="3" fill="#006E8A"/>
+          <rect x="27" y="33" width="3" height="3" fill="#006E8A"/>
+          <rect x="33" y="33" width="9" height="3" fill="#006E8A"/>
+          <rect x="45" y="33" width="6" height="3" fill="#006E8A"/>
+          <rect x="54" y="33" width="3" height="3" fill="#006E8A"/>
+          <rect x="60" y="33" width="6" height="3" fill="#006E8A"/>
+          <rect x="69" y="33" width="12" height="3" fill="#006E8A"/>
+          <rect x="0" y="39" width="6" height="3" fill="#006E8A"/>
+          <rect x="9" y="39" width="6" height="3" fill="#006E8A"/>
+          <rect x="18" y="39" width="6" height="3" fill="#006E8A"/>
+          <rect x="27" y="39" width="6" height="3" fill="#006E8A"/>
+          <rect x="36" y="39" width="3" height="3" fill="#006E8A"/>
+          <rect x="42" y="39" width="9" height="3" fill="#006E8A"/>
+          <rect x="54" y="39" width="6" height="3" fill="#006E8A"/>
+          <rect x="63" y="39" width="6" height="3" fill="#006E8A"/>
+          <rect x="72" y="39" width="9" height="3" fill="#006E8A"/>
+          <rect x="3" y="45" width="3" height="3" fill="#006E8A"/>
+          <rect x="9" y="45" width="6" height="3" fill="#006E8A"/>
+          <rect x="21" y="45" width="3" height="3" fill="#006E8A"/>
+          <rect x="27" y="45" width="3" height="3" fill="#006E8A"/>
+          <rect x="33" y="45" width="6" height="3" fill="#006E8A"/>
+          <rect x="42" y="45" width="3" height="3" fill="#006E8A"/>
+          <rect x="48" y="45" width="6" height="3" fill="#006E8A"/>
+          <rect x="57" y="45" width="3" height="3" fill="#006E8A"/>
+          <rect x="63" y="45" width="9" height="3" fill="#006E8A"/>
+          <rect x="75" y="45" width="6" height="3" fill="#006E8A"/>
+          <rect x="0" y="51" width="9" height="3" fill="#006E8A"/>
+          <rect x="12" y="51" width="6" height="3" fill="#006E8A"/>
+          <rect x="21" y="51" width="3" height="3" fill="#006E8A"/>
+          <rect x="27" y="51" width="6" height="3" fill="#006E8A"/>
+          <rect x="36" y="51" width="3" height="3" fill="#006E8A"/>
+          <rect x="42" y="51" width="9" height="3" fill="#006E8A"/>
+          <rect x="54" y="51" width="3" height="3" fill="#006E8A"/>
+          <rect x="60" y="51" width="6" height="3" fill="#006E8A"/>
+          <rect x="69" y="51" width="3" height="3" fill="#006E8A"/>
+          <rect x="75" y="51" width="6" height="3" fill="#006E8A"/>
+          <rect x="27" y="57" width="3" height="3" fill="#006E8A"/>
+          <rect x="33" y="57" width="6" height="3" fill="#006E8A"/>
+          <rect x="42" y="57" width="3" height="3" fill="#006E8A"/>
+          <rect x="48" y="57" width="6" height="3" fill="#006E8A"/>
+          <rect x="57" y="57" width="9" height="3" fill="#006E8A"/>
+          <rect x="69" y="57" width="3" height="3" fill="#006E8A"/>
+          <rect x="75" y="57" width="6" height="3" fill="#006E8A"/>
+          <rect x="27" y="63" width="6" height="3" fill="#006E8A"/>
+          <rect x="36" y="63" width="3" height="3" fill="#006E8A"/>
+          <rect x="42" y="63" width="6" height="3" fill="#006E8A"/>
+          <rect x="51" y="63" width="3" height="3" fill="#006E8A"/>
+          <rect x="57" y="63" width="6" height="3" fill="#006E8A"/>
+          <rect x="66" y="63" width="6" height="3" fill="#006E8A"/>
+          <rect x="75" y="63" width="6" height="3" fill="#006E8A"/>
+        </svg>
+        <div style="font-size:8px;color:#888;margin-top:4px;font-family:monospace">SKMC-MR-2026-018847</div>
+        <div style="font-size:8px;color:#888;font-family:'Cairo',sans-serif;direction:rtl">للتحقق الإلكتروني</div>
+      </div>
+
+      <!-- Doctors Signatures -->
+      <div style="display:flex;gap:40px">
+        <div class="sig-block">
+          <div style="height:36px;display:flex;align-items:flex-end">
+            <div style="font-size:20px;color:#006E8A;font-family:'Cairo',sans-serif;opacity:0.5;transform:rotate(-4deg)">Khalid</div>
+          </div>
+          <div class="sig-line"></div>
+          <div class="sig-name">Dr. Khalid M. Al-Hashemi</div>
+          <div style="font-family:'Cairo',sans-serif;direction:rtl;font-size:11px;color:#444;margin-top:2px">د. خالد محمد الهاشمي</div>
+          <div class="sig-title">Orthopedics &amp; Spine Specialist</div>
+        </div>
+        <div class="sig-block">
+          <div style="height:36px;display:flex;align-items:flex-end">
+            <div style="font-size:20px;color:#006E8A;font-family:'Cairo',sans-serif;opacity:0.5;transform:rotate(-4deg)">Ahmed</div>
+          </div>
+          <div class="sig-line"></div>
+          <div class="sig-name">Dr. Ahmed Saif Al-Qasimi</div>
+          <div style="font-family:'Cairo',sans-serif;direction:rtl;font-size:11px;color:#444;margin-top:2px">د. أحمد سيف القاسمي</div>
+          <div class="sig-title">Head of Neurosurgery</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ FOOTER ═══ -->
+    <div class="doc-footer">
+      <div>Sheikh Khalifa Medical City · Abu Dhabi Health Services Co. (SEHA) · P.O. Box 51900, Abu Dhabi, UAE</div>
+      <div>Tel: +971 2 819 0000 · www.seha.ae · JCI Accredited · Report Ref: SKMC-MR-2026-018847</div>
+      <div style="font-family:'Cairo',sans-serif;direction:rtl;margin-top:3px">مدينة الشيخ خليفة الطبية · أبوظبي، الإمارات · للتحقق: 0000 819 2 971+</div>
+    </div>
+
+    <div class="security-strip"></div>
+
+  </div><!-- end .content -->
+</div><!-- end .page -->
+
+</body>
+</html>

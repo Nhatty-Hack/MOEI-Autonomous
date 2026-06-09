@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MOEI Sample Documents — Hackathon Demo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0D1117;
+      min-height: 100vh;
+      padding: 40px 20px;
+      color: white;
+    }
+    .header {
+      text-align: center;
+      max-width: 860px;
+      margin: 0 auto 40px;
+    }
+    .header-badge {
+      display: inline-block;
+      background: rgba(200,146,42,0.15);
+      border: 1px solid rgba(200,146,42,0.3);
+      color: #C8922A;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 14px;
+      border-radius: 20px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    h1 { font-size: 28px; font-weight: 700; color: white; margin-bottom: 8px; }
+    .subtitle { font-size: 14px; color: #888; margin-bottom: 5px; }
+    .subtitle-ar { font-family: 'Cairo', sans-serif; font-size: 14px; color: #666; direction: rtl; }
+
+    .tip {
+      background: rgba(200,146,42,0.08);
+      border: 1px solid rgba(200,146,42,0.2);
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 12px;
+      color: #C8922A;
+      max-width: 860px;
+      margin: 0 auto 32px;
+      text-align: center;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    .doc-card {
+      background: #161B22;
+      border: 1px solid #30363D;
+      border-radius: 10px;
+      overflow: hidden;
+      transition: transform 0.15s, border-color 0.15s;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+    .doc-card:hover { transform: translateY(-2px); border-color: #C8922A; }
+
+    .card-header {
+      padding: 14px 16px;
+      border-bottom: 1px solid #21262D;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .card-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .card-title { font-size: 14px; font-weight: 600; color: white; }
+    .card-title-ar { font-family: 'Cairo', sans-serif; font-size: 12px; color: #888; direction: rtl; margin-top: 2px; }
+
+    .card-body { padding: 14px 16px; }
+    .card-row { display: flex; justify-content: space-between; margin-bottom: 6px; }
+    .card-label { font-size: 11px; color: #666; }
+    .card-value { font-size: 11px; font-weight: 600; color: #CCC; font-family: monospace; }
+    .card-amount { font-size: 13px; font-weight: 700; color: #C8922A; font-family: monospace; }
+
+    .card-footer {
+      padding: 10px 16px;
+      background: rgba(255,255,255,0.02);
+      border-top: 1px solid #21262D;
+      font-size: 11px;
+      color: #555;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #C8922A;
+      color: white;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 5px;
+      text-decoration: none;
+      margin-left: auto;
+    }
+    .open-btn:hover { background: #A07020; }
+
+    .tag {
+      display: inline-block;
+      font-size: 9px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .tag-green { background: rgba(0,112,74,0.2); color: #00C880; }
+    .tag-gold { background: rgba(200,146,42,0.2); color: #E8B84A; }
+    .tag-blue { background: rgba(0,110,138,0.2); color: #00B0D8; }
+    .tag-amber { background: rgba(204,100,0,0.2); color: #FF8844; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-badge">🏛 MOEI Hackathon · Demo Documents</div>
+  <h1>Sample Government Documents</h1>
+  <p class="subtitle">AI-validated documents for the Sheikh Zayed Housing Programme Portal demonstration</p>
+  <p class="subtitle-ar">مستندات نموذجية للتحقق بالذكاء الاصطناعي — بوابة برنامج الشيخ زايد للإسكان</p>
+</div>
+
+<div class="tip">
+  💡 Open each document in a new tab · Press <strong>Ctrl+P → Save as PDF</strong> to generate PDF files · Then upload to the AI document validator in the portal
+</div>
+
+<div class="grid">
+
+  <!-- Doc 1 -->
+  <a class="doc-card" href="salary_certificate_mansoori.html" target="_blank">
+    <div class="card-header">
+      <div class="card-icon" style="background:rgba(26,39,68,0.8)">📄</div>
+      <div>
+        <div class="card-title">Salary Certificate</div>
+        <div class="card-title-ar">شهادة الراتب</div>
+      </div>
+      <span class="tag tag-green" style="margin-left:auto">VALID</span>
+    </div>
+    <div class="card-body">
+      <div class="card-row"><span class="card-label">Applicant</span><span class="card-value">Saeed M. Al-Mansoori</span></div>
+      <div class="card-row"><span class="card-label">Emirates ID</span><span class="card-value">784-1985-4521458-1</span></div>
+      <div class="card-row"><span class="card-label">Employer</span><span class="card-value">Emirates Steel Industries</span></div>
+      <div class="card-row"><span class="card-label">Monthly Salary</span><span class="card-amount">AED 35,000</span></div>
+      <div class="card-row"><span class="card-label">Date</span><span class="card-value">01 June 2026</span></div>
+    </div>
+    <div class="card-footer">
+      <span>Stamped & Signed · ESI-HR-2026-00847</span>
+      <span class="open-btn">Open ↗</span>
+    </div>
+  </a>
+
+  <!-- Doc 2 -->
+  <a class="doc-card" href="bank_statement_mansoori.html" target="_blank">
+    <div class="card-header">
+      <div class="card-icon" style="background:rgba(0,49,105,0.8)">🏦</div>
+      <div>
+        <div class="card-title">Bank Statement (6 months)</div>
+        <div class="card-title-ar">كشف الحساب البنكي — 6 أشهر</div>
+      </div>
+      <span class="tag tag-green" style="margin-left:auto">VALID</span>
+    </div>
+    <div class="card-body">
+      <div class="card-row"><span class="card-label">Account Holder</span><span class="card-value">Saeed M. Al-Mansoori</span></div>
+      <div class="card-row"><span class="card-label">Bank</span><span class="card-value">Emirates NBD</span></div>
+      <div class="card-row"><span class="card-label">Period</span><span class="card-value">Jan – May 2026</span></div>
+      <div class="card-row"><span class="card-label">Salary Credits</span><span class="card-amount">5 × AED 35,000</span></div>
+      <div class="card-row"><span class="card-label">Closing Balance</span><span class="card-amount">AED 12,450</span></div>
+    </div>
+    <div class="card-footer">
+      <span>Electronic Statement · ENBD-ST-2026-0088421</span>
+      <span class="open-btn">Open ↗</span>
+    </div>
+  </a>
+
+  <!-- Doc 3 -->
+  <a class="doc-card" href="salary_certificate_alali.html" target="_blank">
+    <div class="card-header">
+      <div class="card-icon" style="background:rgba(0,82,59,0.8)">📜</div>
+      <div>
+        <div class="card-title">Pension Certificate</div>
+        <div class="card-title-ar">شهادة صرف المعاش التقاعدي</div>
+      </div>
+      <span class="tag tag-gold" style="margin-left:auto">PENSION</span>
+    </div>
+    <div class="card-body">
+      <div class="card-row"><span class="card-label">Applicant</span><span class="card-value">Fatima H. Al-Ali</span></div>
+      <div class="card-row"><span class="card-label">Emirates ID</span><span class="card-value">784-1968-1234567-5</span></div>
+      <div class="card-row"><span class="card-label">Issuer</span><span class="card-value">Abu Dhabi RPBF</span></div>
+      <div class="card-row"><span class="card-label">Monthly Pension</span><span class="card-amount">AED 18,000</span></div>
+      <div class="card-row"><span class="card-label">Date</span><span class="card-value">01 June 2026</span></div>
+    </div>
+    <div class="card-footer">
+      <span>Government Issued · ADRPBF-PC-2026-04821</span>
+      <span class="open-btn">Open ↗</span>
+    </div>
+  </a>
+
+  <!-- Doc 4 -->
+  <a class="doc-card" href="medical_report_alnuaimi.html" target="_blank">
+    <div class="card-header">
+      <div class="card-icon" style="background:rgba(0,110,138,0.8)">⚕</div>
+      <div>
+        <div class="card-title">Medical Report</div>
+        <div class="card-title-ar">التقرير الطبي الرسمي</div>
+      </div>
+      <span class="tag tag-amber" style="margin-left:auto">REVIEW</span>
+    </div>
+    <div class="card-body">
+      <div class="card-row"><span class="card-label">Patient</span><span class="card-value">Hamad A. Al-Nuaimi</span></div>
+      <div class="card-row"><span class="card-label">Emirates ID</span><span class="card-value">784-1982-4567890-2</span></div>
+      <div class="card-row"><span class="card-label">Hospital</span><span class="card-value">Sheikh Khalifa Medical City</span></div>
+      <div class="card-row"><span class="card-label">Diagnosis</span><span class="card-value" style="font-family:'Inter';font-size:10px">Lumbar Disc Disease</span></div>
+      <div class="card-row"><span class="card-label">Treatment</span><span class="card-value">12–18 months extended</span></div>
+    </div>
+    <div class="card-footer">
+      <span>JCI Accredited · SKMC-MR-2026-018847</span>
+      <span class="open-btn">Open ↗</span>
+    </div>
+  </a>
+
+</div>
+
+</body>
+</html>

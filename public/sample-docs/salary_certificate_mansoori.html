@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Salary Certificate — Saeed Al-Mansoori</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', 'Arial', sans-serif;
+      background: #D8D0C4;
+      min-height: 100vh;
+      padding: 30px 20px;
+      print-color-adjust: exact;
+      -webkit-print-color-adjust: exact;
+    }
+
+    .print-tip {
+      text-align: center;
+      background: #1A2744;
+      color: white;
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      margin-bottom: 20px;
+      max-width: 794px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* A4 page */
+    .page {
+      width: 794px;
+      min-height: 1123px;
+      background: #FFFFFF;
+      margin: 0 auto;
+      position: relative;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.25);
+      overflow: hidden;
+    }
+
+    /* Gold top bar */
+    .page::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 6px;
+      background: linear-gradient(90deg, #C8922A, #E8B84A, #C8922A);
+    }
+
+    /* Decorative border */
+    .border-frame {
+      position: absolute;
+      top: 18px; left: 18px; right: 18px; bottom: 18px;
+      border: 1px solid rgba(200,146,42,0.25);
+      pointer-events: none;
+    }
+    .border-frame::before {
+      content: '';
+      position: absolute;
+      top: 4px; left: 4px; right: 4px; bottom: 4px;
+      border: 0.5px solid rgba(200,146,42,0.15);
+    }
+
+    /* Watermark */
+    .watermark {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-35deg);
+      font-size: 90px;
+      font-weight: 900;
+      color: rgba(200,146,42,0.04);
+      letter-spacing: 8px;
+      font-family: 'Cairo', sans-serif;
+      pointer-events: none;
+      white-space: nowrap;
+      z-index: 0;
+    }
+
+    .content { padding: 32px 44px; position: relative; z-index: 1; }
+
+    /* ── Header ── */
+    .doc-header {
+      display: grid;
+      grid-template-columns: 90px 1fr 90px;
+      align-items: center;
+      gap: 16px;
+      padding-bottom: 18px;
+      border-bottom: 2px solid #1A2744;
+      margin-bottom: 4px;
+    }
+
+    .uae-emblem-area { text-align: center; }
+    .company-area { text-align: center; }
+    .company-name-en {
+      font-size: 18px;
+      font-weight: 700;
+      color: #1A2744;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .company-name-ar {
+      font-family: 'Cairo', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      color: #1A2744;
+      direction: rtl;
+      margin-top: 3px;
+    }
+    .company-sub {
+      font-size: 9.5px;
+      color: #777;
+      margin-top: 5px;
+      letter-spacing: 0.5px;
+    }
+    .doc-ref-area { text-align: right; }
+    .doc-ref-label { font-size: 8px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+    .doc-ref-value { font-size: 11px; font-weight: 600; color: #1A2744; font-family: monospace; }
+
+    /* ── Gold divider bar ── */
+    .gold-bar {
+      height: 3px;
+      background: linear-gradient(90deg, #C8922A 0%, #E8B84A 50%, #C8922A 100%);
+      margin: 0;
+    }
+
+    /* ── Document title ── */
+    .doc-title-block {
+      background: #1A2744;
+      padding: 14px;
+      text-align: center;
+      margin: 0 -44px;
+      margin-top: 0;
+    }
+    .doc-title-en {
+      font-size: 18px;
+      font-weight: 700;
+      color: #FFFFFF;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+    .doc-title-ar {
+      font-family: 'Cairo', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      color: #E8B84A;
+      direction: rtl;
+      margin-top: 3px;
+    }
+
+    /* ── Date row ── */
+    .date-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #E8E0D0;
+      font-size: 11px;
+      color: #555;
+    }
+    .date-row span { font-weight: 600; color: #1A2744; }
+
+    /* ── To whom block ── */
+    .to-whom {
+      padding: 14px 0 10px;
+      font-size: 12px;
+      color: #333;
+      line-height: 1.7;
+    }
+    .to-whom-ar {
+      font-family: 'Cairo', sans-serif;
+      font-size: 12px;
+      direction: rtl;
+      color: #333;
+      line-height: 1.7;
+      margin-top: 5px;
+    }
+
+    /* ── Details table ── */
+    .details-section {
+      margin: 14px 0;
+      border: 1px solid #E0D8CC;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .details-header {
+      background: #F5F0E8;
+      padding: 8px 14px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #1A2744;
+      border-bottom: 1px solid #E0D8CC;
+    }
+    .details-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+    .detail-row {
+      padding: 10px 14px;
+      border-bottom: 1px solid #F0EBE0;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .detail-row:nth-child(even) { background: #FDFAF7; }
+    .detail-label {
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #888;
+      font-weight: 600;
+    }
+    .detail-label-ar {
+      font-family: 'Cairo', sans-serif;
+      font-size: 9px;
+      color: #AAA;
+      direction: rtl;
+    }
+    .detail-value {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #1A1A1A;
+    }
+    .detail-value.mono { font-family: monospace; }
+
+    /* ── Salary table ── */
+    .salary-section {
+      margin: 16px 0;
+      border: 1px solid #E0D8CC;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .salary-header {
+      background: #1A2744;
+      padding: 9px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .salary-header-en { font-size: 10px; font-weight: 700; color: white; text-transform: uppercase; letter-spacing: 1px; }
+    .salary-header-ar { font-family: 'Cairo', sans-serif; font-size: 11px; font-weight: 600; color: #E8B84A; direction: rtl; }
+    .salary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 9px 14px;
+      border-bottom: 1px solid #F0EBE0;
+      font-size: 12px;
+    }
+    .salary-row:nth-child(even) { background: #FDFAF7; }
+    .salary-row-label { color: #444; }
+    .salary-row-label-ar { font-family: 'Cairo', sans-serif; font-size: 11px; color: #777; direction: rtl; }
+    .salary-row-amount { font-weight: 600; color: #1A2744; font-family: monospace; }
+    .salary-total {
+      background: #F5F0E8;
+      border-top: 2px solid #C8922A;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 11px 14px;
+    }
+    .salary-total-label { font-size: 12px; font-weight: 700; color: #1A2744; }
+    .salary-total-amount { font-size: 16px; font-weight: 700; color: #C8922A; font-family: monospace; }
+
+    /* ── Certification text ── */
+    .certification {
+      margin: 16px 0;
+      padding: 14px;
+      background: #F8F5EE;
+      border-left: 3px solid #C8922A;
+      border-radius: 0 4px 4px 0;
+    }
+    .certification p { font-size: 11.5px; color: #333; line-height: 1.7; }
+    .certification p + p { margin-top: 8px; }
+    .certification .ar { font-family: 'Cairo', sans-serif; direction: rtl; font-size: 12px; color: #222; }
+
+    /* ── Validity notice ── */
+    .validity-notice {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 14px;
+      background: #FFF9E8;
+      border: 1px solid #E8C870;
+      border-radius: 4px;
+      margin: 10px 0;
+      font-size: 11px;
+      color: #7A5A10;
+    }
+    .validity-notice .ar { font-family: 'Cairo', sans-serif; direction: rtl; }
+
+    /* ── Signature + Stamp ── */
+    .sign-stamp-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-top: 28px;
+      padding-top: 20px;
+      border-top: 1px solid #E8E0D0;
+    }
+    .signature-block { min-width: 200px; }
+    .sig-line {
+      width: 180px;
+      height: 1px;
+      background: #333;
+      margin-bottom: 6px;
+    }
+    .sig-name { font-size: 12px; font-weight: 700; color: #1A1A1A; }
+    .sig-name-ar { font-family: 'Cairo', sans-serif; font-size: 12px; color: #444; direction: rtl; margin-top: 2px; }
+    .sig-title { font-size: 10px; color: #666; margin-top: 2px; }
+    .sig-title-ar { font-family: 'Cairo', sans-serif; font-size: 10px; color: #888; direction: rtl; }
+
+    /* ── Document footer ── */
+    .doc-footer {
+      text-align: center;
+      padding-top: 20px;
+      margin-top: 12px;
+      border-top: 1px solid #F0EBE0;
+      font-size: 9px;
+      color: #AAA;
+      line-height: 1.6;
+    }
+    .doc-footer .ar { font-family: 'Cairo', sans-serif; direction: rtl; }
+
+    /* ── Security strip ── */
+    .security-strip {
+      background: repeating-linear-gradient(
+        45deg,
+        #1A2744 0px, #1A2744 4px,
+        #243466 4px, #243466 8px
+      );
+      height: 8px;
+      margin: 0 -44px;
+      opacity: 0.8;
+    }
+
+    @media print {
+      body { background: white; padding: 0; }
+      .print-tip { display: none; }
+      .page { box-shadow: none; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="print-tip">
+  📄 Press <strong>Ctrl+P</strong> (or Cmd+P on Mac) → Save as PDF to generate the document file
+</div>
+
+<div class="page">
+  <div class="border-frame"></div>
+  <div class="watermark">CERTIFIED</div>
+
+  <div class="content">
+
+    <!-- ═══ HEADER ═══ -->
+    <div class="doc-header">
+      <!-- UAE Coat of Arms -->
+      <div class="uae-emblem-area">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 95" width="72" height="68">
+          <text x="50" y="9" text-anchor="middle" font-size="8" fill="#C8922A" letter-spacing="3" font-family="serif">★★★★★★★</text>
+          <path d="M50 30 C43 26 32 22 14 28 C25 35 42 39 50 42" fill="#C8922A"/>
+          <path d="M50 30 C57 26 68 22 86 28 C75 35 58 39 50 42" fill="#C8922A"/>
+          <path d="M50 28 C45 24 38 22 27 25 C35 30 45 33 50 35" fill="#B07818" opacity="0.5"/>
+          <path d="M50 28 C55 24 62 22 73 25 C65 30 55 33 50 35" fill="#B07818" opacity="0.5"/>
+          <ellipse cx="50" cy="56" rx="8" ry="15" fill="#C8922A"/>
+          <circle cx="50" cy="33" r="10" fill="#C8922A"/>
+          <path d="M50 23 C47 18 44 19 47 23" fill="#C8922A"/>
+          <path d="M50 23 C53 18 56 19 53 23" fill="#C8922A"/>
+          <path d="M45 37 Q42 40 44 42 L48 41 L50 38 Z" fill="#7A5208"/>
+          <circle cx="47" cy="32" r="2.2" fill="#1A0A02"/>
+          <circle cx="46.5" cy="31.5" r="0.7" fill="white"/>
+          <rect x="44" y="50" width="12" height="14" rx="1" fill="white"/>
+          <rect x="44" y="50" width="2.8" height="14" fill="#009944"/>
+          <rect x="44" y="50" width="12" height="3.5" fill="#EE1111"/>
+          <rect x="44" y="60.5" width="12" height="3.5" fill="#111111"/>
+          <path d="M45 70 L43 82" stroke="#C8922A" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M50 71 L50 83" stroke="#C8922A" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M55 70 L57 82" stroke="#C8922A" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M43 82 L40 85 M43 82 L43 86 M43 82 L46 85" stroke="#C8922A" stroke-width="1.4" stroke-linecap="round" fill="none"/>
+          <path d="M57 82 L54 85 M57 82 L57 86 M57 82 L60 85" stroke="#C8922A" stroke-width="1.4" stroke-linecap="round" fill="none"/>
+          <rect x="20" y="87" width="60" height="7" rx="3.5" fill="#C8922A" opacity="0.7"/>
+          <text x="50" y="93" text-anchor="middle" font-size="4.5" fill="white" font-family="Arial" font-weight="bold" letter-spacing="0.3">UNITED ARAB EMIRATES</text>
+        </svg>
+      </div>
+
+      <!-- Company Name -->
+      <div class="company-area">
+        <div class="company-name-en">Emirates Steel Industries</div>
+        <div class="company-name-ar">مجموعة الإمارات للصلب</div>
+        <div class="company-sub">P.O. Box 32800 · Mussafah Industrial Area · Abu Dhabi, UAE<br>
+        Tel: +971 2 555 3000 · www.emiratessteel.com · CR: 1014267</div>
+      </div>
+
+      <!-- Ref / Date -->
+      <div class="doc-ref-area">
+        <div class="doc-ref-label">Document No.</div>
+        <div class="doc-ref-value">ESI-HR-2026-00847</div>
+        <div style="margin-top:8px">
+          <div class="doc-ref-label">Date</div>
+          <div class="doc-ref-value">01 June 2026</div>
+          <div class="doc-ref-value" style="font-family:'Cairo',sans-serif;direction:rtl;font-size:10px;color:#888;margin-top:2px">5 ذو الحجة 1447هـ</div>
+        </div>
+      </div>
+    </div><!-- end .doc-header -->
+
+    <div class="gold-bar" style="margin: 0 -44px;"></div>
+
+    <!-- ═══ TITLE BLOCK ═══ -->
+    <div class="doc-title-block">
+      <div class="doc-title-en">Salary Certificate</div>
+      <div class="doc-title-ar">شهادة الراتب</div>
+    </div>
+
+    <!-- ═══ ADDRESSEE / DATE ROW ═══ -->
+    <div class="date-row">
+      <div>Ref: <span>MSZHP_100201 / EDB_CUS_001201</span></div>
+      <div style="font-family:'Cairo',sans-serif;direction:rtl">تاريخ الإصدار: <span>1 يونيو 2026</span></div>
+    </div>
+
+    <!-- ═══ TO WHOM ═══ -->
+    <div class="to-whom">
+      <strong>TO WHOM IT MAY CONCERN,</strong>
+      <br>
+      This is to certify that the following individual is currently employed by Emirates Steel Industries L.L.C. in the capacity stated below, and to confirm their current monthly salary as follows:
+    </div>
+    <div class="to-whom-ar" style="font-family:'Cairo',sans-serif;direction:rtl;font-size:12px;color:#333;line-height:1.7;margin-bottom:14px">
+      <strong>إلى من يهمه الأمر،</strong>
+      <br>
+      يُشهد بموجب هذه الوثيقة أن الموظف المذكور أدناه يعمل لدى شركة مجموعة الإمارات للصلب ذ.م.م بالمسمى الوظيفي المحدد، ويُقر بموجبها بصحة راتبه الشهري على النحو التالي:
+    </div>
+
+    <!-- ═══ EMPLOYEE DETAILS ═══ -->
+    <div class="details-section">
+      <div class="details-header">Employee Particulars — بيانات الموظف</div>
+      <div class="details-grid">
+        <div class="detail-row">
+          <div class="detail-label">Full Name (English)</div>
+          <div class="detail-value">Saeed Mohammad Al-Mansoori</div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-label">الاسم الكامل (بالعربية)</div>
+          <div class="detail-value" style="font-family:'Cairo',sans-serif;direction:rtl">سعيد محمد المنصوري</div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-label">Emirates ID No.</div>
+          <div class="detail-value mono">784-1985-4521458-1</div>
+          <div class="detail-label-ar" style="font-family:'Cairo',sans-serif;direction:rtl">رقم الهوية الإماراتية</div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-label">Employee Number</div>
+          <div class="detail-value mono">ESI-EMP-5829</div>
+          <div class="detail-label-ar" style="font-family:'Cairo',sans-serif;direction:rtl">رقم الموظف</div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-label">Position</div>
+          <div class="detail-value">Senior Operations Engineer</div>
+          <div class="detail-label-ar" style="font-family:'Cairo',sans-serif;direction:rtl">مهندس عمليات أولى</div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-label">Department</div>
+          <div class="detail-value">Operations Division — Abu Dhabi</div>
+          <div class="detail-label-ar" style="font-family:'Cairo',sans-serif;direction:rtl">قسم العمليات — أبوظبي</div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-label">Date of Joining</div>
+          <div class="detail-value">15 March 2018</div>
+          <div class="detail-label-ar" style="font-family:'Cairo',sans-serif;direction:rtl">تاريخ الالتحاق بالعمل</div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-label">Employment Type</div>
+          <div class="detail-value">Full-Time / Permanent</div>
+          <div class="detail-label-ar" style="font-family:'Cairo',sans-serif;direction:rtl">دوام كامل / دائم</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ SALARY BREAKDOWN ═══ -->
+    <div class="salary-section">
+      <div class="salary-header">
+        <div class="salary-header-en">Monthly Salary Breakdown</div>
+        <div class="salary-header-ar">تفاصيل الراتب الشهري</div>
+      </div>
+      <div class="salary-row">
+        <div>
+          <div class="salary-row-label">Basic Salary</div>
+          <div class="salary-row-label-ar">الراتب الأساسي</div>
+        </div>
+        <div class="salary-row-amount">AED &nbsp;25,000.00</div>
+      </div>
+      <div class="salary-row">
+        <div>
+          <div class="salary-row-label">Housing Allowance</div>
+          <div class="salary-row-label-ar">بدل السكن</div>
+        </div>
+        <div class="salary-row-amount">AED &nbsp;&nbsp;7,000.00</div>
+      </div>
+      <div class="salary-row">
+        <div>
+          <div class="salary-row-label">Transportation Allowance</div>
+          <div class="salary-row-label-ar">بدل المواصلات</div>
+        </div>
+        <div class="salary-row-amount">AED &nbsp;&nbsp;3,000.00</div>
+      </div>
+      <div class="salary-total">
+        <div>
+          <div class="salary-total-label">TOTAL MONTHLY SALARY</div>
+          <div style="font-family:'Cairo',sans-serif;font-size:11px;color:#888;direction:rtl;margin-top:2px">إجمالي الراتب الشهري</div>
+        </div>
+        <div class="salary-total-amount">AED 35,000.00</div>
+      </div>
+    </div>
+
+    <!-- ═══ CERTIFICATION TEXT ═══ -->
+    <div class="certification">
+      <p>We hereby confirm that the above details are true and correct to the best of our knowledge. This certificate is issued upon the employee's request for official banking and government purposes only.</p>
+      <p class="ar" style="font-family:'Cairo',sans-serif;direction:rtl;margin-top:8px">نؤكد بموجب هذه الوثيقة أن البيانات الواردة أعلاه صحيحة ودقيقة وفقاً لما هو مسجل لدينا. وتصدر هذه الشهادة بناءً على طلب الموظف للأغراض البنكية والحكومية الرسمية فقط.</p>
+    </div>
+
+    <!-- ═══ VALIDITY NOTICE ═══ -->
+    <div class="validity-notice">
+      <svg width="16" height="16" fill="none" stroke="#C8922A" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+      <div>
+        <strong>This certificate is valid for 30 days from the date of issue (01 June 2026 — 01 July 2026).</strong>
+        <div class="ar" style="font-family:'Cairo',sans-serif;direction:rtl;margin-top:2px">صالحة لمدة 30 يوماً من تاريخ الإصدار (1 يونيو 2026 — 1 يوليو 2026)</div>
+      </div>
+    </div>
+
+    <!-- ═══ SIGNATURE + STAMP ═══ -->
+    <div class="sign-stamp-row">
+      <div class="signature-block">
+        <div style="height:40px;display:flex;align-items:flex-end">
+          <div style="font-size:28px;color:#1A2744;font-family:'Cairo',sans-serif;opacity:0.6;transform:rotate(-5deg);letter-spacing:-1px">Mohammed</div>
+        </div>
+        <div class="sig-line"></div>
+        <div class="sig-name">Mohammed Khalid Al-Rashidi</div>
+        <div class="sig-name-ar" style="font-family:'Cairo',sans-serif;direction:rtl">محمد خالد الراشدي</div>
+        <div class="sig-title">Human Resources Manager</div>
+        <div class="sig-title-ar" style="font-family:'Cairo',sans-serif;direction:rtl">مدير الموارد البشرية</div>
+        <div class="sig-title" style="margin-top:4px">Emirates Steel Industries L.L.C.</div>
+      </div>
+
+      <!-- Official Stamp -->
+      <svg xmlns="http://www.w3.org/2000/svg" width="130" height="130" viewBox="0 0 130 130" style="transform:rotate(-12deg);opacity:0.72">
+        <defs>
+          <path id="outer-arc" d="M 65,10 A 55,55 0 1,1 64.99,10"/>
+          <path id="inner-arc" d="M 65,24 A 41,41 0 1,0 64.99,24"/>
+        </defs>
+        <circle cx="65" cy="65" r="58" fill="none" stroke="#C8922A" stroke-width="2.5"/>
+        <circle cx="65" cy="65" r="50" fill="none" stroke="#C8922A" stroke-width="1"/>
+        <circle cx="65" cy="65" r="43" fill="none" stroke="#C8922A" stroke-width="0.5"/>
+        <text font-size="7.5" fill="#C8922A" font-family="Arial" font-weight="bold">
+          <textPath href="#outer-arc" startOffset="2%">EMIRATES STEEL INDUSTRIES · ABU DHABI · UAE ·  ESI  ·</textPath>
+        </text>
+        <text font-size="6.5" fill="#C8922A" font-family="Arial">
+          <textPath href="#inner-arc" startOffset="5%">مجموعة الإمارات للصلب · الموارد البشرية · HUMAN RESOURCES ·</textPath>
+        </text>
+        <text x="65" y="58" text-anchor="middle" font-size="11" fill="#C8922A" font-weight="bold" font-family="Arial">ESI</text>
+        <text x="65" y="71" text-anchor="middle" font-size="7" fill="#C8922A" font-family="Arial">OFFICIAL</text>
+        <text x="65" y="81" text-anchor="middle" font-size="7" fill="#C8922A" font-family="Arial">STAMP</text>
+        <text x="65" y="91" text-anchor="middle" font-size="6" fill="#C8922A" font-family="Arial">2026</text>
+      </svg>
+    </div>
+
+    <!-- ═══ FOOTER ═══ -->
+    <div class="doc-footer">
+      <div>Document generated by Emirates Steel Industries HR Department · ESI-HR-2026-00847 · Verification hotline: +971 2 555 3010</div>
+      <div class="ar" style="font-family:'Cairo',sans-serif;direction:rtl;margin-top:3px">أصدرت هذا المستند إدارة الموارد البشرية في مجموعة الإمارات للصلب · للتحقق: 3010 555 2 971+</div>
+      <div style="margin-top:6px;color:#CCC">■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■</div>
+    </div>
+
+  </div><!-- end .content -->
+
+  <div class="security-strip"></div>
+
+</div><!-- end .page -->
+
+</body>
+</html>
