@@ -186,15 +186,17 @@ export default function App() {
       <aside className="sidebar no-print">
         {/* Logo */}
         <div className="sidebar-logo">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '11px' }}>
-            <UAEFalcon size={36} />
-            <div>
-              <div dir="rtl" style={{ fontSize: '13px', fontWeight: 700, color: '#1A1A1A', lineHeight: 1.2, fontFamily: 'Segoe UI, Tahoma, sans-serif' }}>
-                وزارة الطاقة والبنية التحتية
-              </div>
-              <div style={{ fontSize: '9.5px', color: '#C8922A', fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase', marginTop: '2px' }}>
-                Ministry of Energy &amp; Infrastructure
-              </div>
+          <img
+            src="/logo/logo.png"
+            alt="Ministry of Energy & Infrastructure"
+            style={{ maxHeight: '48px', width: 'auto', maxWidth: '100%', objectFit: 'contain', display: 'block' }}
+          />
+          <div style={{ marginTop: '10px' }}>
+            <div dir="rtl" style={{ fontSize: '13px', fontWeight: 700, color: '#1A1A1A', lineHeight: 1.2, fontFamily: 'Segoe UI, Tahoma, sans-serif' }}>
+              وزارة الطاقة والبنية التحتية
+            </div>
+            <div style={{ fontSize: '9.5px', color: '#C8922A', fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase', marginTop: '2px' }}>
+              Ministry of Energy &amp; Infrastructure
             </div>
           </div>
           <div style={{ marginTop: '10px', paddingTop: '10px', borderTop: '1px solid #F0EBE0', display: 'flex', alignItems: 'center', gap: '6px' }}>

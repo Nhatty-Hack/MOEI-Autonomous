@@ -101,10 +101,14 @@ export default function UAEPassLogin({ onAuthenticated, onBack, applications }: 
 
         <div style={{ padding: '44px 44px 0', position: 'relative' }}>
           {/* Logo */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '32px' }}>
-            <UAEFalcon size={44} />
+          <div style={{ marginBottom: '32px' }}>
+            <img
+              src="/logo/logo.png"
+              alt="Ministry of Energy & Infrastructure"
+              style={{ maxHeight: '48px', width: 'auto', maxWidth: '100%', objectFit: 'contain', display: 'block', marginBottom: '8px' }}
+            />
             <div>
-              <div style={{ fontSize: '17px', fontWeight: 700, color: '#1A1A1A', lineHeight: 1.2 }}>MOEI</div>
+              <div dir="rtl" style={{ fontSize: '13px', fontWeight: 700, color: '#1A1A1A', fontFamily: 'Segoe UI, Tahoma, sans-serif', lineHeight: 1.3 }}>وزارة الطاقة والبنية التحتية</div>
               <div style={{ fontSize: '10px', color: '#C8922A', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: '2px', fontWeight: 600 }}>Arrears Portal</div>
             </div>
           </div>
