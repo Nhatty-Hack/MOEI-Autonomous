@@ -10,6 +10,7 @@ import {
   FileText,
   Clock,
   Activity,
+  LogOut,
 } from 'lucide-react';
 
 interface BeneficiaryViewProps {
@@ -17,6 +18,7 @@ interface BeneficiaryViewProps {
   recommendation: AgentRecommendation | null;
   isProcessing: boolean;
   onSubmitForAssessment: () => void;
+  onLogout?: () => void;
 }
 
 const PROCESSING_STEPS = [
@@ -85,6 +87,7 @@ export default function BeneficiaryView({
   recommendation,
   isProcessing,
   onSubmitForAssessment,
+  onLogout,
 }: BeneficiaryViewProps) {
   return (
     <div style={{ maxWidth: '680px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -115,13 +118,26 @@ export default function BeneficiaryView({
             طلب إعادة جدولة المتأخرات
           </div>
         </div>
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: '10px', color: '#888888', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '2px' }}>
-            Application ID
+        <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
+          <div>
+            <div style={{ fontSize: '10px', color: '#888888', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '2px' }}>
+              Application ID
+            </div>
+            <div style={{ fontSize: '12px', fontFamily: 'monospace', color: '#555555', fontWeight: 600 }}>
+              {app.application_id}
+            </div>
           </div>
-          <div style={{ fontSize: '12px', fontFamily: 'monospace', color: '#555555', fontWeight: 600 }}>
-            {app.application_id}
-          </div>
+          {onLogout && (
+            <button
+              onClick={onLogout}
+              style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px', fontWeight: 600, color: '#888888', background: 'none', border: '1px solid #E8E0D0', borderRadius: '6px', padding: '5px 10px', cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.13s' }}
+              onMouseEnter={e => { e.currentTarget.style.color = '#CC3333'; e.currentTarget.style.borderColor = 'rgba(204,51,51,0.3)'; e.currentTarget.style.background = '#FEE8E8'; }}
+              onMouseLeave={e => { e.currentTarget.style.color = '#888888'; e.currentTarget.style.borderColor = '#E8E0D0'; e.currentTarget.style.background = 'none'; }}
+            >
+              <LogOut size={11} />
+              Logout
+            </button>
+          )}
         </div>
       </div>
 

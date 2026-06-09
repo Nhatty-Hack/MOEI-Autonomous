@@ -1,11 +1,15 @@
 import { useState, useEffect } from 'react';
-import { CheckCircle2, Loader2, Fingerprint, ArrowLeft, Shield, Zap, Users } from 'lucide-react';
+import { CheckCircle2, Loader2, Fingerprint, ArrowLeft, Shield, Zap, Users, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { ReschedulingApplication } from '../types';
 
 interface UAEPassLoginProps {
   onAuthenticated: (emiratesId: string) => void;
   onBack?: () => void;
+  applications: ReschedulingApplication[];
 }
+
+const normalizeId = (id: string) => id.replace(/[-\s]/g, '');
 
 const VERIFICATION_STEPS = [
   { en: 'Verifying identity via UAE PASS...', ar: 'جارٍ التحقق من الهوية عبر UAE PASS...' },
@@ -41,9 +45,9 @@ function UAEFalcon({ size = 52 }: { size?: number }) {
 
 const OTP_DIGITS = 4;
 
-export default function UAEPassLogin({ onAuthenticated, onBack }: UAEPassLoginProps) {
-  const [emiratesId, setEmiratesId] = useState('784-1985-1234567-8');
-  const [step, setStep] = useState<'input' | 'otp' | 'connecting' | 'done'>('input');
+export default function UAEPassLogin({ onAuthenticated, onBack, applications }: UAEPassLoginProps) {
+  const [emiratesId, setEmiratesId] = useState('784-1985-4521458-1');
+  const [step, setStep] = useState<'input' | 'otp' | 'connecting' | 'done' | 'not_found'>('input');
   const [otp, setOtp] = useState(['', '', '', '']);
   const [currentVerifyStep, setCurrentVerifyStep] = useState(0);
 
@@ -69,9 +73,20 @@ export default function UAEPassLogin({ onAuthenticated, onBack }: UAEPassLoginPr
     VERIFICATION_STEPS.forEach((_, idx) => {
       timers.push(setTimeout(() => setCurrentVerifyStep(idx), idx * 750));
     });
-    timers.push(setTimeout(() => onAuthenticated(emiratesId), VERIFICATION_STEPS.length * 750 + 400));
+    timers.push(setTimeout(() => {
+      const found = applications.find(
+        app =>
+          app.beneficiary.emirates_id === emiratesId ||
+          normalizeId(app.beneficiary.emirates_id) === normalizeId(emiratesId)
+      );
+      if (found) {
+        onAuthenticated(emiratesId);
+      } else {
+        setStep('not_found');
+      }
+    }, VERIFICATION_STEPS.length * 750 + 400));
     return () => timers.forEach(clearTimeout);
-  }, [step, emiratesId, onAuthenticated]);
+  }, [step, emiratesId, onAuthenticated, applications]);
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', backgroundColor: '#FFFFFF' }}>
@@ -255,6 +270,34 @@ export default function UAEPassLogin({ onAuthenticated, onBack }: UAEPassLoginPr
                         </div>
                       </motion.div>
                     ))}
+                  </motion.div>
+                )}
+
+                {/* Step 4: Not Found */}
+                {step === 'not_found' && (
+                  <motion.div key="not_found" initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.3 }}>
+                    <div style={{ textAlign: 'center', padding: '8px 0 20px' }}>
+                      <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: '#FEE8E8', border: '1px solid rgba(204,51,51,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+                        <AlertCircle size={26} color="#CC3333" />
+                      </div>
+                      <div style={{ fontSize: '16px', fontWeight: 700, color: '#1A1A1A', marginBottom: '4px' }}>Emirates ID Not Found</div>
+                      <div dir="rtl" className="arabic" style={{ fontSize: '12px', color: '#888888', marginBottom: '14px' }}>لم يتم العثور على هذه الهوية الإماراتية</div>
+                      <div style={{ background: '#FAF7F2', border: '1px solid #E8E0D0', borderRadius: '8px', padding: '10px 14px', marginBottom: '20px', textAlign: 'left' }}>
+                        <div style={{ fontSize: '10px', fontWeight: 600, color: '#AAAAAA', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '4px' }}>Searched for</div>
+                        <div style={{ fontSize: '13px', fontFamily: 'IBM Plex Mono, monospace', color: '#CC3333', fontWeight: 600 }}>{emiratesId}</div>
+                      </div>
+                      <p style={{ fontSize: '12.5px', color: '#666666', lineHeight: 1.6, margin: '0 0 20px' }}>
+                        No active application was found for this Emirates ID. Please check the number and try again.
+                      </p>
+                      <button
+                        onClick={() => { setStep('input'); setOtp(['', '', '', '']); }}
+                        style={{ width: '100%', height: '48px', backgroundColor: '#C8922A', color: '#FFFFFF', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                        onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#A67420')}
+                        onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#C8922A')}
+                      >
+                        ← Try a Different Emirates ID
+                      </button>
+                    </div>
                   </motion.div>
                 )}
 

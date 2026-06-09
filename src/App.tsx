@@ -140,8 +140,20 @@ export default function App() {
     setExpandedApp((prev) => (prev === appId ? null : appId));
   }, []);
 
-  const handleAuthenticated = useCallback((_emiratesId: string) => {
+  const handleAuthenticated = useCallback((emiratesId: string) => {
+    const normalize = (id: string) => id.replace(/[-\s]/g, '');
+    const match = applications.find(
+      app =>
+        app.beneficiary.emirates_id === emiratesId ||
+        normalize(app.beneficiary.emirates_id) === normalize(emiratesId)
+    );
+    if (match) setSelectedBeneficiaryApp(match.application_id);
     setIsAuthenticated(true);
+  }, [applications]);
+
+  const handleLogout = useCallback(() => {
+    setIsAuthenticated(false);
+    setSelectedBeneficiaryApp(null);
   }, []);
 
   if (loading) {
@@ -161,7 +173,7 @@ export default function App() {
 
   /* Full-screen UAE Pass login (no sidebar) */
   if (activeTab === 'beneficiary' && !isAuthenticated) {
-    return <UAEPassLogin onAuthenticated={handleAuthenticated} onBack={() => setActiveTab('dashboard')} />;
+    return <UAEPassLogin onAuthenticated={handleAuthenticated} onBack={() => setActiveTab('dashboard')} applications={applications} />;
   }
 
   const unassessedCount = applications.filter((app) => !recommendations[app.application_id]).length;
@@ -277,6 +289,7 @@ export default function App() {
                 recommendation={recommendations[beneficiaryApp.application_id] || null}
                 isProcessing={processingApps.has(beneficiaryApp.application_id)}
                 onSubmitForAssessment={() => handleAssessAgentic(beneficiaryApp.application_id)}
+                onLogout={handleLogout}
               />
             ) : (
               <div style={{ textAlign: 'center', color: '#888888', padding: '80px 0' }}>No applications found.</div>
