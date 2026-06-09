@@ -519,24 +519,11 @@ export async function processWithAgent(
   } catch (error: unknown) {
     const err = error as { status?: number | string; message?: string };
     const errMsg = err.message ?? '';
-
-    // ── Rate Limit / Quota Fallback ───────────────────────────────────
-    if (
-      err.status === 429 ||
-      err.status === 'RESOURCE_EXHAUSTED' ||
-      errMsg.includes('quota') ||
-      errMsg.includes('429')
-    ) {
-      addTrace(
-        'System',
-        'WARNING',
-        `Agent rate-limited (${err.status}). Falling back to deterministic compliance engine.`,
-      );
-
-      return buildDeterministicResult(app, trace, startTime, addTrace);
-    }
-
-    addTrace('System', 'FAILED', `Agent loop crashed: ${errMsg}`);
-    throw error;
+    addTrace(
+      'System',
+      'WARNING',
+      `Agent error (${err.status ?? 'unknown'}): ${errMsg.substring(0, 120)}. Falling back to deterministic compliance engine.`,
+    );
+    return buildDeterministicResult(app, trace, startTime, addTrace);
   }
 }

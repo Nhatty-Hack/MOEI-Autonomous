@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { ReschedulingApplication, AgentRecommendation } from '../types';
 import {
   BrainCircuit,
@@ -6,9 +7,9 @@ import {
   XCircle,
   Clock,
   AlertTriangle,
+  FileQuestion,
   ChevronDown,
   ChevronUp,
-  FileText,
   Users,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -24,48 +25,48 @@ interface ApplicationCardProps {
   onToggleExpand: (appId: string) => void;
 }
 
-function getRecommendationColor(rec: string) {
-  switch (rec) {
-    case 'APPROVE':
-      return 'bg-emerald-500/10 text-emerald-700 border-emerald-200';
-    case 'REQUEST_DOCUMENTS':
-      return 'bg-amber-500/10 text-amber-700 border-amber-200';
-    case 'REFER_TO_EMPLOYEE':
-      return 'bg-blue-500/10 text-blue-700 border-blue-200';
-    case 'REJECT':
-      return 'bg-red-500/10 text-red-700 border-red-200';
-    default:
-      return 'bg-slate-500/10 text-slate-700 border-slate-200';
-  }
-}
+type BadgeConfig = {
+  bg: string;
+  text: string;
+  border: string;
+  label: string;
+  labelAr: string;
+  accentColor: string;
+  icon: ReactNode;
+};
 
-function getRecommendationIcon(rec: string) {
+function getStatusBadge(rec: string): BadgeConfig {
   switch (rec) {
     case 'APPROVE':
-      return <CheckCircle2 className="w-5 h-5 text-emerald-600" />;
+      return {
+        bg: '#E8F5EE', text: '#00704A', border: '#A7D9BC', accentColor: '#00704A',
+        label: 'Approved', labelAr: 'موافق',
+        icon: <CheckCircle2 size={12} />,
+      };
     case 'REQUEST_DOCUMENTS':
-      return <Clock className="w-5 h-5 text-amber-600" />;
+      return {
+        bg: '#FFF9E8', text: '#A67420', border: '#E8C870', accentColor: '#C8922A',
+        label: 'Docs Required', labelAr: 'مستندات',
+        icon: <FileQuestion size={12} />,
+      };
     case 'REFER_TO_EMPLOYEE':
-      return <AlertTriangle className="w-5 h-5 text-blue-600" />;
+      return {
+        bg: '#FEF3E8', text: '#C8922A', border: '#F0C888', accentColor: '#C8922A',
+        label: 'Referred', labelAr: 'محال',
+        icon: <AlertTriangle size={12} />,
+      };
     case 'REJECT':
-      return <XCircle className="w-5 h-5 text-red-600" />;
+      return {
+        bg: '#FEE8E8', text: '#CC0000', border: '#F5AAAA', accentColor: '#CC3333',
+        label: 'Rejected', labelAr: 'مرفوض',
+        icon: <XCircle size={12} />,
+      };
     default:
-      return <Clock className="w-5 h-5 text-slate-600" />;
-  }
-}
-
-function getRecommendationLabel(rec: string) {
-  switch (rec) {
-    case 'APPROVE':
-      return 'APPROVED';
-    case 'REQUEST_DOCUMENTS':
-      return 'DOCUMENTS REQUIRED';
-    case 'REFER_TO_EMPLOYEE':
-      return 'REFERRED TO EMPLOYEE';
-    case 'REJECT':
-      return 'REJECTED';
-    default:
-      return rec;
+      return {
+        bg: '#F5F0E8', text: '#8B7355', border: '#D4C5A9', accentColor: '#888888',
+        label: 'Pending', labelAr: 'قيد الانتظار',
+        icon: <Clock size={12} />,
+      };
   }
 }
 
@@ -77,226 +78,515 @@ export default function ApplicationCard({
   onAssess,
   onToggleExpand,
 }: ApplicationCardProps) {
+  const badge = recommendation ? getStatusBadge(recommendation.recommendation) : null;
+  const accentColor = badge?.accentColor ?? '#E8E0D0';
+
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 transition-all relative overflow-hidden">
+    <div
+      style={{
+        backgroundColor: '#FFFFFF',
+        border: '1px solid #E8E0D0',
+        borderRadius: '12px',
+        overflow: 'hidden',
+        position: 'relative',
+        boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+        transition: 'box-shadow 0.2s ease',
+      }}
+      onMouseEnter={e => {
+        (e.currentTarget as HTMLDivElement).style.boxShadow = '0 4px 16px rgba(0,0,0,0.08)';
+      }}
+      onMouseLeave={e => {
+        (e.currentTarget as HTMLDivElement).style.boxShadow = '0 1px 4px rgba(0,0,0,0.04)';
+      }}
+    >
+      {/* Left gold/status accent bar */}
+      <div
+        style={{
+          position: 'absolute',
+          left: 0,
+          top: 0,
+          bottom: 0,
+          width: '4px',
+          backgroundColor: accentColor,
+        }}
+      />
+
+      {/* Processing overlay */}
       {isProcessing && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="absolute inset-0 bg-slate-900/5 backdrop-blur-[2px] z-10 pointer-events-none rounded-xl"
-        />
+          style={{
+            position: 'absolute',
+            inset: 0,
+            backgroundColor: 'rgba(255,255,255,0.75)',
+            backdropFilter: 'blur(1px)',
+            zIndex: 10,
+            borderRadius: '12px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <div style={{ textAlign: 'center' }}>
+            <div
+              style={{
+                width: '32px',
+                height: '32px',
+                border: '3px solid #E8E0D0',
+                borderTopColor: '#C8922A',
+                borderRadius: '50%',
+                animation: 'spin 0.8s linear infinite',
+                margin: '0 auto 8px',
+              }}
+            />
+            <div style={{ fontSize: '12px', color: '#888888' }}>Processing...</div>
+          </div>
+        </motion.div>
       )}
 
-      <div className="flex flex-col md:flex-row gap-6 justify-between items-start">
-        {/* Left: Beneficiary Info */}
-        <div className="space-y-4 flex-1">
-          <div>
-            <div className="flex items-center gap-3 mb-1">
-              <h3 className="text-xl font-medium">{app.beneficiary.full_name}</h3>
-              <span className="px-2.5 py-0.5 text-xs font-semibold bg-slate-100 text-slate-600 rounded border border-slate-200 uppercase tracking-wide">
-                {app.beneficiary.employment_status.replace('_', ' ')}
-              </span>
+      <div style={{ padding: '20px 20px 20px 24px' }}>
+        {/* ── Top row: name + status badge ────────────────────── */}
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            gap: '12px',
+            marginBottom: '16px',
+          }}
+        >
+          <div style={{ flex: 1, minWidth: 0 }}>
+            {/* Arabic name first (MOEI convention) */}
+            {app.beneficiary.full_name_ar && (
+              <div
+                dir="rtl"
+                className="arabic"
+                style={{
+                  fontSize: '18px',
+                  fontWeight: 700,
+                  color: '#1A1A1A',
+                  lineHeight: 1.3,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {app.beneficiary.full_name_ar}
+              </div>
+            )}
+            <div
+              style={{
+                fontSize: '14px',
+                color: '#555555',
+                marginTop: app.beneficiary.full_name_ar ? '2px' : '0',
+                fontWeight: app.beneficiary.full_name_ar ? 400 : 600,
+              }}
+            >
+              {app.beneficiary.full_name}
             </div>
-            <div className="text-sm font-mono text-slate-500">
-              ID: {app.beneficiary.emirates_id} &middot; APP: {app.application_id}
+            <div
+              style={{
+                fontSize: '11px',
+                color: '#888888',
+                fontFamily: "'Roboto Mono', monospace",
+                marginTop: '4px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+              }}
+            >
+              <span>{app.beneficiary.emirates_id}</span>
+              <span style={{ color: '#E8E0D0' }}>·</span>
+              <span>{app.application_id}</span>
+              <span style={{ color: '#E8E0D0' }}>·</span>
+              <span
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '3px',
+                  color: '#555555',
+                }}
+              >
+                <Users size={10} />
+                {app.family.total_family_members}
+              </span>
             </div>
           </div>
 
-          <div className="grid sm:grid-cols-2 gap-4 text-sm mt-4">
-            {/* Financial Summary */}
-            <div className="bg-slate-50 rounded pl-3 py-2 border-l-2 border-indigo-200">
-              <div className="text-slate-500 text-xs uppercase tracking-wider font-semibold mb-1">
-                Arrears
-              </div>
-              <div className="font-mono text-slate-800 font-semibold">
-                {app.arrears.overdue_amount.toLocaleString()} AED
-              </div>
-              <div className="text-xs text-slate-500">
-                {app.arrears.overdue_months} Months Overdue
-              </div>
-            </div>
-
-            <div className="bg-slate-50 rounded pl-3 py-2 border-l-2 border-emerald-200">
-              <div className="text-slate-500 text-xs uppercase tracking-wider font-semibold mb-1">
-                Income & Family
-              </div>
-              <div className="font-mono text-slate-800 font-semibold">
-                {app.income.current_salary.toLocaleString()} AED
-              </div>
-              <div className="text-xs text-slate-500 flex items-center gap-1">
-                <Users className="w-3 h-3" /> {app.family.dependents_count} dependents · {app.family.total_family_members} members
-              </div>
-            </div>
-
-            {/* Request Type */}
-            <div className="col-span-1 sm:col-span-2 flex items-center gap-3">
-              <span
-                className={`px-2.5 py-1 text-xs font-semibold rounded border ${
-                  app.request_type === 'UPDATE_INSTALLMENT'
-                    ? 'bg-blue-50 text-blue-700 border-blue-200'
-                    : 'bg-purple-50 text-purple-700 border-purple-200'
-                }`}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px', flexShrink: 0 }}>
+            {badge ? (
+              <div
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  padding: '4px 12px',
+                  borderRadius: '20px',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  backgroundColor: badge.bg,
+                  color: badge.text,
+                  border: `1px solid ${badge.border}`,
+                  whiteSpace: 'nowrap',
+                }}
               >
-                {app.request_type.replace('_', ' ')}
-              </span>
-              <span className="text-xs text-slate-500">
-                EMI: {app.loan.current_emi.toLocaleString()} AED
-              </span>
-              <span className="text-xs text-slate-500">
-                <FileText className="w-3 h-3 inline mr-0.5" />
-                {app.arrears.supporting_documents.length} docs
-              </span>
+                {badge.icon}
+                {badge.labelAr} | {badge.label}
+              </div>
+            ) : (
+              <div
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  padding: '4px 12px',
+                  borderRadius: '20px',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  backgroundColor: '#F5F0E8',
+                  color: '#8B7355',
+                  border: '1px solid #D4C5A9',
+                }}
+              >
+                <Clock size={11} />
+                قيد الانتظار | Pending
+              </div>
+            )}
+            <div
+              style={{
+                fontSize: '10px',
+                color: '#888888',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+              }}
+            >
+              {app.request_type.replace(/_/g, ' ')}
             </div>
+          </div>
+        </div>
 
-            {/* Reason */}
-            {app.arrears.reason_for_delay && (
-              <div className="col-span-1 sm:col-span-2 pt-2 border-t border-slate-100">
-                <div className="text-slate-500 text-[10px] font-bold uppercase tracking-wider mb-1">
-                  Reason for Delay
-                </div>
-                <div className="text-sm text-slate-700 leading-relaxed italic bg-amber-50 p-2 rounded border border-amber-100 border-dashed">
-                  "{app.arrears.reason_for_delay}"
-                </div>
+        {/* ── Financial figures row ─────────────────────────── */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            borderRadius: '8px',
+            border: '1px solid #E8E0D0',
+            overflow: 'hidden',
+            marginBottom: '16px',
+          }}
+        >
+          {/* Loan Balance */}
+          <div
+            style={{
+              padding: '12px 14px',
+              backgroundColor: '#FDFAF5',
+              textAlign: 'center',
+            }}
+          >
+            <div
+              style={{
+                fontSize: '10px',
+                color: '#888888',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                marginBottom: '5px',
+                fontWeight: 500,
+              }}
+            >
+              Loan Balance
+            </div>
+            <div
+              style={{
+                fontSize: '16px',
+                fontWeight: 700,
+                color: '#1A1A1A',
+                fontFamily: 'monospace',
+                lineHeight: 1,
+              }}
+            >
+              {app.loan.remaining_balance.toLocaleString()}
+            </div>
+            <div style={{ fontSize: '10px', color: '#C8922A', fontWeight: 600, marginTop: '3px' }}>
+              AED
+            </div>
+          </div>
+
+          {/* Arrears */}
+          <div
+            style={{
+              padding: '12px 14px',
+              backgroundColor: '#FFF8F8',
+              textAlign: 'center',
+              borderLeft: '1px solid #E8E0D0',
+              borderRight: '1px solid #E8E0D0',
+            }}
+          >
+            <div
+              style={{
+                fontSize: '10px',
+                color: '#888888',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                marginBottom: '5px',
+                fontWeight: 500,
+              }}
+            >
+              Arrears
+            </div>
+            <div
+              style={{
+                fontSize: '16px',
+                fontWeight: 700,
+                color: '#CC3333',
+                fontFamily: 'monospace',
+                lineHeight: 1,
+              }}
+            >
+              {app.arrears.overdue_amount.toLocaleString()}
+            </div>
+            <div style={{ fontSize: '10px', color: '#CC3333', fontWeight: 600, marginTop: '3px' }}>
+              AED
+            </div>
+          </div>
+
+          {/* Overdue months + salary */}
+          <div
+            style={{
+              padding: '12px 14px',
+              backgroundColor: '#FDFAF5',
+              textAlign: 'center',
+            }}
+          >
+            <div
+              style={{
+                fontSize: '10px',
+                color: '#888888',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                marginBottom: '5px',
+                fontWeight: 500,
+              }}
+            >
+              Overdue
+            </div>
+            <div
+              style={{
+                fontSize: '16px',
+                fontWeight: 700,
+                color: '#1A1A1A',
+                fontFamily: 'monospace',
+                lineHeight: 1,
+              }}
+            >
+              {app.arrears.overdue_months}
+            </div>
+            <div style={{ fontSize: '10px', color: '#888888', fontWeight: 600, marginTop: '3px' }}>
+              months
+            </div>
+          </div>
+        </div>
+
+        {/* ── Salary + compliance chips ─────────────────────── */}
+        {recommendation && (
+          <div
+            style={{
+              display: 'flex',
+              gap: '8px',
+              flexWrap: 'wrap',
+              marginBottom: '14px',
+            }}
+          >
+            <div
+              style={{
+                fontSize: '11px',
+                fontWeight: 600,
+                padding: '3px 10px',
+                borderRadius: '20px',
+                backgroundColor: recommendation.twenty_pct_rule_compliant ? '#E8F5EE' : '#FEE8E8',
+                color: recommendation.twenty_pct_rule_compliant ? '#00704A' : '#CC0000',
+                border: `1px solid ${recommendation.twenty_pct_rule_compliant ? '#A7D9BC' : '#F5AAAA'}`,
+              }}
+            >
+              {recommendation.twenty_pct_rule_compliant ? '✓' : '✗'} 20% Rule
+            </div>
+            <div
+              style={{
+                fontSize: '11px',
+                fontWeight: 600,
+                padding: '3px 10px',
+                borderRadius: '20px',
+                backgroundColor: recommendation.period_rule_compliant ? '#E8F5EE' : '#FEE8E8',
+                color: recommendation.period_rule_compliant ? '#00704A' : '#CC0000',
+                border: `1px solid ${recommendation.period_rule_compliant ? '#A7D9BC' : '#F5AAAA'}`,
+              }}
+            >
+              {recommendation.period_rule_compliant ? '✓' : '✗'} Period Rule
+            </div>
+            {recommendation.proposed_plan && (
+              <div
+                style={{
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  padding: '3px 10px',
+                  borderRadius: '20px',
+                  backgroundColor: '#F5F0E8',
+                  color: '#555555',
+                  border: '1px solid #E8E0D0',
+                }}
+              >
+                New EMI: {recommendation.proposed_plan.new_emi.toLocaleString()} AED
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── Action row ───────────────────────────────────── */}
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            gap: '12px',
+          }}
+        >
+          <div
+            style={{ fontSize: '11.5px', color: '#888888', display: 'flex', alignItems: 'center', gap: '8px' }}
+          >
+            <span
+              style={{
+                padding: '2px 8px',
+                borderRadius: '4px',
+                backgroundColor: '#F5F0E8',
+                border: '1px solid #E8E0D0',
+                fontSize: '10px',
+                fontWeight: 600,
+                color: '#555555',
+                textTransform: 'uppercase',
+                letterSpacing: '0.04em',
+              }}
+            >
+              {app.beneficiary.employment_status.replace(/_/g, ' ')}
+            </span>
+            {app.beneficiary.is_person_of_determination && (
+              <span
+                style={{
+                  padding: '2px 8px',
+                  borderRadius: '4px',
+                  backgroundColor: '#EFF6FF',
+                  border: '1px solid #BFDBFE',
+                  fontSize: '10px',
+                  fontWeight: 600,
+                  color: '#1D4ED8',
+                }}
+              >
+                PoD
+              </span>
+            )}
+          </div>
+
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            {!recommendation && !isProcessing && (
+              <button
+                onClick={() => onAssess(app.application_id)}
+                style={{
+                  height: '40px',
+                  padding: '0 20px',
+                  backgroundColor: '#C8922A',
+                  color: '#FFFFFF',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  fontFamily: 'inherit',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  whiteSpace: 'nowrap',
+                }}
+                onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#A67420')}
+                onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#C8922A')}
+              >
+                <Zap size={13} />
+                تقييم الطلب | Assess
+              </button>
+            )}
+            {recommendation && !isProcessing && (
+              <button
+                onClick={() => onToggleExpand(app.application_id)}
+                style={{
+                  height: '38px',
+                  padding: '0 16px',
+                  backgroundColor: 'transparent',
+                  color: '#C8922A',
+                  border: '1.5px solid #C8922A',
+                  borderRadius: '8px',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  fontFamily: 'inherit',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  whiteSpace: 'nowrap',
+                }}
+                onMouseEnter={e => {
+                  (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#FEF3E8';
+                }}
+                onMouseLeave={e => {
+                  (e.currentTarget as HTMLButtonElement).style.backgroundColor = 'transparent';
+                }}
+              >
+                {isExpanded ? (
+                  <>
+                    <ChevronUp size={14} />
+                    إخفاء | Hide
+                  </>
+                ) : (
+                  <>
+                    <ChevronDown size={14} />
+                    عرض التفاصيل | Details
+                  </>
+                )}
+              </button>
+            )}
+            {!recommendation && isProcessing && (
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  fontSize: '12px',
+                  color: '#C8922A',
+                  fontWeight: 600,
+                }}
+              >
+                <BrainCircuit size={14} />
+                Analysing...
               </div>
             )}
           </div>
         </div>
-
-        {/* Right: Assessment Panel */}
-        <div className="w-full md:w-80 space-y-4 shrink-0 flex flex-col justify-start">
-          {!recommendation && !isProcessing && (
-            <div className="h-full flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-200 rounded-lg text-center bg-slate-50 space-y-3">
-              <BrainCircuit className="w-8 h-8 text-indigo-400 opacity-60" />
-              <div className="text-sm text-slate-500">
-                Requires AI assessment to generate recommendation.
-              </div>
-              <button
-                onClick={() => onAssess(app.application_id)}
-                className="w-full mt-2 bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm font-medium py-2 rounded flex items-center justify-center gap-2 transition-colors text-sm"
-              >
-                <Zap className="w-4 h-4" /> Execute AI Assessment
-              </button>
-            </div>
-          )}
-
-          {recommendation && !isProcessing && (
-            <>
-              {/* Recommendation Badge */}
-              <div
-                className={`rounded-lg border px-4 py-3 flex items-start gap-3 shadow-sm ${getRecommendationColor(recommendation.recommendation)}`}
-              >
-                <div className="mt-0.5 shrink-0">{getRecommendationIcon(recommendation.recommendation)}</div>
-                <div className="space-y-1.5">
-                  <div className="font-bold text-sm tracking-widest">
-                    {getRecommendationLabel(recommendation.recommendation)}
-                  </div>
-                  <div className="text-xs font-medium leading-relaxed opacity-95">
-                    {recommendation.reasoning}
-                  </div>
-                </div>
-              </div>
-
-              {/* Compliance Checks */}
-              <div className="flex gap-2">
-                <div
-                  className={`flex-1 text-center text-xs font-semibold py-1.5 rounded border ${
-                    recommendation.twenty_pct_rule_compliant
-                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                      : 'bg-red-50 text-red-700 border-red-200'
-                  }`}
-                >
-                  {recommendation.twenty_pct_rule_compliant ? '✓' : '✗'} 20% Rule
-                </div>
-                <div
-                  className={`flex-1 text-center text-xs font-semibold py-1.5 rounded border ${
-                    recommendation.period_rule_compliant
-                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                      : 'bg-red-50 text-red-700 border-red-200'
-                  }`}
-                >
-                  {recommendation.period_rule_compliant ? '✓' : '✗'} Period Rule
-                </div>
-              </div>
-
-              {/* Proposed Plan */}
-              {recommendation.recommendation === 'APPROVE' && recommendation.proposed_plan && (
-                <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div className="border border-emerald-100 bg-emerald-50/50 p-2.5 rounded">
-                    <span className="block text-emerald-600/80 text-[10px] font-bold uppercase tracking-wider mb-1">
-                      New EMI
-                    </span>
-                    <span className="font-mono text-emerald-700 text-lg font-semibold">
-                      {recommendation.proposed_plan.new_emi.toLocaleString()}
-                    </span>
-                    <span className="text-emerald-500 ml-1">AED</span>
-                  </div>
-                  <div className="border border-emerald-100 bg-emerald-50/50 p-2.5 rounded">
-                    <span className="block text-emerald-600/80 text-[10px] font-bold uppercase tracking-wider mb-1">
-                      Add. Premium
-                    </span>
-                    <span className="font-mono text-emerald-700 text-lg font-semibold">
-                      {recommendation.proposed_plan.additional_premium.toLocaleString()}
-                    </span>
-                    <span className="text-emerald-500 ml-1">AED</span>
-                  </div>
-                  <div className="border border-emerald-100 bg-emerald-50/50 p-2.5 rounded">
-                    <span className="block text-emerald-600/80 text-[10px] font-bold uppercase tracking-wider mb-1">
-                      Add. Months
-                    </span>
-                    <span className="font-mono text-emerald-700 text-lg font-semibold">
-                      {recommendation.proposed_plan.additional_months}
-                    </span>
-                  </div>
-                  <div className="border border-emerald-100 bg-emerald-50/50 p-2.5 rounded">
-                    <span className="block text-emerald-600/80 text-[10px] font-bold uppercase tracking-wider mb-1">
-                      Deduction Rate
-                    </span>
-                    <span className="font-mono text-emerald-700 text-lg font-semibold">
-                      {recommendation.proposed_plan.deduction_rate.toFixed(1)}%
-                    </span>
-                  </div>
-                </div>
-              )}
-
-              {/* Arabic reasoning */}
-              {recommendation.reasoning_ar && (
-                <div
-                  className="text-xs text-slate-600 bg-slate-50 p-3 rounded border border-slate-200 font-[family-name:var(--font-arabic)] leading-relaxed"
-                  dir="rtl"
-                >
-                  {recommendation.reasoning_ar}
-                </div>
-              )}
-
-              <button
-                onClick={() => onToggleExpand(app.application_id)}
-                className="w-full flex items-center justify-center gap-2 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors bg-slate-100 hover:bg-slate-200 rounded-md border border-slate-200 mt-2"
-              >
-                {isExpanded ? (
-                  <>
-                    <ChevronUp className="w-3.5 h-3.5" /> Hide Assessment Details
-                  </>
-                ) : (
-                  <>
-                    <ChevronDown className="w-3.5 h-3.5" /> View Assessment Details
-                  </>
-                )}
-              </button>
-            </>
-          )}
-        </div>
       </div>
 
-      {/* Processing / Details Panel */}
+      {/* ── Expanded assessment panel ─────────────────────────── */}
       <AnimatePresence>
         {isExpanded && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="overflow-hidden"
+            transition={{ duration: 0.25 }}
+            style={{ overflow: 'hidden' }}
           >
-            <div className="mt-8 pt-8 border-t border-slate-200">
+            <div
+              style={{
+                borderTop: '1px solid #E8E0D0',
+                margin: '0 0 0 4px',
+              }}
+            >
               {isProcessing ? (
                 <ProcessingAnimation />
               ) : recommendation ? (

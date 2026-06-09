@@ -1,32 +1,80 @@
-import { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { ReschedulingApplication, AgentRecommendation } from './types';
 import {
-  Activity,
-  Zap,
-  LayoutDashboard,
-  Briefcase,
-  Scale,
-  User,
-  Workflow,
+  Briefcase, Scale, User, Workflow, Settings, Home, ChevronRight, Zap,
 } from 'lucide-react';
 import { AnimatePresence } from 'motion/react';
 
-import Header from './components/Header';
 import UAEPassLogin from './components/UAEPassLogin';
 import BeneficiaryView from './components/BeneficiaryView';
-import PipelineComparison from './components/PipelineComparison';
-import ApplicationCard from './components/ApplicationCard';
+import ApplicationsTable from './components/ApplicationsTable';
 import Dashboard from './components/Dashboard';
+import GovernancePage from './components/GovernancePage';
+import AgentPipelinePage from './components/AgentPipelinePage';
 import ErrorBanner from './components/ErrorBanner';
 
-type Tab = 'beneficiary' | 'officer' | 'pipeline' | 'dashboard' | 'governance';
+type Tab = 'beneficiary' | 'officer' | 'pipeline' | 'dashboard' | 'governance' | 'settings';
+
+/* ── UAE Falcon SVG ──────────────────────────────────────────────── */
+function UAEFalcon({ size = 36 }: { size?: number }) {
+  const w = size; const h = size * 1.1;
+  return (
+    <svg width={w} height={h} viewBox="0 0 46 52" fill="none" aria-label="UAE Coat of Arms">
+      <path d="M14 21 C9 15 2 18 2 27 C7 26 12 24 14 27Z" fill="#C8922A" />
+      <path d="M14 27 C8 28 4 34 6 40 C10 37 13 32 14 32Z" fill="#C8922A" />
+      <path d="M32 21 C37 15 44 18 44 27 C39 26 34 24 32 27Z" fill="#C8922A" />
+      <path d="M32 27 C38 28 42 34 40 40 C36 37 33 32 32 32Z" fill="#C8922A" />
+      <ellipse cx="23" cy="28" rx="8" ry="11" fill="#C8922A" />
+      <circle cx="23" cy="13" r="6.5" fill="#C8922A" />
+      <path d="M19.5 16 Q23 22 23 22 Q26.5 22 26.5 16Z" fill="#7A5008" />
+      <circle cx="21" cy="11" r="1.4" fill="#1A0A00" />
+      <rect x="17.5" y="24" width="11" height="14" rx="1" fill="#FFFFFF" />
+      <rect x="17.5" y="24" width="3.2" height="14" fill="#EF3340" />
+      <rect x="20.7" y="24"   width="7.8" height="4.7" fill="#00732F" />
+      <rect x="20.7" y="28.7" width="7.8" height="4.6" fill="#FFFFFF" />
+      <rect x="20.7" y="33.3" width="7.8" height="4.7" fill="#1A1A1A" />
+      <line x1="18" y1="39" x2="15" y2="47" stroke="#C8922A" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="20.5" y1="40" x2="19.5" y2="48" stroke="#C8922A" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="23" y1="40" x2="23"  y2="49" stroke="#C8922A" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="25.5" y1="40" x2="26.5" y2="48" stroke="#C8922A" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="28" y1="39" x2="31" y2="47" stroke="#C8922A" strokeWidth="1.5" strokeLinecap="round" />
+      <rect x="11" y="47" width="24" height="5" rx="2" fill="#C8922A" />
+    </svg>
+  );
+}
+
+const NAV_ITEMS = [
+  { id: 'dashboard'   as Tab, label: 'Dashboard',          labelAr: 'لوحة المعلومات',  icon: Home },
+  { id: 'beneficiary' as Tab, label: 'Beneficiary Portal', labelAr: 'بوابة المستفيد',  icon: User },
+  { id: 'officer'     as Tab, label: 'Applications',       labelAr: 'الطلبات',          icon: Briefcase },
+  { id: 'pipeline'    as Tab, label: 'AI Agent Pipeline',  labelAr: 'مسار المعالجة',   icon: Workflow },
+  { id: 'governance'  as Tab, label: 'Governance',         labelAr: 'الحوكمة',          icon: Scale },
+  { id: 'settings'    as Tab, label: 'Settings',           labelAr: 'الإعدادات',        icon: Settings },
+] as const;
+
+const BREADCRUMBS: Record<Tab, string> = {
+  dashboard:   'Dashboard',
+  beneficiary: 'Beneficiary Portal',
+  officer:     'Applications',
+  pipeline:    'AI Agent Pipeline',
+  governance:  'Governance',
+  settings:    'Settings',
+};
+const BREADCRUMBS_AR: Record<Tab, string> = {
+  dashboard:   'لوحة المعلومات',
+  beneficiary: 'بوابة المستفيد',
+  officer:     'الطلبات',
+  pipeline:    'مسار المعالجة',
+  governance:  'الحوكمة',
+  settings:    'الإعدادات',
+};
 
 export default function App() {
   const [applications, setApplications] = useState<ReschedulingApplication[]>([]);
   const [recommendations, setRecommendations] = useState<Record<string, AgentRecommendation>>({});
   const [processingApps, setProcessingApps] = useState<Set<string>>(new Set());
   const [expandedApp, setExpandedApp] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<Tab>('beneficiary');
+  const [activeTab, setActiveTab] = useState<Tab>('dashboard');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [selectedBeneficiaryApp, setSelectedBeneficiaryApp] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -39,9 +87,7 @@ export default function App() {
         const resApps = await fetch('/api/applications');
         const apps = await resApps.json();
         setApplications(apps);
-        if (apps.length > 0) {
-          setSelectedBeneficiaryApp(apps[0].application_id);
-        }
+        if (apps.length > 0) setSelectedBeneficiaryApp(apps[0].application_id);
       } catch (err) {
         console.error('Failed to load initial data', err);
         setError('Failed to load application data. Please refresh the page.');
@@ -52,7 +98,6 @@ export default function App() {
     fetchData();
   }, []);
 
-  // Auto-dismiss errors after 8 seconds
   useEffect(() => {
     if (!error) return;
     const timer = setTimeout(() => setError(null), 8000);
@@ -63,32 +108,29 @@ export default function App() {
     setProcessingApps((prev) => new Set(prev).add(appId));
     setExpandedApp(appId);
     try {
-      const res = await fetch(`/api/agent-assess/${appId}`, { method: 'POST' });
-      const json = await res.json();
-      if (json.data) {
-        setRecommendations((prev) => ({ ...prev, [appId]: json.data }));
-      } else {
-        setError(`Assessment failed for ${appId}: ${json.error || 'Unknown error'}`);
+      const agentRes = await fetch(`/api/agent-assess/${appId}`, { method: 'POST' });
+      if (agentRes.ok) {
+        const json = await agentRes.json();
+        if (json.data) { setRecommendations((prev) => ({ ...prev, [appId]: json.data })); return; }
       }
-    } catch (e) {
-      console.error(e);
-      setError(`Network error processing ${appId}. Please try again.`);
+      throw new Error('agent-assess returned no data');
+    } catch {
+      try {
+        const deterRes = await fetch(`/api/assess/${appId}`, { method: 'POST' });
+        const json = await deterRes.json();
+        if (json.data) setRecommendations((prev) => ({ ...prev, [appId]: json.data }));
+      } catch (e) { console.error('Both assessment paths failed:', e); }
     } finally {
-      setProcessingApps((prev) => {
-        const next = new Set(prev);
-        next.delete(appId);
-        return next;
-      });
+      setProcessingApps((prev) => { const next = new Set(prev); next.delete(appId); return next; });
     }
   }, []);
 
   const handleAssessAll = useCallback(async () => {
     const unassessed = applications.filter((app) => !recommendations[app.application_id]);
     if (unassessed.length === 0) return;
-
     for (let i = 0; i < unassessed.length; i++) {
       const app = unassessed[i];
-      setBatchProgress(`Processing ${i + 1}/${unassessed.length}...`);
+      setBatchProgress(`Processing ${i + 1} of ${unassessed.length}...`);
       await handleAssessAgentic(app.application_id);
     }
     setBatchProgress(null);
@@ -104,66 +146,132 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center font-sans text-slate-800">
-        <Activity className="w-6 h-6 animate-spin text-[#00694E]" />
-        <span className="ml-3 font-medium">Loading SZHP Systems...</span>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#F5F0E8' }}>
+        <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px' }}>
+          <UAEFalcon size={52} />
+          <div style={{ width: '36px', height: '36px', border: '3px solid rgba(200,146,42,0.25)', borderTopColor: '#C8922A', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+          <div>
+            <p style={{ fontSize: '15px', fontWeight: 600, color: '#1A1A1A', margin: '0 0 4px', fontFamily: 'Segoe UI, sans-serif' }}>Loading MOEI Portal</p>
+            <p dir="rtl" style={{ fontSize: '12px', color: '#888888', margin: 0, fontFamily: 'Segoe UI, Tahoma, sans-serif' }}>جارٍ تحميل بوابة الوزارة</p>
+          </div>
+        </div>
       </div>
     );
   }
 
-  const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
-    { id: 'beneficiary', label: 'Beneficiary Portal', icon: <User className="w-4 h-4" /> },
-    { id: 'officer', label: 'Officer Dashboard', icon: <Briefcase className="w-4 h-4" /> },
-    { id: 'pipeline', label: 'Agent Pipeline', icon: <Workflow className="w-4 h-4" /> },
-    { id: 'dashboard', label: 'Analytics', icon: <LayoutDashboard className="w-4 h-4" /> },
-    { id: 'governance', label: 'Governance', icon: <Scale className="w-4 h-4" /> },
-  ];
+  /* Full-screen UAE Pass login (no sidebar) */
+  if (activeTab === 'beneficiary' && !isAuthenticated) {
+    return <UAEPassLogin onAuthenticated={handleAuthenticated} onBack={() => setActiveTab('dashboard')} />;
+  }
 
   const unassessedCount = applications.filter((app) => !recommendations[app.application_id]).length;
-
-  // Get the selected beneficiary application
   const beneficiaryApp = applications.find((a) => a.application_id === selectedBeneficiaryApp) || applications[0];
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-900 pb-20">
-      <Header applicationCount={applications.length} />
+    <div style={{ display: 'flex', minHeight: '100vh' }}>
 
-      {/* Tab Navigation */}
-      <div className="bg-white border-b border-slate-200 sticky top-0 z-30 no-print">
-        <div className="max-w-6xl mx-auto px-6 md:px-12">
-          <nav className="flex gap-1 overflow-x-auto" role="tablist">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                role="tab"
-                aria-selected={activeTab === tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-5 py-3.5 text-sm font-medium transition-all border-b-2 whitespace-nowrap ${
-                  activeTab === tab.id
-                    ? 'border-[#00694E] text-[#00694E]'
-                    : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-                }`}
-              >
-                {tab.icon}
-                {tab.label}
-              </button>
-            ))}
-          </nav>
+      {/* ── Sidebar ──────────────────────────────────────────────── */}
+      <aside className="sidebar no-print">
+        {/* Logo */}
+        <div className="sidebar-logo">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '11px' }}>
+            <UAEFalcon size={36} />
+            <div>
+              <div dir="rtl" style={{ fontSize: '13px', fontWeight: 700, color: '#1A1A1A', lineHeight: 1.2, fontFamily: 'Segoe UI, Tahoma, sans-serif' }}>
+                وزارة الطاقة والبنية التحتية
+              </div>
+              <div style={{ fontSize: '9.5px', color: '#C8922A', fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase', marginTop: '2px' }}>
+                Ministry of Energy &amp; Infrastructure
+              </div>
+            </div>
+          </div>
+          <div style={{ marginTop: '10px', paddingTop: '10px', borderTop: '1px solid #F0EBE0', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <div style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.06em', color: '#999999', textTransform: 'uppercase' }}>Arrears Portal</div>
+            <div style={{ fontSize: '9px', color: '#CCBBAA' }}>·</div>
+            <div style={{ fontSize: '9px', color: '#C8922A', fontWeight: 600 }}>v2.0</div>
+          </div>
         </div>
-      </div>
 
-      <div className="max-w-6xl mx-auto p-6 md:p-12 space-y-10">
-        {/* Error Banner */}
+        {/* Navigation */}
+        <nav className="sidebar-nav">
+          <div className="nav-section-label">Main Menu</div>
+          {NAV_ITEMS.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeTab === item.id;
+            return (
+              <button
+                key={item.id}
+                className={`nav-item ${isActive ? 'active' : ''}`}
+                onClick={() => setActiveTab(item.id)}
+              >
+                <span className="nav-icon"><Icon size={16} /></span>
+                <div style={{ flex: 1, textAlign: 'right' }}>
+                  <div className="nav-label-ar">{item.labelAr}</div>
+                  <div className="nav-label-en">{item.label}</div>
+                </div>
+                {isActive && <ChevronRight size={12} style={{ opacity: 0.5, flexShrink: 0 }} />}
+              </button>
+            );
+          })}
+        </nav>
+
+        {/* Footer */}
+        <div className="sidebar-footer">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#00704A', flexShrink: 0, animation: 'pulseDot 2s ease infinite' }} />
+            <div>
+              <div dir="rtl" style={{ fontSize: '11px', color: '#00704A', fontWeight: 700, fontFamily: 'Segoe UI, Tahoma, sans-serif' }}>مباشر</div>
+              <div style={{ fontSize: '10px', color: '#888888', fontWeight: 500 }}>System Live</div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      {/* ── Main area ────────────────────────────────────────────── */}
+      <div className="main-wrapper">
+
+        {/* Top bar */}
+        <header className="topbar no-print">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '11.5px', color: '#999999', fontWeight: 500 }}>MOEI</span>
+            <ChevronRight size={12} color="#CCBBAA" />
+            <span style={{ fontSize: '14px', fontWeight: 600, color: '#1A1A1A' }}>{BREADCRUMBS[activeTab]}</span>
+            <span dir="rtl" style={{ fontSize: '11.5px', color: '#AAAAAA', marginRight: '4px', fontFamily: 'Segoe UI, Tahoma, sans-serif' }}>
+              · {BREADCRUMBS_AR[activeTab]}
+            </span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            {/* Cases badge */}
+            <div style={{ background: '#FDF3E3', border: '1px solid rgba(200,146,42,0.3)', borderRadius: '6px', padding: '5px 12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ fontSize: '14px', fontWeight: 700, color: '#C8922A', fontFamily: 'IBM Plex Mono, monospace' }}>{applications.length}</span>
+              <span style={{ fontSize: '10px', color: '#A67420', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.07em' }}>Cases</span>
+            </div>
+            {/* EN/AR toggle */}
+            <div style={{ display: 'flex', border: '1px solid #E8E0D0', borderRadius: '6px', overflow: 'hidden', fontSize: '11px', fontWeight: 600 }}>
+              <div style={{ padding: '5px 12px', backgroundColor: '#C8922A', color: '#FFFFFF' }}>EN</div>
+              <div style={{ padding: '5px 12px', color: '#999999', cursor: 'pointer', backgroundColor: '#FFFFFF' }}>AR</div>
+            </div>
+          </div>
+        </header>
+
+        {/* Error banner */}
         <AnimatePresence>
-          {error && <ErrorBanner message={error} onDismiss={() => setError(null)} />}
+          {error && (
+            <div style={{ padding: '12px 28px 0' }}>
+              <ErrorBanner message={error} onDismiss={() => setError(null)} />
+            </div>
+          )}
         </AnimatePresence>
 
-        {/* Beneficiary Portal Tab */}
-        {activeTab === 'beneficiary' && (
-          <>
-            {!isAuthenticated ? (
-              <UAEPassLogin onAuthenticated={handleAuthenticated} />
-            ) : beneficiaryApp ? (
+        {/* Page content */}
+        <main className="page-content">
+
+          {activeTab === 'dashboard' && (
+            <Dashboard applications={applications} recommendations={recommendations} />
+          )}
+
+          {activeTab === 'beneficiary' && (
+            beneficiaryApp ? (
               <BeneficiaryView
                 application={beneficiaryApp}
                 recommendation={recommendations[beneficiaryApp.application_id] || null}
@@ -171,70 +279,40 @@ export default function App() {
                 onSubmitForAssessment={() => handleAssessAgentic(beneficiaryApp.application_id)}
               />
             ) : (
-              <div className="text-center text-slate-500 py-20">No applications found.</div>
-            )}
-          </>
-        )}
+              <div style={{ textAlign: 'center', color: '#888888', padding: '80px 0' }}>No applications found.</div>
+            )
+          )}
 
-        {/* Officer Dashboard Tab */}
-        {activeTab === 'officer' && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-              <h2 className="text-2xl font-semibold tracking-tight">Active Application Queue</h2>
-              <div className="flex items-center gap-4">
-                {batchProgress && (
-                  <span className="text-sm font-medium text-[#00694E] animate-pulse">
-                    {batchProgress}
-                  </span>
-                )}
-                <span className="text-sm font-medium text-slate-500">
-                  {applications.length} Records
-                </span>
-                {unassessedCount > 0 && (
-                  <button
-                    onClick={handleAssessAll}
-                    disabled={!!batchProgress}
-                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium bg-[#00694E] hover:bg-[#005740] disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg shadow-sm transition-colors"
-                  >
-                    <Zap className="w-3.5 h-3.5" />
-                    {batchProgress ? batchProgress : `Assess All (${unassessedCount})`}
-                  </button>
-                )}
-              </div>
+          {activeTab === 'officer' && (
+            <ApplicationsTable
+              applications={applications}
+              recommendations={recommendations}
+              processingApps={processingApps}
+              expandedApp={expandedApp}
+              batchProgress={batchProgress}
+              onAssess={handleAssessAgentic}
+              onToggleExpand={handleToggleExpand}
+              onAssessAll={handleAssessAll}
+            />
+          )}
+
+          {activeTab === 'pipeline' && (
+            <AgentPipelinePage applications={applications} recommendations={recommendations} onAssessAll={handleAssessAll} batchProgress={batchProgress} />
+          )}
+
+          {activeTab === 'governance' && (
+            <GovernancePage applications={applications} recommendations={recommendations} />
+          )}
+
+          {activeTab === 'settings' && (
+            <div style={{ textAlign: 'center', padding: '80px 0', color: '#CCBBAA' }}>
+              <Settings size={48} style={{ margin: '0 auto 16px', display: 'block', opacity: 0.3, color: '#C8922A' }} />
+              <p style={{ fontSize: '14px', fontWeight: 500, color: '#888888' }}>Settings — Coming Soon</p>
+              <p dir="rtl" style={{ fontSize: '12px', color: '#AAAAAA', fontFamily: 'Segoe UI, Tahoma, sans-serif' }}>الإعدادات — قريباً</p>
             </div>
+          )}
 
-            <div className="space-y-6">
-              {applications.map((app) => (
-                <ApplicationCard
-                  key={app.application_id}
-                  app={app}
-                  recommendation={recommendations[app.application_id]}
-                  isProcessing={processingApps.has(app.application_id)}
-                  isExpanded={expandedApp === app.application_id}
-                  onAssess={handleAssessAgentic}
-                  onToggleExpand={handleToggleExpand}
-                />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Pipeline Tab */}
-        {activeTab === 'pipeline' && (
-          <div className="space-y-10">
-            <PipelineComparison />
-          </div>
-        )}
-
-        {/* Analytics Tab */}
-        {activeTab === 'dashboard' && (
-          <Dashboard applications={applications} recommendations={recommendations} />
-        )}
-
-        {/* Governance Tab */}
-        {activeTab === 'governance' && (
-          <Dashboard applications={applications} recommendations={recommendations} />
-        )}
+        </main>
       </div>
     </div>
   );

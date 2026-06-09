@@ -84,15 +84,21 @@ async function startServer() {
     });
   });
 
-  // Agentic LLM assessment (single application)
+  // Agentic LLM assessment (single application) — always returns valid JSON
   app.post('/api/agent-assess/:id', asyncHandler(async (req, res) => {
     const application = mockApplications.find(a => a.application_id === req.params.id);
     if (!application) {
        res.status(404).json({ error: 'Application not found' });
        return;
     }
-    const result = await processWithAgent(application);
-    res.json({ status: "success", data: result });
+    try {
+      const result = await processWithAgent(application);
+      res.json({ status: 'success', data: result });
+    } catch (err) {
+      console.warn(`Agent failed for ${req.params.id}, using deterministic fallback:`, (err as Error).message?.substring(0, 80));
+      const result = assessApplication(application);
+      res.json({ status: 'success', data: result });
+    }
   }));
 
   // Batch assess all applications (deterministic)
@@ -160,6 +166,12 @@ async function startServer() {
         });
       }
     }
+  });
+
+  // ── JSON error handler (must be after routes, before Vite) ─────────────
+  app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
+    console.error('API error:', err.message);
+    res.status(500).json({ error: err.message || 'Internal server error' });
   });
 
   // ── Vite development middleware ──────────────────────────────────────────

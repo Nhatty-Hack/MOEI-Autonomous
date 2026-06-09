@@ -1,39 +1,91 @@
-import { Sparkles, CheckCircle2, XCircle, Clock } from 'lucide-react';
+import type { ReactNode } from 'react';
+import { CheckCircle2, XCircle, Clock, AlertTriangle, FileQuestion, Activity } from 'lucide-react';
 import { AgentRecommendation } from '../types';
 
-function statusColors(status: string) {
-  switch (status) {
-    case 'PASSED':
-    case 'SUCCESS':
-    case 'COMPLETED':
-      return 'bg-emerald-500/10 text-emerald-400';
-    case 'PROCESSING':
-      return 'bg-blue-500/10 text-blue-400';
-    case 'WARNING':
-    case 'SKIPPED':
-      return 'bg-amber-500/10 text-amber-400';
-    case 'FAILED':
-      return 'bg-red-500/10 text-red-400';
+type DecisionConfig = {
+  bg: string;
+  label: string;
+  labelAr: string;
+  icon: ReactNode;
+};
+
+function getDecisionConfig(rec: string): DecisionConfig {
+  switch (rec) {
+    case 'APPROVE':
+      return {
+        bg: '#00704A',
+        label: 'APPROVED',
+        labelAr: 'موافق',
+        icon: <CheckCircle2 size={28} color="rgba(255,255,255,0.9)" />,
+      };
+    case 'REJECT':
+      return {
+        bg: '#CC3333',
+        label: 'REJECTED',
+        labelAr: 'مرفوض',
+        icon: <XCircle size={28} color="rgba(255,255,255,0.9)" />,
+      };
+    case 'REFER_TO_EMPLOYEE':
+      return {
+        bg: '#C8922A',
+        label: 'REFERRED FOR REVIEW',
+        labelAr: 'محال للمراجعة',
+        icon: <AlertTriangle size={28} color="rgba(255,255,255,0.9)" />,
+      };
+    case 'REQUEST_DOCUMENTS':
+      return {
+        bg: '#A67420',
+        label: 'DOCUMENTS REQUIRED',
+        labelAr: 'مستندات مطلوبة',
+        icon: <FileQuestion size={28} color="rgba(255,255,255,0.9)" />,
+      };
     default:
-      return 'bg-slate-500/10 text-slate-400';
+      return {
+        bg: '#888888',
+        label: rec,
+        labelAr: '',
+        icon: <Clock size={28} color="rgba(255,255,255,0.9)" />,
+      };
   }
 }
 
-function statusBorderStyle(status: string) {
+/* SVG confidence gauge ring */
+function ConfidenceGauge({ score }: { score: number }) {
+  const r = 30;
+  const circ = 2 * Math.PI * r;
+  const offset = circ - (score / 100) * circ;
+  return (
+    <svg width="80" height="80" viewBox="0 0 80 80">
+      <circle cx="40" cy="40" r={r} fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="7" />
+      <circle
+        cx="40" cy="40" r={r}
+        fill="none"
+        stroke="rgba(255,255,255,0.85)"
+        strokeWidth="7"
+        strokeDasharray={circ}
+        strokeDashoffset={offset}
+        strokeLinecap="round"
+        transform="rotate(-90 40 40)"
+      />
+      <text x="40" y="44" textAnchor="middle" fill="white" fontSize="15" fontWeight="700" fontFamily="Roboto, Arial">
+        {score}%
+      </text>
+    </svg>
+  );
+}
+
+function traceStatusStyle(status: string): { color: string; bg: string } {
   switch (status) {
-    case 'PASSED':
-    case 'SUCCESS':
-    case 'COMPLETED':
-      return 'border-emerald-500';
+    case 'PASSED': case 'SUCCESS': case 'COMPLETED':
+      return { color: '#00704A', bg: '#E8F5EE' };
     case 'PROCESSING':
-      return 'border-blue-500';
-    case 'WARNING':
-    case 'SKIPPED':
-      return 'border-amber-500';
+      return { color: '#2563EB', bg: '#EFF6FF' };
+    case 'WARNING': case 'SKIPPED':
+      return { color: '#A67420', bg: '#FFF9E8' };
     case 'FAILED':
-      return 'border-red-500';
+      return { color: '#CC3333', bg: '#FEE8E8' };
     default:
-      return 'border-slate-500';
+      return { color: '#555555', bg: '#F5F0E8' };
   }
 }
 
@@ -41,165 +93,396 @@ interface AssessmentPanelProps {
   recommendation: AgentRecommendation;
 }
 
-export default function AssessmentPanel({ recommendation }: AssessmentPanelProps) {
-  const r = recommendation;
+export default function AssessmentPanel({ recommendation: r }: AssessmentPanelProps) {
+  const decision = getDecisionConfig(r.recommendation);
 
   return (
-    <div className="space-y-8">
-      <div className="grid lg:grid-cols-2 gap-6">
-        {/* Assessment Details Table */}
-        <div className="space-y-4">
-          <h4 className="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
-            <Sparkles className="w-3 h-3 text-indigo-500" /> Assessment Output
-          </h4>
+    <div style={{ backgroundColor: '#FFFFFF' }}>
 
-          <div className="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
-            <table className="w-full text-sm">
-              <tbody className="divide-y divide-slate-100">
-                <tr className="hover:bg-slate-50">
-                  <td className="py-2.5 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider w-44">Application Status</td>
-                  <td className="py-2.5 px-4 font-medium text-slate-900">{r.application_status}</td>
-                </tr>
-                <tr className="hover:bg-slate-50">
-                  <td className="py-2.5 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Case Summary</td>
-                  <td className="py-2.5 px-4 text-slate-700 text-xs leading-relaxed">{r.case_summary}</td>
-                </tr>
-                <tr className="hover:bg-slate-50">
-                  <td className="py-2.5 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Income Analysis</td>
-                  <td className="py-2.5 px-4 text-slate-700 text-xs leading-relaxed">{r.income_analysis}</td>
-                </tr>
-                <tr className="hover:bg-slate-50">
-                  <td className="py-2.5 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Arrears Amount</td>
-                  <td className="py-2.5 px-4 font-mono font-semibold text-slate-900">{r.arrears_amount.toLocaleString()} AED</td>
-                </tr>
-                <tr className="hover:bg-slate-50">
-                  <td className="py-2.5 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Remaining Balance</td>
-                  <td className="py-2.5 px-4 font-mono font-semibold text-slate-900">{r.remaining_loan_balance.toLocaleString()} AED</td>
-                </tr>
-                <tr className="hover:bg-slate-50">
-                  <td className="py-2.5 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Remaining Period</td>
-                  <td className="py-2.5 px-4 font-mono text-slate-900">{r.remaining_period_months} months</td>
-                </tr>
-                {r.proposed_plan && (
-                  <>
-                    <tr className="hover:bg-slate-50">
-                      <td className="py-2.5 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Deduction Rate</td>
-                      <td className="py-2.5 px-4 font-mono font-semibold text-slate-900">{r.proposed_plan.deduction_rate.toFixed(1)}%</td>
-                    </tr>
-                    <tr className="hover:bg-slate-50">
-                      <td className="py-2.5 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Proposed Plan</td>
-                      <td className="py-2.5 px-4 text-xs text-slate-700">
-                        New EMI: {r.proposed_plan.new_emi.toLocaleString()} AED · 
-                        Premium: {r.proposed_plan.additional_premium.toLocaleString()} AED · 
-                        {r.proposed_plan.additional_months} add. months
-                      </td>
-                    </tr>
-                  </>
-                )}
-                <tr className="hover:bg-slate-50">
-                  <td className="py-2.5 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">20% Rule</td>
-                  <td className="py-2.5 px-4">
-                    {r.twenty_pct_rule_compliant ? (
-                      <span className="inline-flex items-center gap-1 text-emerald-600 text-xs font-semibold">
-                        <CheckCircle2 className="w-3.5 h-3.5" /> Compliant
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 text-red-600 text-xs font-semibold">
-                        <XCircle className="w-3.5 h-3.5" /> Non-Compliant
-                      </span>
-                    )}
-                  </td>
-                </tr>
-                <tr className="hover:bg-slate-50">
-                  <td className="py-2.5 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Period Rule</td>
-                  <td className="py-2.5 px-4">
-                    {r.period_rule_compliant ? (
-                      <span className="inline-flex items-center gap-1 text-emerald-600 text-xs font-semibold">
-                        <CheckCircle2 className="w-3.5 h-3.5" /> Compliant
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 text-red-600 text-xs font-semibold">
-                        <XCircle className="w-3.5 h-3.5" /> Non-Compliant
-                      </span>
-                    )}
-                  </td>
-                </tr>
-                <tr className="hover:bg-slate-50">
-                  <td className="py-2.5 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Recommendation</td>
-                  <td className="py-2.5 px-4 font-semibold text-slate-900">{r.recommendation.replace(/_/g, ' ')}</td>
-                </tr>
-              </tbody>
-            </table>
+      {/* ── Decision band ─────────────────────────────────────── */}
+      <div
+        style={{
+          backgroundColor: decision.bg,
+          padding: '24px 28px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '24px',
+        }}
+      >
+        {/* Left: icon + decision text */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div
+            style={{
+              width: '56px',
+              height: '56px',
+              borderRadius: '50%',
+              backgroundColor: 'rgba(255,255,255,0.15)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+            }}
+          >
+            {decision.icon}
           </div>
+          <div>
+            <div
+              style={{ fontSize: '11px', color: 'rgba(255,255,255,0.65)', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '4px' }}
+            >
+              Assessment Decision — قرار التقييم
+            </div>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
+              <div
+                dir="rtl"
+                className="arabic"
+                style={{ fontSize: '26px', fontWeight: 700, color: '#FFFFFF', lineHeight: 1 }}
+              >
+                {decision.labelAr}
+              </div>
+              <div style={{ fontSize: '14px', color: 'rgba(255,255,255,0.7)', fontWeight: 600 }}>
+                | {decision.label}
+              </div>
+            </div>
+          </div>
+        </div>
 
-          {/* Confidence & Processing Time */}
-          {(r.confidence_score !== undefined || r.processing_time_ms !== undefined) && (
-            <div className="flex gap-3 text-xs">
-              {r.confidence_score !== undefined && (
-                <div className="bg-indigo-50 border border-indigo-200 rounded px-3 py-1.5 font-mono text-indigo-700">
-                  Confidence: {r.confidence_score}%
-                </div>
-              )}
-              {r.processing_time_ms !== undefined && (
-                <div className="bg-slate-50 border border-slate-200 rounded px-3 py-1.5 font-mono text-slate-700 flex items-center gap-1">
-                  <Clock className="w-3 h-3" /> {(r.processing_time_ms / 1000).toFixed(2)}s
-                </div>
-              )}
+        {/* Right: confidence gauge + processing time */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexShrink: 0 }}>
+          {r.confidence_score !== undefined && (
+            <div style={{ textAlign: 'center' }}>
+              <ConfidenceGauge score={r.confidence_score} />
+              <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.65)', marginTop: '2px', fontWeight: 500, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+                Confidence
+              </div>
             </div>
           )}
-
-          {/* Bilingual Memos */}
-          <div className="space-y-3 mt-4">
-            <h4 className="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
-              <Sparkles className="w-3 h-3 text-indigo-500" /> AI Generated Memos
-            </h4>
-
-            <div className="bg-white border border-slate-200 rounded-lg p-5 shadow-sm text-sm">
-              <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
-                English Memo
-              </span>
-              <p className="text-slate-700 leading-relaxed min-h-16">
-                {r.memo_en || r.reasoning || 'System processed.'}
-              </p>
-            </div>
-
-            <div className="bg-white border border-slate-200 rounded-lg p-5 shadow-sm text-sm" dir="rtl">
-              <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2" dir="ltr">
-                Arabic Memo
-              </span>
-              <p className="text-slate-800 font-medium leading-relaxed min-h-16 text-base font-[family-name:var(--font-arabic)]">
-                {r.memo_ar || r.reasoning_ar || 'تم المعالجة آلياً.'}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Execution Trace Segment */}
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 md:p-6 shadow-inner relative flex flex-col h-full max-h-[500px]">
-          <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 sticky top-0 bg-slate-900 pb-2 border-b border-slate-800">
-            System Execution Trace Log
-          </h4>
-
-          <div className="overflow-y-auto pr-2 space-y-1 font-mono text-[11px] text-slate-300 flex-1 trace-scroll">
-            {r.trace.map((step, i) => (
-              <div key={i} className="flex gap-3 py-1.5 hover:bg-slate-800/80 rounded px-2">
-                <div className="shrink-0 pt-0.5">
-                  <span
-                    className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider shrink-0 w-24 inline-block text-center border-l-2 ${statusBorderStyle(step.status)} ${statusColors(step.status)}`}
-                  >
-                    {step.status}
-                  </span>
-                </div>
-                <div>
-                  <div className="text-slate-100 font-bold tracking-tight mb-0.5 opacity-90">
-                    {step.step_name}
-                  </div>
-                  <div className="text-slate-400 leading-relaxed">{step.log_message}</div>
-                </div>
+          {r.processing_time_ms !== undefined && (
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '22px', fontWeight: 700, color: '#FFFFFF', lineHeight: 1, fontFamily: 'monospace' }}>
+                {(r.processing_time_ms / 1000).toFixed(1)}s
               </div>
-            ))}
+              <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.65)', marginTop: '2px', fontWeight: 500, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+                Processed
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div style={{ padding: '24px 28px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+
+        {/* ── Key metrics row ──────────────────────────────────── */}
+        {r.proposed_plan && (
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(4, 1fr)',
+              gap: '12px',
+            }}
+          >
+            {/* New EMI */}
+            <div
+              style={{
+                backgroundColor: '#F5F0E8',
+                border: '1px solid #E8E0D0',
+                borderRadius: '8px',
+                padding: '14px',
+                textAlign: 'center',
+              }}
+            >
+              <div style={{ fontSize: '10px', color: '#888888', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>
+                New Monthly EMI
+              </div>
+              <div style={{ fontSize: '20px', fontWeight: 700, color: '#C8922A', fontFamily: 'monospace', lineHeight: 1 }}>
+                {r.proposed_plan.new_emi.toLocaleString()}
+              </div>
+              <div style={{ fontSize: '10px', color: '#888888', marginTop: '3px', fontWeight: 600 }}>AED / month</div>
+            </div>
+
+            {/* Deduction rate vs 20% rule */}
+            <div
+              style={{
+                backgroundColor: r.twenty_pct_rule_compliant ? '#E8F5EE' : '#FEE8E8',
+                border: `1px solid ${r.twenty_pct_rule_compliant ? '#A7D9BC' : '#F5AAAA'}`,
+                borderRadius: '8px',
+                padding: '14px',
+                textAlign: 'center',
+              }}
+            >
+              <div style={{ fontSize: '10px', color: '#888888', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>
+                Deduction Rate
+              </div>
+              <div
+                style={{
+                  fontSize: '20px',
+                  fontWeight: 700,
+                  color: r.twenty_pct_rule_compliant ? '#00704A' : '#CC3333',
+                  fontFamily: 'monospace',
+                  lineHeight: 1,
+                }}
+              >
+                {r.proposed_plan.deduction_rate.toFixed(1)}%
+              </div>
+              <div
+                style={{
+                  fontSize: '10px',
+                  color: r.twenty_pct_rule_compliant ? '#00704A' : '#CC3333',
+                  marginTop: '3px',
+                  fontWeight: 600,
+                }}
+              >
+                {r.twenty_pct_rule_compliant ? '✓ ≤ 20% limit' : '✗ > 20% limit'}
+              </div>
+            </div>
+
+            {/* Additional months */}
+            <div
+              style={{
+                backgroundColor: '#F5F0E8',
+                border: '1px solid #E8E0D0',
+                borderRadius: '8px',
+                padding: '14px',
+                textAlign: 'center',
+              }}
+            >
+              <div style={{ fontSize: '10px', color: '#888888', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>
+                Extra Months
+              </div>
+              <div style={{ fontSize: '20px', fontWeight: 700, color: '#1A1A1A', fontFamily: 'monospace', lineHeight: 1 }}>
+                {r.proposed_plan.additional_months}
+              </div>
+              <div style={{ fontSize: '10px', color: '#888888', marginTop: '3px', fontWeight: 600 }}>added</div>
+            </div>
+
+            {/* Premium */}
+            <div
+              style={{
+                backgroundColor: '#F5F0E8',
+                border: '1px solid #E8E0D0',
+                borderRadius: '8px',
+                padding: '14px',
+                textAlign: 'center',
+              }}
+            >
+              <div style={{ fontSize: '10px', color: '#888888', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>
+                Added Premium
+              </div>
+              <div style={{ fontSize: '20px', fontWeight: 700, color: '#1A1A1A', fontFamily: 'monospace', lineHeight: 1 }}>
+                {r.proposed_plan.additional_premium.toLocaleString()}
+              </div>
+              <div style={{ fontSize: '10px', color: '#888888', marginTop: '3px', fontWeight: 600 }}>AED / mo</div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Explanation box (cream, Arabic first) ────────────── */}
+        <div
+          style={{
+            backgroundColor: '#F5F0E8',
+            border: '1px solid #E8E0D0',
+            borderRadius: '8px',
+            padding: '18px 20px',
+          }}
+        >
+          <div
+            style={{
+              fontSize: '10.5px',
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              letterSpacing: '0.07em',
+              color: '#C8922A',
+              marginBottom: '12px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+            }}
+          >
+            <div style={{ width: '3px', height: '14px', backgroundColor: '#C8922A', borderRadius: '2px' }} />
+            Case Assessment — تقييم الحالة
+          </div>
+
+          {/* Arabic first */}
+          {r.case_summary_ar && (
+            <p
+              dir="rtl"
+              className="arabic"
+              style={{
+                fontSize: '14px',
+                color: '#1A1A1A',
+                lineHeight: 1.75,
+                marginBottom: '12px',
+                paddingBottom: '12px',
+                borderBottom: '1px solid #E8E0D0',
+              }}
+            >
+              {r.case_summary_ar}
+            </p>
+          )}
+          {/* English below */}
+          <p style={{ fontSize: '13.5px', color: '#555555', lineHeight: 1.65, margin: 0 }}>
+            {r.case_summary}
+          </p>
+        </div>
+
+        {/* ── Bilingual memos ──────────────────────────────────── */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+          {/* Arabic memo */}
+          <div
+            style={{
+              backgroundColor: '#FFFFFF',
+              border: '1px solid #E8E0D0',
+              borderRadius: '8px',
+              padding: '16px 18px',
+              borderTop: '3px solid #C8922A',
+            }}
+          >
+            <div
+              style={{
+                fontSize: '10px',
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                letterSpacing: '0.07em',
+                color: '#C8922A',
+                marginBottom: '10px',
+              }}
+            >
+              المذكرة الرسمية
+            </div>
+            <p
+              dir="rtl"
+              className="arabic"
+              style={{
+                fontSize: '13px',
+                color: '#1A1A1A',
+                lineHeight: 1.75,
+                margin: 0,
+                whiteSpace: 'pre-line',
+              }}
+            >
+              {r.memo_ar || r.reasoning_ar || 'تمت معالجة الطلب.'}
+            </p>
+          </div>
+
+          {/* English memo */}
+          <div
+            style={{
+              backgroundColor: '#FFFFFF',
+              border: '1px solid #E8E0D0',
+              borderRadius: '8px',
+              padding: '16px 18px',
+              borderTop: '3px solid #E8E0D0',
+            }}
+          >
+            <div
+              style={{
+                fontSize: '10px',
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                letterSpacing: '0.07em',
+                color: '#888888',
+                marginBottom: '10px',
+              }}
+            >
+              Official Memo
+            </div>
+            <p
+              style={{
+                fontSize: '13px',
+                color: '#555555',
+                lineHeight: 1.65,
+                margin: 0,
+                whiteSpace: 'pre-line',
+              }}
+            >
+              {r.memo_en || r.reasoning || 'Application processed.'}
+            </p>
           </div>
         </div>
+
+        {/* ── Audit timeline ───────────────────────────────────── */}
+        <div>
+          <div
+            style={{
+              fontSize: '10.5px',
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              letterSpacing: '0.07em',
+              color: '#888888',
+              marginBottom: '12px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+            }}
+          >
+            <Activity size={13} color="#888888" />
+            Execution Trace — سجل المعالجة
+          </div>
+
+          <div
+            className="trace-scroll"
+            style={{
+              maxHeight: '220px',
+              overflowY: 'auto',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '2px',
+            }}
+          >
+            {r.trace.map((step, i) => {
+              const sc = traceStatusStyle(step.status);
+              return (
+                <div
+                  key={i}
+                  style={{
+                    display: 'flex',
+                    gap: '10px',
+                    padding: '8px 10px',
+                    borderRadius: '6px',
+                    backgroundColor: i % 2 === 0 ? '#FDFAF5' : '#FFFFFF',
+                    border: '1px solid #F0EBE0',
+                    alignItems: 'flex-start',
+                  }}
+                >
+                  {/* Timeline dot */}
+                  <div
+                    style={{
+                      width: '8px',
+                      height: '8px',
+                      borderRadius: '50%',
+                      backgroundColor: sc.color,
+                      flexShrink: 0,
+                      marginTop: '4px',
+                    }}
+                  />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
+                      <span style={{ fontSize: '12px', fontWeight: 600, color: '#1A1A1A' }}>
+                        {step.step_name}
+                      </span>
+                      <span
+                        style={{
+                          fontSize: '10px',
+                          fontWeight: 600,
+                          padding: '1px 7px',
+                          borderRadius: '10px',
+                          backgroundColor: sc.bg,
+                          color: sc.color,
+                        }}
+                      >
+                        {step.status}
+                      </span>
+                    </div>
+                    <div style={{ fontSize: '11.5px', color: '#888888', lineHeight: 1.4 }}>
+                      {step.log_message}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
       </div>
     </div>
   );

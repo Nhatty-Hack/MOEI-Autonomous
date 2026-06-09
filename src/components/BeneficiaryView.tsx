@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { ReschedulingApplication, AgentRecommendation } from '../types';
 import { motion } from 'motion/react';
 import {
@@ -19,232 +20,443 @@ interface BeneficiaryViewProps {
 }
 
 const PROCESSING_STEPS = [
-  'Verifying identity via UAE PASS...',
-  'Checking for prior active requests...',
-  'Validating salary certificate & documents...',
-  'Retrieving loan data from SZHP systems...',
-  'Analyzing income & family situation...',
-  'Calculating rescheduling plan...',
-  'Validating 20% deduction rule...',
-  'Generating recommendation...',
+  { en: 'Verifying identity via UAE PASS...',       ar: 'التحقق من الهوية عبر UAE PASS...' },
+  { en: 'Checking for prior active requests...',    ar: 'التحقق من الطلبات النشطة المسبقة...' },
+  { en: 'Validating salary certificate...',         ar: 'التحقق من شهادة الراتب...' },
+  { en: 'Retrieving loan data from SZHP...',        ar: 'استرداد بيانات القرض...' },
+  { en: 'Analysing income & family situation...',   ar: 'تحليل الدخل والوضع الأسري...' },
+  { en: 'Calculating rescheduling plan...',         ar: 'حساب خطة إعادة الجدولة...' },
+  { en: 'Validating 20% deduction rule...',         ar: 'التحقق من قاعدة الاستقطاع 20٪...' },
+  { en: 'Generating official recommendation...',   ar: 'إصدار التوصية الرسمية...' },
 ];
 
-function getRecommendationConfig(rec: string) {
+type StatusConfig = {
+  label: string;
+  labelAr: string;
+  bg: string;
+  border: string;
+  text: string;
+  accentColor: string;
+  icon: ReactNode;
+};
+
+function getRecommendationConfig(rec: string): StatusConfig {
   switch (rec) {
     case 'APPROVE':
-      return { label: 'Approved', bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-700', icon: <CheckCircle2 className="w-8 h-8 text-emerald-600" /> };
+      return {
+        label: 'Application Approved',
+        labelAr: 'تمت الموافقة على الطلب',
+        bg: '#E8F5EE', border: '#A7D9BC', text: '#00704A', accentColor: '#00704A',
+        icon: <CheckCircle2 size={36} color="#00704A" />,
+      };
     case 'REQUEST_DOCUMENTS':
-      return { label: 'Additional Documents Required', bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-700', icon: <FileQuestion className="w-8 h-8 text-amber-600" /> };
+      return {
+        label: 'Additional Documents Required',
+        labelAr: 'مستندات إضافية مطلوبة',
+        bg: '#FFF9E8', border: '#E8C870', text: '#A67420', accentColor: '#C8922A',
+        icon: <FileQuestion size={36} color="#A67420" />,
+      };
     case 'REFER_TO_EMPLOYEE':
-      return { label: 'Referred for Manual Review', bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-700', icon: <UserCheck className="w-8 h-8 text-blue-600" /> };
+      return {
+        label: 'Referred for Manual Review',
+        labelAr: 'محال للمراجعة اليدوية',
+        bg: '#FEF3E8', border: '#F0C888', text: '#C8922A', accentColor: '#C8922A',
+        icon: <UserCheck size={36} color="#C8922A" />,
+      };
     case 'REJECT':
-      return { label: 'Request Declined', bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-700', icon: <XCircle className="w-8 h-8 text-red-600" /> };
+      return {
+        label: 'Request Declined',
+        labelAr: 'تم رفض الطلب',
+        bg: '#FEE8E8', border: '#F5AAAA', text: '#CC3333', accentColor: '#CC3333',
+        icon: <XCircle size={36} color="#CC3333" />,
+      };
     default:
-      return { label: 'Pending', bg: 'bg-slate-50', border: 'border-slate-200', text: 'text-slate-700', icon: <Clock className="w-8 h-8 text-slate-600" /> };
+      return {
+        label: 'Pending',
+        labelAr: 'قيد الانتظار',
+        bg: '#F5F0E8', border: '#E8E0D0', text: '#8B7355', accentColor: '#888888',
+        icon: <Clock size={36} color="#888888" />,
+      };
   }
 }
 
 export default function BeneficiaryView({
-  application,
+  application: app,
   recommendation,
   isProcessing,
   onSubmitForAssessment,
 }: BeneficiaryViewProps) {
-  const app = application;
-
   return (
-    <div className="max-w-3xl mx-auto space-y-8">
-      {/* Header */}
-      <div className="text-center space-y-2">
-        <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
-          Your Rescheduling Request
-        </h2>
-        <p className="text-sm font-mono text-slate-500">
-          Application ID: {app.application_id}
-        </p>
+    <div style={{ maxWidth: '680px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+
+      {/* ── Portal header card ──────────────────────────────── */}
+      <div
+        style={{
+          backgroundColor: '#FFFFFF',
+          border: '1px solid #E8E0D0',
+          borderRadius: '10px',
+          borderTop: '3px solid #C8922A',
+          padding: '18px 20px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '16px',
+        }}
+      >
+        <div>
+          <h2 style={{ fontSize: '17px', fontWeight: 700, color: '#1A1A1A', margin: '0 0 3px' }}>
+            Your Rescheduling Request
+          </h2>
+          <div
+            dir="rtl"
+            className="arabic"
+            style={{ fontSize: '13px', color: '#888888' }}
+          >
+            طلب إعادة جدولة المتأخرات
+          </div>
+        </div>
+        <div style={{ textAlign: 'right' }}>
+          <div style={{ fontSize: '10px', color: '#888888', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '2px' }}>
+            Application ID
+          </div>
+          <div style={{ fontSize: '12px', fontFamily: 'monospace', color: '#555555', fontWeight: 600 }}>
+            {app.application_id}
+          </div>
+        </div>
       </div>
 
-      {/* Processing State */}
+      {/* ── Processing animation ────────────────────────────── */}
       {isProcessing && (
-        <div className="bg-slate-900 rounded-xl p-6 md:p-8 shadow-2xl border border-slate-800">
-          <h4 className="flex items-center text-emerald-400 font-mono text-sm tracking-widest font-bold mb-6">
-            <Activity className="w-4 h-4 mr-2" /> PROCESSING YOUR REQUEST...
-          </h4>
-          <div className="font-mono text-xs md:text-sm text-slate-400 space-y-3">
+        <div
+          style={{
+            backgroundColor: '#FFFFFF',
+            border: '1px solid #E8E0D0',
+            borderRadius: '10px',
+            padding: '22px',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              fontSize: '12px',
+              fontWeight: 700,
+              color: '#C8922A',
+              fontFamily: 'monospace',
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+              marginBottom: '18px',
+            }}
+          >
+            <Activity size={14} />
+            Processing your request...
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {PROCESSING_STEPS.map((step, i) => (
               <motion.div
                 key={i}
-                initial={{ opacity: 0, x: -10 }}
+                initial={{ opacity: 0, x: -8 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.6 }}
-                className="flex items-center gap-2"
+                style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}
               >
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ delay: i * 0.6 + 0.4 }}
+                  style={{ marginTop: '2px', flexShrink: 0 }}
                 >
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                  <CheckCircle2 size={13} color="#C8922A" />
                 </motion.div>
-                <span>{step}</span>
+                <div>
+                  <span style={{ fontSize: '12px', color: '#444444', fontFamily: 'monospace' }}>
+                    {step.en}
+                  </span>
+                  <span
+                    dir="rtl"
+                    className="arabic"
+                    style={{ display: 'block', fontSize: '10px', color: '#999999', marginTop: '1px' }}
+                  >
+                    {step.ar}
+                  </span>
+                </div>
               </motion.div>
             ))}
           </div>
         </div>
       )}
 
-      {/* Recommendation Result */}
-      {recommendation && !isProcessing && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="space-y-6"
-        >
-          {/* Status Badge */}
-          {(() => {
-            const config = getRecommendationConfig(recommendation.recommendation);
-            return (
-              <div className={`${config.bg} border ${config.border} rounded-xl p-6 text-center space-y-3`}>
-                <div className="flex justify-center">{config.icon}</div>
-                <h3 className={`text-xl font-bold ${config.text}`}>{config.label}</h3>
-                <p className="text-sm text-slate-600 leading-relaxed max-w-lg mx-auto">
-                  {recommendation.reasoning}
-                </p>
-                {recommendation.reasoning_ar && (
-                  <p
-                    className="text-sm text-slate-700 leading-relaxed max-w-lg mx-auto font-[family-name:var(--font-arabic)]"
-                    dir="rtl"
-                  >
-                    {recommendation.reasoning_ar}
-                  </p>
-                )}
+      {/* ── Result ──────────────────────────────────────────── */}
+      {recommendation && !isProcessing && (() => {
+        const cfg = getRecommendationConfig(recommendation.recommendation);
+        return (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}
+          >
+            {/* Decision card */}
+            <div
+              style={{
+                backgroundColor: cfg.bg,
+                border: `1px solid ${cfg.border}`,
+                borderRadius: '10px',
+                borderTop: `3px solid ${cfg.accentColor}`,
+                padding: '24px',
+                textAlign: 'center',
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
+                {cfg.icon}
               </div>
-            );
-          })()}
-
-          {/* Proposed Plan */}
-          {recommendation.recommendation === 'APPROVE' && recommendation.proposed_plan && (
-            <div className="bg-white border border-emerald-200 rounded-xl p-6 space-y-4">
-              <h4 className="text-sm font-bold text-emerald-700 uppercase tracking-wider">
-                Approved Rescheduling Plan
-              </h4>
-              <div className="grid sm:grid-cols-3 gap-4">
-                <div className="bg-emerald-50 rounded-lg p-4 text-center">
-                  <div className="text-xs text-emerald-600 font-semibold uppercase tracking-wider mb-1">
-                    New Monthly EMI
-                  </div>
-                  <div className="text-2xl font-bold font-mono text-emerald-800">
-                    {recommendation.proposed_plan.new_emi.toLocaleString()}
-                  </div>
-                  <div className="text-xs text-emerald-600">AED</div>
-                </div>
-                <div className="bg-emerald-50 rounded-lg p-4 text-center">
-                  <div className="text-xs text-emerald-600 font-semibold uppercase tracking-wider mb-1">
-                    Additional Months
-                  </div>
-                  <div className="text-2xl font-bold font-mono text-emerald-800">
-                    {recommendation.proposed_plan.additional_months}
-                  </div>
-                  <div className="text-xs text-emerald-600">months</div>
-                </div>
-                <div className="bg-emerald-50 rounded-lg p-4 text-center">
-                  <div className="text-xs text-emerald-600 font-semibold uppercase tracking-wider mb-1">
-                    Deduction Rate
-                  </div>
-                  <div className="text-2xl font-bold font-mono text-emerald-800">
-                    {recommendation.proposed_plan.deduction_rate.toFixed(1)}%
-                  </div>
-                  <div className="text-xs text-emerald-600">of salary</div>
-                </div>
+              <div
+                dir="rtl"
+                className="arabic"
+                style={{ fontSize: '22px', fontWeight: 700, color: cfg.text, lineHeight: 1.2 }}
+              >
+                {cfg.labelAr}
               </div>
-            </div>
-          )}
-
-          {/* Missing Documents */}
-          {recommendation.recommendation === 'REQUEST_DOCUMENTS' && (
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-6 space-y-3">
-              <h4 className="text-sm font-bold text-amber-700 uppercase tracking-wider">
-                Documents Required
-              </h4>
-              <p className="text-sm text-amber-800 leading-relaxed">
-                {recommendation.case_summary}
+              <div style={{ fontSize: '15px', fontWeight: 600, color: cfg.text, marginTop: '4px' }}>
+                {cfg.label}
+              </div>
+              <p style={{ fontSize: '13.5px', color: '#555555', marginTop: '12px', lineHeight: 1.65 }}>
+                {recommendation.reasoning}
               </p>
+              {recommendation.reasoning_ar && (
+                <p
+                  dir="rtl"
+                  className="arabic"
+                  style={{ fontSize: '13px', color: '#1A1A1A', marginTop: '8px', lineHeight: 1.75 }}
+                >
+                  {recommendation.reasoning_ar}
+                </p>
+              )}
             </div>
-          )}
-        </motion.div>
-      )}
 
-      {/* Pre-assessment View */}
+            {/* Approved plan metrics */}
+            {recommendation.recommendation === 'APPROVE' && recommendation.proposed_plan && (
+              <div
+                style={{
+                  backgroundColor: '#FFFFFF',
+                  border: '1px solid #A7D9BC',
+                  borderRadius: '10px',
+                  borderTop: '3px solid #00704A',
+                  padding: '18px 20px',
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: '10.5px',
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.07em',
+                    color: '#00704A',
+                    marginBottom: '14px',
+                  }}
+                >
+                  Approved Rescheduling Plan — الخطة المعتمدة
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+                  {[
+                    {
+                      label: 'New Monthly EMI',
+                      labelAr: 'القسط الشهري الجديد',
+                      value: `${recommendation.proposed_plan.new_emi.toLocaleString()}`,
+                      unit: 'AED',
+                    },
+                    {
+                      label: 'Additional Months',
+                      labelAr: 'أشهر إضافية',
+                      value: `${recommendation.proposed_plan.additional_months}`,
+                      unit: 'months',
+                    },
+                    {
+                      label: 'Deduction Rate',
+                      labelAr: 'نسبة الاستقطاع',
+                      value: `${recommendation.proposed_plan.deduction_rate.toFixed(1)}%`,
+                      unit: 'of salary',
+                    },
+                  ].map(m => (
+                    <div
+                      key={m.label}
+                      style={{
+                        backgroundColor: '#F5F0E8',
+                        border: '1px solid #E8E0D0',
+                        borderRadius: '8px',
+                        padding: '14px',
+                        textAlign: 'center',
+                      }}
+                    >
+                      <div style={{ fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#00704A', marginBottom: '6px' }}>
+                        {m.label}
+                      </div>
+                      <div style={{ fontSize: '22px', fontWeight: 700, color: '#1A1A1A', fontFamily: 'monospace', lineHeight: 1 }}>
+                        {m.value}
+                      </div>
+                      <div style={{ fontSize: '10px', color: '#888888', marginTop: '3px' }}>{m.unit}</div>
+                      <div dir="rtl" className="arabic" style={{ fontSize: '10px', color: '#888888', marginTop: '2px' }}>
+                        {m.labelAr}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </motion.div>
+        );
+      })()}
+
+      {/* ── Pre-assessment ──────────────────────────────────── */}
       {!recommendation && !isProcessing && (
-        <div className="space-y-6">
-          {/* Application Summary */}
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-5">
-            <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider">
-              Application Summary
-            </h3>
-            <div className="grid sm:grid-cols-2 gap-4 text-sm">
-              <div className="space-y-1">
-                <div className="text-slate-500 text-xs font-semibold uppercase">Beneficiary</div>
-                <div className="text-slate-900 font-medium">{app.beneficiary.full_name}</div>
-              </div>
-              <div className="space-y-1">
-                <div className="text-slate-500 text-xs font-semibold uppercase">Emirates ID</div>
-                <div className="text-slate-900 font-mono">{app.beneficiary.emirates_id}</div>
-              </div>
-              <div className="space-y-1">
-                <div className="text-slate-500 text-xs font-semibold uppercase">Current Salary</div>
-                <div className="text-slate-900 font-mono font-semibold">
-                  {app.income.current_salary.toLocaleString()} AED
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          {/* Application summary card */}
+          <div
+            style={{
+              backgroundColor: '#FFFFFF',
+              border: '1px solid #E8E0D0',
+              borderRadius: '10px',
+              borderTop: '3px solid #C8922A',
+              padding: '20px',
+            }}
+          >
+            <div
+              style={{
+                fontSize: '10.5px',
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                letterSpacing: '0.07em',
+                color: '#1A1A1A',
+                marginBottom: '16px',
+              }}
+            >
+              Application Summary — ملخص الطلب
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+              {[
+                { labelEn: 'Beneficiary', labelAr: 'المستفيد', value: app.beneficiary.full_name, valueAr: app.beneficiary.full_name_ar },
+                { labelEn: 'Emirates ID', labelAr: 'رقم الهوية', value: app.beneficiary.emirates_id, mono: true },
+                { labelEn: 'Monthly Salary', labelAr: 'الراتب الشهري', value: `${app.income.current_salary.toLocaleString()} AED`, mono: true },
+                { labelEn: 'Arrears Amount', labelAr: 'مبلغ المتأخرات', value: `${app.arrears.overdue_amount.toLocaleString()} AED`, mono: true, red: true },
+                { labelEn: 'Overdue Months', labelAr: 'أشهر التأخر', value: `${app.arrears.overdue_months} months`, mono: true },
+                { labelEn: 'Request Type', labelAr: 'نوع الطلب', value: app.request_type.replace(/_/g, ' ') },
+              ].map(({ labelEn, labelAr, value, valueAr, mono, red }) => (
+                <div key={labelEn}>
+                  <div style={{ fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#888888', marginBottom: '3px' }}>
+                    {labelEn}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: '14px',
+                      fontWeight: 600,
+                      color: red ? '#CC3333' : '#1A1A1A',
+                      fontFamily: mono ? 'monospace' : 'inherit',
+                    }}
+                  >
+                    {value}
+                  </div>
+                  {valueAr && (
+                    <div
+                      dir="rtl"
+                      className="arabic"
+                      style={{ fontSize: '12px', color: '#888888' }}
+                    >
+                      {valueAr}
+                    </div>
+                  )}
+                  <div dir="rtl" className="arabic" style={{ fontSize: '10px', color: '#AAAAAA' }}>
+                    {labelAr}
+                  </div>
                 </div>
-              </div>
-              <div className="space-y-1">
-                <div className="text-slate-500 text-xs font-semibold uppercase">Arrears Amount</div>
-                <div className="text-red-700 font-mono font-semibold">
-                  {app.arrears.overdue_amount.toLocaleString()} AED
-                </div>
-              </div>
-              <div className="space-y-1">
-                <div className="text-slate-500 text-xs font-semibold uppercase">Overdue Months</div>
-                <div className="text-slate-900 font-mono">{app.arrears.overdue_months}</div>
-              </div>
-              <div className="space-y-1">
-                <div className="text-slate-500 text-xs font-semibold uppercase">Request Type</div>
-                <div className="text-slate-900 text-xs font-semibold">
-                  {app.request_type.replace('_', ' ')}
-                </div>
-              </div>
+              ))}
             </div>
           </div>
 
-          {/* Document Checklist */}
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-4">
-            <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
-              <FileText className="w-4 h-4" /> Submitted Documents
-            </h3>
-            <ul className="space-y-2">
+          {/* Documents */}
+          <div
+            style={{
+              backgroundColor: '#FFFFFF',
+              border: '1px solid #E8E0D0',
+              borderRadius: '10px',
+              padding: '18px 20px',
+            }}
+          >
+            <div
+              style={{
+                fontSize: '10.5px',
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                letterSpacing: '0.07em',
+                color: '#1A1A1A',
+                marginBottom: '12px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+              }}
+            >
+              <FileText size={13} color="#C8922A" />
+              Submitted Documents — المستندات المقدمة
+            </div>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {app.arrears.supporting_documents.map((doc, idx) => (
-                <li key={idx} className="flex items-center gap-3 text-sm">
-                  <CheckCircle2
-                    className={`w-4 h-4 shrink-0 ${doc.is_valid ? 'text-emerald-500' : 'text-amber-500'}`}
-                  />
-                  <span className="text-slate-700">{doc.name}</span>
-                  {doc.is_stamped && (
-                    <span className="text-[10px] font-semibold bg-emerald-50 text-emerald-600 px-1.5 py-0.5 rounded border border-emerald-200">
-                      STAMPED
-                    </span>
-                  )}
+                <li
+                  key={idx}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    fontSize: '13px',
+                    padding: '8px 12px',
+                    backgroundColor: '#FDFAF5',
+                    border: '1px solid #F0EBE0',
+                    borderRadius: '6px',
+                  }}
+                >
+                  <CheckCircle2 size={14} color={doc.is_valid ? '#00704A' : '#C8922A'} style={{ flexShrink: 0 }} />
+                  <span style={{ flex: 1, color: '#555555' }}>{doc.name}</span>
+                  <span
+                    style={{
+                      fontSize: '10px',
+                      fontWeight: 600,
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      backgroundColor: doc.is_stamped ? '#E8F5EE' : '#FEE8E8',
+                      color: doc.is_stamped ? '#00704A' : '#CC3333',
+                    }}
+                  >
+                    {doc.is_stamped ? 'STAMPED' : 'UNSTAMPED'}
+                  </span>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Submit Button */}
+          {/* Submit CTA */}
           <button
             onClick={onSubmitForAssessment}
-            className="w-full py-3.5 bg-[#00694E] hover:bg-[#005740] text-white font-semibold rounded-xl flex items-center justify-center gap-2.5 transition-all shadow-lg shadow-emerald-900/20 text-sm"
+            style={{
+              width: '100%',
+              height: '52px',
+              backgroundColor: '#C8922A',
+              color: '#FFFFFF',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '16px',
+              fontWeight: 700,
+              fontFamily: 'inherit',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '10px',
+              boxShadow: '0 4px 14px rgba(200,146,42,0.25)',
+            }}
+            onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#A67420')}
+            onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#C8922A')}
           >
-            <Zap className="w-5 h-5" />
-            Submit for AI Assessment
+            <Zap size={18} />
+            تقديم للتقييم | Submit for Assessment
           </button>
         </div>
       )}

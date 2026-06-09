@@ -34,9 +34,9 @@ export function loadHistoricalData(filePath: string): HistoricalRecord[] {
 
   for (const sheetName of workbook.SheetNames) {
     const worksheet = workbook.Sheets[sheetName];
-    const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(worksheet, {
+    const rows = XLSX.utils.sheet_to_json(worksheet, {
       defval: undefined,
-    });
+    }) as Record<string, unknown>[];
 
     for (const row of rows) {
       const record: HistoricalRecord = {
