@@ -12,6 +12,17 @@ const require = createRequire(import.meta.url);
 const XLSX = require('xlsx');
 import { HistoricalRecord, HistoricalStats } from '../types';
 
+export interface HistoricalPrecedentData {
+  similar_count: number;
+  approved_count: number;
+  referred_count: number;
+  rejected_count: number;
+  avg_additional_months: number;
+  salary_range_label: string;
+  arrears_ratio_label: string;
+  insight_text: string;
+}
+
 let cachedRecords: HistoricalRecord[] | null = null;
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -183,5 +194,87 @@ export function getHistoricalStats(records: HistoricalRecord[]): HistoricalStats
     arrears_stats: arrearsStats,
     avg_deduction_rate: avgDeductionRate,
     avg_additional_months: avgAdditionalMonths,
+  };
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Historical Precedent Insight
+// ──────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Finds historical cases similar to the given salary + arrears profile.
+ * Similarity: salary within ±30%, arrears ratio (arrears/salary) within ±50%.
+ */
+export function computeHistoricalInsight(
+  records: HistoricalRecord[],
+  salary: number,
+  arrearsAmount: number,
+): HistoricalPrecedentData {
+  if (!records.length || salary <= 0) {
+    return {
+      similar_count: 0,
+      approved_count: 0,
+      referred_count: 0,
+      rejected_count: 0,
+      avg_additional_months: 0,
+      salary_range_label: '',
+      arrears_ratio_label: '',
+      insight_text: 'No historical data available for comparison.',
+    };
+  }
+
+  const targetRatio = arrearsAmount / salary;
+  const salaryLow = salary * 0.7;
+  const salaryHigh = salary * 1.3;
+  const ratioLow = targetRatio * 0.5;
+  const ratioHigh = targetRatio * 1.5;
+
+  const similar = records.filter(r => {
+    if (r.CURRENT_SALARY <= 0) return false;
+    const ratio = r.OVER_DUE_AMT / r.CURRENT_SALARY;
+    return (
+      r.CURRENT_SALARY >= salaryLow &&
+      r.CURRENT_SALARY <= salaryHigh &&
+      ratio >= ratioLow &&
+      ratio <= ratioHigh
+    );
+  });
+
+  const statusUpper = (r: HistoricalRecord) => (r.STATUS || '').toUpperCase();
+  const approved = similar.filter(r => statusUpper(r).includes('APPROV')).length;
+  const referred = similar.filter(r =>
+    statusUpper(r).includes('REFER') || statusUpper(r).includes('COMMIT'),
+  ).length;
+  const rejected = similar.filter(r => statusUpper(r).includes('REJECT')).length;
+
+  const addMonths = similar
+    .filter(r => r.ADDITIONAL_MONTHS != null && r.ADDITIONAL_MONTHS > 0)
+    .map(r => r.ADDITIONAL_MONTHS!);
+  const avgAdditional = addMonths.length > 0
+    ? Math.round(addMonths.reduce((a, b) => a + b, 0) / addMonths.length)
+    : 0;
+
+  const salaryK = Math.round(salary / 1000);
+  const salaryRangeLabel = `${Math.round(salaryLow / 1000)}K–${Math.round(salaryHigh / 1000)}K AED`;
+  const arrearsRatioLabel = `${Math.round(targetRatio * 100)}% of salary`;
+
+  let insightText = `No similar historical cases found in this salary/arrears range.`;
+  if (similar.length > 0) {
+    const successRate = Math.round(((approved + referred) / similar.length) * 100);
+    insightText = `Based on ${similar.length} similar historical case${similar.length > 1 ? 's' : ''} (salary ~${salaryK}K AED, arrears ~${arrearsRatioLabel}), this profile shows a ${successRate}% successful rescheduling rate.`;
+    if (avgAdditional > 0) {
+      insightText += ` Average extension granted: ${avgAdditional} months.`;
+    }
+  }
+
+  return {
+    similar_count: similar.length,
+    approved_count: approved,
+    referred_count: referred,
+    rejected_count: rejected,
+    avg_additional_months: avgAdditional,
+    salary_range_label: salaryRangeLabel,
+    arrears_ratio_label: arrearsRatioLabel,
+    insight_text: insightText,
   };
 }

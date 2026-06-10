@@ -7,7 +7,7 @@ import { mockApplications } from './src/data';
 import { assessApplication } from './src/services/assessment';
 import { processWithAgent } from './src/services/agent';
 import { GOVERNANCE } from './src/services/complianceEngine';
-import { loadHistoricalData, getHistoricalStats } from './src/services/dataLoader';
+import { loadHistoricalData, getHistoricalStats, computeHistoricalInsight } from './src/services/dataLoader';
 import { HistoricalRecord, HistoricalStats } from './src/types';
 
 // ── Async error wrapper ────────────────────────────────────────────────────────
@@ -36,7 +36,7 @@ async function startServer() {
   });
 
   // ── Load historical data at startup ──────────────────────────────────────
-  const excelPath = '/home/ayal-awa/Downloads/RescheduleArrears.xlsx';
+  const excelPath = path.join(process.cwd(), 'RescheduleArrears.xlsx');
   try {
     if (fs.existsSync(excelPath)) {
       historicalRecords = loadHistoricalData(excelPath);
@@ -70,6 +70,29 @@ async function startServer() {
     res.json(GOVERNANCE);
   });
 
+  // ── Enrich result with historical precedent ──────────────────────────────
+  function enrichWithHistory<T extends { arrears_amount?: number }>(
+    result: T,
+    salary: number,
+    arrearsAmount: number,
+  ): T & { historical_insight?: string; historical_precedent?: unknown } {
+    if (!historicalRecords.length) return result;
+    const precedent = computeHistoricalInsight(historicalRecords, salary, arrearsAmount);
+    return {
+      ...result,
+      historical_insight: precedent.insight_text,
+      historical_precedent: precedent.similar_count > 0 ? {
+        similar_count: precedent.similar_count,
+        approved_count: precedent.approved_count,
+        referred_count: precedent.referred_count,
+        rejected_count: precedent.rejected_count,
+        avg_additional_months: precedent.avg_additional_months,
+        salary_range_label: precedent.salary_range_label,
+        arrears_ratio_label: precedent.arrears_ratio_label,
+      } : undefined,
+    };
+  }
+
   // Deterministic assessment (single application)
   app.post('/api/assess/:id', (req, res) => {
     const application = mockApplications.find(a => a.application_id === req.params.id);
@@ -78,9 +101,10 @@ async function startServer() {
        return;
     }
     const result = assessApplication(application);
+    const enriched = enrichWithHistory(result, application.income.current_salary, application.arrears.overdue_amount);
     res.json({
       status: "success",
-      data: result
+      data: enriched
     });
   });
 
@@ -93,11 +117,13 @@ async function startServer() {
     }
     try {
       const result = await processWithAgent(application);
-      res.json({ status: 'success', data: result });
+      const enriched = enrichWithHistory(result, application.income.current_salary, application.arrears.overdue_amount);
+      res.json({ status: 'success', data: enriched });
     } catch (err) {
       console.warn(`Agent failed for ${req.params.id}, using deterministic fallback:`, (err as Error).message?.substring(0, 80));
       const result = assessApplication(application);
-      res.json({ status: 'success', data: result });
+      const enriched = enrichWithHistory(result, application.income.current_salary, application.arrears.overdue_amount);
+      res.json({ status: 'success', data: enriched });
     }
   }));
 

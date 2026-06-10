@@ -177,6 +177,18 @@ export interface AgentRecommendation {
   trace: TraceStep[];
   confidence_score?: number;            // 0-100, for governance
   processing_time_ms?: number;
+
+  // Historical context (enriched from Excel data)
+  historical_insight?: string;
+  historical_precedent?: {
+    similar_count: number;
+    approved_count: number;
+    referred_count: number;
+    rejected_count: number;
+    avg_additional_months: number;
+    salary_range_label: string;
+    arrears_ratio_label: string;
+  };
 }
 
 /** API response wrapper */

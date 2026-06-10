@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { CheckCircle2, XCircle, Clock, AlertTriangle, FileQuestion, Activity, Shield } from 'lucide-react';
+import { CheckCircle2, XCircle, Clock, AlertTriangle, FileQuestion, Activity, Shield, History, Users } from 'lucide-react';
 import { AgentRecommendation } from '../types';
 
 const DOC_ITEMS = [
@@ -494,6 +494,92 @@ export default function AssessmentPanel({ recommendation: r }: AssessmentPanelPr
             })()}
           </div>
         </div>
+
+        {/* ── Historical Precedent ────────────────────────────── */}
+        {r.historical_precedent && r.historical_precedent.similar_count > 0 && (
+          <div style={{ marginBottom: '20px' }}>
+            <div style={{
+              fontSize: '10.5px', fontWeight: 700, textTransform: 'uppercase',
+              letterSpacing: '0.07em', color: '#888888', marginBottom: '12px',
+              display: 'flex', alignItems: 'center', gap: '6px',
+            }}>
+              <History size={13} color="#888888" />
+              السوابق التاريخية — Historical Precedent
+            </div>
+
+            <div style={{
+              background: '#FDFCFA', border: '1px solid #E8E0D0', borderRadius: '10px',
+              padding: '14px 16px',
+            }}>
+              {/* Main count + insight text */}
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', marginBottom: '12px' }}>
+                <div style={{
+                  background: '#FDF3E3', border: '1px solid rgba(200,146,42,0.25)',
+                  borderRadius: '8px', padding: '8px 14px', textAlign: 'center', flexShrink: 0,
+                }}>
+                  <div style={{ fontSize: '22px', fontWeight: 800, color: '#C8922A', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
+                    {r.historical_precedent.similar_count}
+                  </div>
+                  <div style={{ fontSize: '9px', color: '#A67420', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: '2px' }}>
+                    Similar Cases
+                  </div>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <p style={{ fontSize: '11.5px', color: '#444444', lineHeight: 1.55, margin: 0 }}>
+                    {r.historical_insight}
+                  </p>
+                  <div style={{ marginTop: '6px', fontSize: '10px', color: '#999999' }}>
+                    <span>Salary range: <strong style={{ color: '#666' }}>{r.historical_precedent.salary_range_label}</strong></span>
+                    <span style={{ margin: '0 6px' }}>·</span>
+                    <span>Arrears: <strong style={{ color: '#666' }}>{r.historical_precedent.arrears_ratio_label}</strong></span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Outcome breakdown bars */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+                {[
+                  { label: 'Approved', labelAr: 'موافقة', count: r.historical_precedent.approved_count, color: '#00704A', bg: '#E8F5EE' },
+                  { label: 'Referred', labelAr: 'إحالة',  count: r.historical_precedent.referred_count, color: '#C8922A', bg: '#FDF3E3' },
+                  { label: 'Rejected', labelAr: 'رفض',   count: r.historical_precedent.rejected_count, color: '#CC3333', bg: '#FDECEA' },
+                ].map(({ label, labelAr, count, color, bg }) => {
+                  const pct = r.historical_precedent!.similar_count > 0
+                    ? Math.round((count / r.historical_precedent!.similar_count) * 100)
+                    : 0;
+                  return (
+                    <div key={label} style={{ background: bg, borderRadius: '7px', padding: '8px 10px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                        <span style={{ fontSize: '10px', fontWeight: 600, color }}>{label}</span>
+                        <span className="rtl" style={{ fontSize: '9.5px', color: '#888' }}>{labelAr}</span>
+                      </div>
+                      <div style={{ height: '3px', background: 'rgba(0,0,0,0.08)', borderRadius: '2px', marginBottom: '4px' }}>
+                        <div style={{ width: `${pct}%`, height: '100%', background: color, borderRadius: '2px', transition: 'width 0.6s ease' }} />
+                      </div>
+                      <div style={{ fontSize: '12px', fontWeight: 800, color, fontVariantNumeric: 'tabular-nums' }}>
+                        {count} <span style={{ fontSize: '10px', fontWeight: 500, color: '#888' }}>({pct}%)</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Avg additional months */}
+              {r.historical_precedent.avg_additional_months > 0 && (
+                <div style={{
+                  marginTop: '10px', padding: '7px 12px',
+                  background: 'rgba(0,112,74,0.05)', borderRadius: '6px',
+                  display: 'flex', alignItems: 'center', gap: '6px',
+                }}>
+                  <Users size={11} color="#00704A" />
+                  <span style={{ fontSize: '11px', color: '#444' }}>
+                    Average extension in similar approved cases:&nbsp;
+                    <strong style={{ color: '#00704A' }}>{r.historical_precedent.avg_additional_months} months</strong>
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* ── Audit timeline ───────────────────────────────────── */}
         <div>
