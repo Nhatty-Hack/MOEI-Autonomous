@@ -9,7 +9,7 @@ import { processWithAgent } from './src/services/agent';
 import { GOVERNANCE } from './src/services/complianceEngine';
 import { loadHistoricalData, getHistoricalStats, computeHistoricalInsight } from './src/services/dataLoader';
 import { validateDocument } from './src/services/geminiValidator';
-import { HistoricalRecord, HistoricalStats, AgentRecommendation, DocumentValidationResult } from './src/types';
+import { HistoricalRecord, HistoricalStats, AgentRecommendation, DocumentValidationResult, TraceStep } from './src/types';
 
 // ── Async error wrapper ────────────────────────────────────────────────────────
 function asyncHandler(
@@ -81,6 +81,23 @@ async function startServer() {
     if (!mismatch) return result;
     const declared = (mismatch.declared_salary ?? 0).toLocaleString();
     const extracted = mismatch.extracted_salary!.toLocaleString();
+    const variancePct = mismatch.salary_variance_pct.toFixed(0);
+    if (mismatch.fraud_flagged) {
+      const fraudTrace: TraceStep = {
+        step_name: 'FRAUD_DETECTION',
+        status: 'FAILED',
+        log_message: `⚠ FRAUD ALERT: Declared income (AED ${declared}) inconsistent with verified financial records (AED ${extracted}). Mismatch: ${variancePct}%. Case escalated to human officer with full evidence trail.`,
+        timestamp: new Date().toISOString(),
+      };
+      return {
+        ...result,
+        recommendation: 'REFER_TO_EMPLOYEE',
+        application_status: 'REFERRED',
+        reasoning: `Declared income (AED ${declared}) inconsistent with verified financial records (AED ${extracted}). Mismatch: ${variancePct}%. Case escalated to human officer with full evidence trail.`,
+        reasoning_ar: 'الدخل المُصرَّح به غير متطابق مع السجلات المالية الموثقة. تم تصعيد الحالة إلى موظف بشري مع مسار التدقيق الكامل.',
+        trace: [...(result.trace ?? []), fraudTrace],
+      };
+    }
     return {
       ...result,
       recommendation: 'REFER_TO_EMPLOYEE',

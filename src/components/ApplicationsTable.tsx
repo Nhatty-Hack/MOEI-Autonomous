@@ -98,10 +98,12 @@ function DocCard({ v }: { v: DocumentValidationResult }) {
         </div>
       )}
 
-      {/* Mismatch pill */}
+      {/* Mismatch / fraud pill */}
       {v.salary_mismatch && (
-        <div style={{ padding: '5px 9px', background: '#FEE8E8', border: '1px solid rgba(204,51,51,0.25)', borderRadius: '6px', fontSize: '10px', fontWeight: 700, color: '#CC3333' }}>
-          Salary mismatch: {v.salary_variance_pct.toFixed(1)}% variance — case REFERRED
+        <div style={{ padding: '5px 9px', background: '#FEE8E8', border: `1px solid rgba(204,51,51,${v.fraud_flagged ? '0.45' : '0.25'})`, borderRadius: '6px', fontSize: '10px', fontWeight: 700, color: '#CC3333' }}>
+          {v.fraud_flagged
+            ? `FRAUD ALERT: AED ${(v.declared_salary ?? 0).toLocaleString()} declared vs AED ${(v.extracted_salary ?? 0).toLocaleString()} verified (${v.salary_variance_pct.toFixed(0)}% mismatch)`
+            : `Salary mismatch: ${v.salary_variance_pct.toFixed(1)}% variance — case REFERRED`}
         </div>
       )}
     </div>
@@ -110,6 +112,7 @@ function DocCard({ v }: { v: DocumentValidationResult }) {
 
 function DocValidationSection({ validations }: { validations: DocumentValidationResult[] }) {
   const hasMismatch = validations.some(v => v.salary_mismatch);
+  const hasFraud = validations.some(v => v.fraud_flagged);
   return (
     <div style={{ padding: '16px 20px', borderBottom: '1px solid #EDE8E0', background: '#FDFCFA' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '7px', marginBottom: '12px' }}>
@@ -117,7 +120,12 @@ function DocValidationSection({ validations }: { validations: DocumentValidation
         <span style={{ fontSize: '10.5px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: '#1A1A1A' }}>
           المستندات | Documents
         </span>
-        {hasMismatch && (
+        {hasFraud && (
+          <span style={{ marginLeft: 'auto', fontSize: '10px', fontWeight: 800, color: '#CC3333', background: '#FEE8E8', padding: '2px 9px', borderRadius: '10px', border: '1px solid rgba(204,51,51,0.45)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <AlertTriangle size={10} /> FRAUD RISK
+          </span>
+        )}
+        {!hasFraud && hasMismatch && (
           <span style={{ marginLeft: 'auto', fontSize: '10px', fontWeight: 700, color: '#CC3333', background: '#FEE8E8', padding: '2px 9px', borderRadius: '10px', border: '1px solid rgba(204,51,51,0.3)', display: 'flex', alignItems: 'center', gap: '4px' }}>
             <AlertTriangle size={10} /> HIGH RISK
           </span>
@@ -299,6 +307,7 @@ export default function ApplicationsTable({
                 const badge = STATUS_BADGE[status];
                 const isProcessing = processingApps.has(app.application_id);
                 const isExpanded = expandedApp === app.application_id;
+                const isFraud = (documentValidations?.[app.application_id] ?? []).some(v => v.fraud_flagged);
                 return (
                   <>
                     <tr key={app.application_id} style={{ cursor: 'default' }}>
@@ -330,10 +339,17 @@ export default function ApplicationsTable({
                             Analysing…
                           </div>
                         ) : (
-                          <span className={`badge ${badge.cls}`} style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                            <div style={{ width: '5px', height: '5px', borderRadius: '50%', backgroundColor: badge.dot, flexShrink: 0 }} />
-                            {badge.label}
-                          </span>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-start' }}>
+                            <span className={`badge ${badge.cls}`} style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                              <div style={{ width: '5px', height: '5px', borderRadius: '50%', backgroundColor: badge.dot, flexShrink: 0 }} />
+                              {badge.label}
+                            </span>
+                            {isFraud && (
+                              <span style={{ fontSize: '9.5px', fontWeight: 800, color: '#CC3333', background: '#FEE8E8', padding: '2px 8px', borderRadius: '8px', border: '1px solid rgba(204,51,51,0.4)', display: 'inline-flex', alignItems: 'center', gap: '3px', whiteSpace: 'nowrap' }}>
+                                <AlertTriangle size={9} /> Fraud Risk: HIGH
+                              </span>
+                            )}
+                          </div>
                         )}
                       </td>
 

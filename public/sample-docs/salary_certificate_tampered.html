@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Salary Certificate — Emirates Steel Industries</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'IBM Plex Sans', 'Segoe UI', sans-serif;
+      background: #E8E4DC;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 30px 20px;
+    }
+    .page {
+      width: 794px;
+      min-height: 1123px;
+      background: #FFFFFF;
+      position: relative;
+      box-shadow: 0 6px 50px rgba(0,0,0,0.22);
+    }
+    .gold-stripe { height: 8px; background: linear-gradient(90deg, #B07A1A, #C8922A, #E0A830, #C8922A, #B07A1A); }
+    .header {
+      background: #003366;
+      padding: 26px 48px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .logo-circle {
+      width: 66px; height: 66px;
+      border-radius: 50%;
+      background: rgba(200,146,42,0.12);
+      border: 2px solid #C8922A;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px; color: #C8922A; flex-shrink: 0;
+    }
+    .logo-block { display: flex; align-items: center; gap: 16px; }
+    .company-name-en { font-size: 16px; font-weight: 700; color: #FFFFFF; letter-spacing: 0.01em; line-height: 1.3; }
+    .company-name-ar { font-family: 'IBM Plex Sans Arabic', sans-serif; font-size: 13.5px; font-weight: 600; color: #C8922A; margin-top: 5px; direction: rtl; }
+    .company-contact { font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 6px; line-height: 1.7; }
+    .header-right { text-align: right; }
+    .header-right .lbl { font-size: 9px; font-weight: 700; color: rgba(200,146,42,0.65); text-transform: uppercase; letter-spacing: 0.09em; }
+    .header-right .ref { font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; color: #FFFFFF; margin-top: 2px; }
+    .header-right .ddate { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #C8922A; margin-top: 2px; }
+    .title-band {
+      background: #F5F0E8;
+      border-top: 3px solid #C8922A;
+      border-bottom: 1px solid #E0D8CC;
+      padding: 13px 48px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .title-en { font-size: 17px; font-weight: 700; color: #003366; text-transform: uppercase; letter-spacing: 0.03em; }
+    .title-ar { font-family: 'IBM Plex Sans Arabic', sans-serif; font-size: 15px; font-weight: 700; color: #003366; direction: rtl; }
+    .body { padding: 28px 48px; }
+    .to-whom { margin-bottom: 20px; }
+    .to-whom p { font-size: 12px; color: #444; line-height: 1.8; }
+    .to-whom p.ar { font-family: 'IBM Plex Sans Arabic', sans-serif; direction: rtl; font-size: 12px; color: #444; line-height: 1.9; margin-top: 3px; }
+    .details-table { width: 100%; border-collapse: collapse; margin-bottom: 22px; border: 1px solid #DDD4C8; }
+    .details-table thead tr th { background: #003366; color: #FFFFFF; font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; padding: 9px 14px; text-align: left; border: 1px solid rgba(255,255,255,0.1); }
+    .details-table thead tr th:last-child { text-align: right; }
+    .details-table tbody tr:nth-child(even) { background: #F8F5F0; }
+    .details-table tbody tr:nth-child(odd)  { background: #FFFFFF; }
+    .details-table td { padding: 9px 14px; font-size: 11.5px; color: #1A1A1A; border: 1px solid #E8E0D4; }
+    .details-table td.field-ar { font-family: 'IBM Plex Sans Arabic', sans-serif; direction: rtl; text-align: right; font-size: 12px; }
+    .details-table td.value { font-weight: 600; font-family: 'IBM Plex Mono', monospace; color: #003366; }
+    .details-table td.salary-value { font-weight: 800; font-family: 'IBM Plex Mono', monospace; color: #00704A; font-size: 14px; }
+    .details-table td.salary-value-ar { font-family: 'IBM Plex Sans Arabic', sans-serif; direction: rtl; text-align: right; font-weight: 700; color: #00704A; font-size: 13px; }
+    .validity-box { background: #F0ECE4; border: 1px solid #D0C8BC; border-left: 4px solid #C8922A; padding: 12px 16px; margin-bottom: 26px; border-radius: 0 4px 4px 0; }
+    .validity-box p.en { font-size: 11px; color: #333; line-height: 1.75; }
+    .validity-box p.ar { font-family: 'IBM Plex Sans Arabic', sans-serif; direction: rtl; font-size: 11px; color: #333; line-height: 1.8; margin-top: 5px; }
+    .sig-block { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 28px; gap: 24px; }
+    .sig-left, .sig-right { flex: 1; }
+    .sig-label { font-size: 9.5px; font-weight: 700; color: #003366; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 44px; }
+    .sig-line { border-bottom: 1.5px solid #003366; padding-bottom: 6px; margin-bottom: 6px; }
+    .sig-name { font-size: 12px; font-weight: 700; color: #1A1A1A; }
+    .sig-title { font-size: 10px; color: #666; margin-top: 2px; }
+    .sig-title-ar { font-family: 'IBM Plex Sans Arabic', sans-serif; direction: rtl; font-size: 10px; color: #666; margin-top: 1px; }
+    .stamp {
+      width: 96px; height: 96px; border-radius: 50%;
+      border: 3px solid #003366;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; padding: 10px; position: relative; flex-shrink: 0;
+    }
+    .stamp::before { content: ''; position: absolute; inset: 5px; border-radius: 50%; border: 1px dashed rgba(0,51,102,0.45); }
+    .stamp-text { font-size: 7px; font-weight: 700; color: #003366; text-transform: uppercase; letter-spacing: 0.05em; line-height: 1.5; z-index: 1; }
+    .stamp-year { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 700; color: #003366; z-index: 1; }
+    .footer { margin-top: 28px; padding: 13px 48px; background: #003366; display: flex; align-items: center; justify-content: space-between; }
+    .footer p { font-size: 9px; color: rgba(255,255,255,0.5); line-height: 1.7; }
+    .footer-code { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #C8922A; letter-spacing: 0.06em; }
+    .watermark {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%) rotate(-30deg);
+      font-size: 84px; font-weight: 900; color: rgba(0,51,102,0.035);
+      pointer-events: none; white-space: nowrap; z-index: 0; letter-spacing: 0.06em;
+    }
+    .cz { position: relative; z-index: 1; }
+    @media print { body { background: white; padding: 0; } .page { box-shadow: none; } }
+  </style>
+</head>
+<body>
+<div class="page" id="doc">
+  <div class="watermark">EMIRATES STEEL</div>
+  <div class="cz">
+    <div class="gold-stripe"></div>
+
+    <div class="header">
+      <div class="logo-block">
+        <div class="logo-circle">⚙</div>
+        <div>
+          <div class="company-name-en">Emirates Steel Industries LLC</div>
+          <div class="company-name-ar">شركة حديد الإمارات للصناعات المحدودة</div>
+          <div class="company-contact">P.O. Box 1234, Musaffah Industrial City, Abu Dhabi, UAE<br>Tel: +971 2 555 8100 &nbsp;·&nbsp; Fax: +971 2 555 8101 &nbsp;·&nbsp; www.emiratessteel.com</div>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="lbl">Reference Number</div>
+        <div class="ref">ESI/HR/2026/0457</div>
+        <div class="lbl" style="margin-top:10px;">Date of Issue</div>
+        <div class="ddate" id="issue-date-display"></div>
+      </div>
+    </div>
+
+    <div class="title-band">
+      <span class="title-en">Salary Certificate</span>
+      <span class="title-ar">شهادة راتب</span>
+    </div>
+
+    <div class="body">
+      <div class="to-whom">
+        <p>To Whom It May Concern,</p>
+        <p style="margin-top:9px; color:#333; font-size:12px; line-height:1.8;">
+          This is to certify that the below-named employee is currently employed with <strong>Emirates Steel Industries LLC</strong> in the capacity mentioned and receives the monthly salary as detailed below. This certificate is issued upon the employee's request for official government purposes.
+        </p>
+        <p class="ar" style="margin-top:8px;">إلى من يهمه الأمر،</p>
+        <p class="ar">نشهد بأن الموظف المذكور أدناه يعمل حالياً في شركة حديد الإمارات للصناعات المحدودة بالمسمى الوظيفي المبيّن ويتقاضى الراتب الشهري الموضح. صدرت هذه الشهادة بناءً على طلب الموظف للأغراض الحكومية الرسمية.</p>
+      </div>
+
+      <table class="details-table">
+        <thead>
+          <tr>
+            <th style="width:150px;">Field</th>
+            <th>Details (English)</th>
+            <th style="width:200px; text-align:right;">التفاصيل (عربي)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Employee Name</td>
+            <td class="value">Saeed Mohammad Al-Mansoori</td>
+            <td class="field-ar">سعيد محمد المنصوري</td>
+          </tr>
+          <tr>
+            <td>Emirates ID</td>
+            <td class="value">784-1985-4521458-1</td>
+            <td class="field-ar">٧٨٤-١٩٨٥-٤٥٢١٤٥٨-١</td>
+          </tr>
+          <tr>
+            <td>Employee ID</td>
+            <td class="value">ESI-EMP-00341</td>
+            <td class="field-ar">رقم الموظف: ESI-EMP-00341</td>
+          </tr>
+          <tr>
+            <td>Department</td>
+            <td class="value">Operations &amp; Engineering</td>
+            <td class="field-ar">قسم العمليات والهندسة</td>
+          </tr>
+          <tr>
+            <td>Designation</td>
+            <td class="value">Senior Engineer</td>
+            <td class="field-ar">مهندس أول</td>
+          </tr>
+          <tr>
+            <td>Date of Joining</td>
+            <td class="value">15 Mar 2018</td>
+            <td class="field-ar">١٥ مارس ٢٠١٨</td>
+          </tr>
+          <tr>
+            <td style="font-weight:700; color:#003366; font-size:12px;">Monthly Salary</td>
+            <td class="salary-value">AED 85,000</td>
+            <td class="salary-value-ar">خمسة وثمانون ألف درهم إماراتي</td>
+          </tr>
+          <tr>
+            <td>Salary Type</td>
+            <td class="value">NET Monthly Salary</td>
+            <td class="field-ar">الراتب الصافي الشهري</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="validity-box">
+        <p class="en">
+          <strong>Validity Clause:</strong> This certificate is valid for <strong>30 days</strong> from the date of issuance
+          (<span id="validity-from"></span>) and expires on <span id="validity-to"></span>.
+          It is issued exclusively for <strong>official government and financial institution purposes</strong>.
+          Any alterations or unauthorized modifications render this document invalid and may constitute fraud.
+        </p>
+        <p class="ar">
+          <strong>شرط الصلاحية:</strong> تُعدّ هذه الشهادة سارية المفعول لمدة <strong>٣٠ يوماً</strong> من تاريخ الإصدار وتنتهي في
+          <span id="validity-to-ar"></span>. أي تعديل غير مصرح به يُبطل الوثيقة وقد يُعدّ تزويراً.
+        </p>
+      </div>
+
+      <div class="sig-block">
+        <div class="sig-left">
+          <div class="sig-label">Authorized Signatory</div>
+          <div style="height:38px; background: url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22160%22 height=%2238%22><path d=%22M8 30 C30 5 60 28 90 12 C115 0 140 22 155 16%22 stroke=%22%23003366%22 fill=%22none%22 stroke-width=%222%22 stroke-linecap=%22round%22/></svg>') no-repeat left bottom; margin-bottom:5px;"></div>
+          <div class="sig-line"></div>
+          <div class="sig-name">Mohammed Al-Rashidi</div>
+          <div class="sig-title">HR Manager · Emirates Steel Industries LLC</div>
+          <div class="sig-title-ar">مدير الموارد البشرية</div>
+        </div>
+
+        <div class="stamp">
+          <div class="stamp-text">EMIRATES</div>
+          <div class="stamp-text">STEEL</div>
+          <div class="stamp-year">2026</div>
+          <div class="stamp-text">INDUSTRIES</div>
+          <div class="stamp-text">ABU DHABI · UAE</div>
+        </div>
+
+        <div class="sig-right" style="text-align:right;">
+          <div class="sig-label" style="text-align:right;">Document Control</div>
+          <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:#888; text-align:right; line-height:1.9;">
+            Doc Type: SALARY CERT<br>
+            Ref No: ESI/HR/2026/0457<br>
+            Pages: 1 of 1<br>
+            <span id="doc-date-ref"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p>Emirates Steel Industries LLC &nbsp;·&nbsp; Musaffah Industrial City, Abu Dhabi, UAE<br>
+      This document is system-generated. Any alteration renders this certificate null and void.</p>
+      <div class="footer-code" id="barcode-ref"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const now = new Date();
+  const issueDate = new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000);
+  const validityEnd = new Date(issueDate.getTime() + 30 * 24 * 60 * 60 * 1000);
+  const MONTHS    = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const MONTHS_AR = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+  const fmt   = d => `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+  const fmtAr = d => `${d.getDate()} ${MONTHS_AR[d.getMonth()]} ${d.getFullYear()}`;
+  const pad   = n => String(n).padStart(2,'0');
+  document.getElementById('issue-date-display').textContent = fmt(issueDate);
+  document.getElementById('validity-from').textContent      = fmt(issueDate);
+  document.getElementById('validity-to').textContent        = fmt(validityEnd);
+  document.getElementById('validity-to-ar').textContent     = fmtAr(validityEnd);
+  document.getElementById('doc-date-ref').textContent       = fmt(issueDate);
+  document.getElementById('barcode-ref').textContent        =
+    `ESI-${issueDate.getFullYear()}${pad(issueDate.getMonth()+1)}${pad(issueDate.getDate())}-0457`;
+</script>
+</body>
+</html>

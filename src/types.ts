@@ -288,4 +288,5 @@ export interface DocumentValidationResult {
   authenticity_score: number;
   risk_level: 'low' | 'medium' | 'high';
   risk_label: string;
+  fraud_flagged: boolean;
 }

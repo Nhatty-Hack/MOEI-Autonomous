@@ -155,6 +155,7 @@ export async function validateDocument(
       ? Math.abs((extracted - declaredSalary) / declaredSalary) * 100
       : 0;
   const salaryMismatch = docType === 'salary_cert' && extracted !== null && variancePct > 15;
+  const fraudFlagged = salaryMismatch && variancePct > 50;
 
   // Date validity (salary certs: 30 days; bank stmts: 90 days)
   const maxDays = docType === 'salary_cert' ? 30 : 90;
@@ -209,10 +210,13 @@ export async function validateDocument(
     salary_variance_pct: variancePct,
     authenticity_score: score,
     risk_level: riskLevel,
-    risk_label: salaryMismatch
+    risk_label: fraudFlagged
+      ? 'FRAUD ALERT — Declared income does not match verified financial records'
+      : salaryMismatch
       ? 'HIGH RISK — Salary mismatch detected'
       : riskLevel === 'medium'
       ? 'MEDIUM RISK — Review required'
       : 'LOW RISK — Document verified',
+    fraud_flagged: fraudFlagged,
   };
 }

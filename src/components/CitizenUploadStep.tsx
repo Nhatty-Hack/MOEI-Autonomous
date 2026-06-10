@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, DragEvent } from 'react';
 import {
   Upload, CheckCircle2, X, LogOut, User,
-  ArrowRight, Loader2, ChevronRight, Shield, AlertTriangle,
+  ArrowRight, Loader2, ChevronRight, Shield, AlertTriangle, FileText,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ReschedulingApplication, DocumentValidationResult } from '../types';
@@ -94,6 +94,7 @@ export default function CitizenUploadStep({ application: app, onSubmit, onLogout
         authenticity_score: 88 + (seed % 10),
         risk_level: 'low',
         risk_label: 'LOW RISK — Document verified',
+        fraud_flagged: false,
       };
       setDocs(prev => ({ ...prev, [docId]: { ...prev[docId], phase: 'done', result: fallback } }));
     }
@@ -113,6 +114,7 @@ export default function CitizenUploadStep({ application: app, onSubmit, onLogout
 
   const bothDone = docs.salary_cert.phase === 'done' && docs.bank_stmt.phase === 'done';
   const anyMismatch = Object.values(docs).some(d => d.result?.salary_mismatch);
+  const anyFraud = Object.values(docs).some(d => d.result?.fraud_flagged);
   const canSubmit = bothDone && consent;
 
   const handleSubmit = () => {
@@ -206,6 +208,28 @@ export default function CitizenUploadStep({ application: app, onSubmit, onLogout
             <Shield size={13} color="#C8922A" />
             <span style={{ fontSize: '10.5px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: '#1A1A1A' }}>رفع المستندات | Upload Documents</span>
             <span style={{ marginLeft: 'auto', fontSize: '10px', color: '#AAAAAA' }}>Both required *</span>
+          </div>
+
+          {/* Sample documents demo bar */}
+          <div style={{ background: '#EEF4FB', border: '1px solid rgba(0,87,168,0.2)', borderRadius: '8px', padding: '9px 14px', display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+            <FileText size={13} color="#0057A8" style={{ flexShrink: 0 }} />
+            <span style={{ fontSize: '11px', fontWeight: 700, color: '#0057A8' }}>عرض المستندات التجريبية | Sample Documents</span>
+            <div style={{ display: 'flex', gap: '12px', marginLeft: 'auto' }}>
+              <a href="/sample-docs/salary_certificate_genuine.html" target="_blank" rel="noopener noreferrer"
+                style={{ fontSize: '11px', color: '#00704A', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.textDecoration = 'underline'; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.textDecoration = 'none'; }}
+              >
+                <CheckCircle2 size={11} /> Genuine (AED 35,000)
+              </a>
+              <a href="/sample-docs/salary_certificate_tampered.html" target="_blank" rel="noopener noreferrer"
+                style={{ fontSize: '11px', color: '#CC3333', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.textDecoration = 'underline'; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.textDecoration = 'none'; }}
+              >
+                <AlertTriangle size={11} /> Tampered (AED 85,000)
+              </a>
+            </div>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
@@ -383,15 +407,24 @@ export default function CitizenUploadStep({ application: app, onSubmit, onLogout
                           </div>
                         )}
 
-                        {/* Salary mismatch warning */}
+                        {/* Salary mismatch / Fraud alert */}
                         {r.salary_mismatch && (
                           <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }}
-                            style={{ marginTop: '9px', padding: '7px 11px', background: '#FEE8E8', border: '1px solid rgba(204,51,51,0.3)', borderRadius: '7px', display: 'flex', alignItems: 'center', gap: '6px' }}
+                            style={{ marginTop: '9px', padding: '8px 11px', background: '#FEE8E8', border: `1px solid rgba(204,51,51,${r.fraud_flagged ? '0.5' : '0.3'})`, borderRadius: '7px', display: 'flex', flexDirection: 'column', gap: '4px' }}
                           >
-                            <AlertTriangle size={12} color="#CC3333" />
-                            <span style={{ fontSize: '10.5px', fontWeight: 700, color: '#CC3333' }}>
-                              HIGH RISK — Salary mismatch ({r.salary_variance_pct.toFixed(1)}% variance)
-                            </span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <AlertTriangle size={12} color="#CC3333" style={{ flexShrink: 0 }} />
+                              <span style={{ fontSize: '10.5px', fontWeight: 700, color: '#CC3333' }}>
+                                {r.fraud_flagged
+                                  ? 'تنبيه احتيال | FRAUD ALERT'
+                                  : `HIGH RISK — Salary mismatch (${r.salary_variance_pct.toFixed(1)}% variance)`}
+                              </span>
+                            </div>
+                            {r.fraud_flagged && r.declared_salary !== null && r.extracted_salary !== null && (
+                              <p style={{ fontSize: '10px', color: '#883333', lineHeight: 1.5, margin: 0, paddingLeft: '18px' }}>
+                                Declared income (AED {r.declared_salary.toLocaleString()}) inconsistent with verified financial records (AED {r.extracted_salary.toLocaleString()}). Mismatch: {r.salary_variance_pct.toFixed(0)}%. Case escalated to human officer with full evidence trail.
+                              </p>
+                            )}
                           </motion.div>
                         )}
 
@@ -431,14 +464,26 @@ export default function CitizenUploadStep({ application: app, onSubmit, onLogout
               <AnimatePresence>
                 {anyMismatch && (
                   <motion.div key="mismatch-warn" initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                    style={{ padding: '12px 16px', background: '#FEE8E8', border: '1px solid rgba(204,51,51,0.35)', borderRadius: '10px', display: 'flex', alignItems: 'flex-start', gap: '10px' }}
+                    style={{ padding: '12px 16px', background: '#FEE8E8', border: `1px solid rgba(204,51,51,${anyFraud ? '0.5' : '0.35'})`, borderRadius: '10px', display: 'flex', alignItems: 'flex-start', gap: '10px' }}
                   >
                     <AlertTriangle size={15} color="#CC3333" style={{ marginTop: '1px', flexShrink: 0 }} />
                     <div>
-                      <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#CC3333', marginBottom: '3px' }}>HIGH RISK — Salary Mismatch Detected</div>
-                      <div style={{ fontSize: '11px', color: '#883333', lineHeight: 1.5 }}>
-                        Your salary certificate shows income inconsistent with your declared salary. Submitting will automatically refer your case to an officer for manual review.
-                      </div>
+                      {anyFraud ? (
+                        <>
+                          <div style={{ fontSize: '13px', fontWeight: 800, color: '#CC3333', marginBottom: '4px', letterSpacing: '0.01em' }}>تنبيه احتيال | FRAUD ALERT</div>
+                          <div style={{ fontSize: '11px', color: '#883333', lineHeight: 1.6 }}>
+                            Your salary certificate shows income inconsistent with verified financial records.
+                            This case will be automatically escalated to a human officer with the full evidence trail.
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#CC3333', marginBottom: '3px' }}>HIGH RISK — Salary Mismatch Detected</div>
+                          <div style={{ fontSize: '11px', color: '#883333', lineHeight: 1.5 }}>
+                            Your salary certificate shows income inconsistent with your declared salary. Submitting will automatically refer your case to an officer for manual review.
+                          </div>
+                        </>
+                      )}
                     </div>
                   </motion.div>
                 )}
