@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle2, ChevronRight } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-import { ReschedulingApplication, AgentRecommendation } from '../types';
+import { ReschedulingApplication, AgentRecommendation, DocumentValidationResult } from '../types';
 import UAEPassLogin from '../components/UAEPassLogin';
 import CitizenUploadStep from '../components/CitizenUploadStep';
 import CitizenProcessingScreen from '../components/CitizenProcessingScreen';
@@ -38,7 +38,8 @@ export default function CitizenPortal() {
     }
   }, [applications, recommendations]);
 
-  const handleSubmitDocuments = useCallback(() => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleSubmitDocuments = useCallback((_validations: DocumentValidationResult[]) => {
     setStep('processing');
   }, []);
 

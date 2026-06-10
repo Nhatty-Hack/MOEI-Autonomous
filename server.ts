@@ -8,7 +8,8 @@ import { assessApplication } from './src/services/assessment';
 import { processWithAgent } from './src/services/agent';
 import { GOVERNANCE } from './src/services/complianceEngine';
 import { loadHistoricalData, getHistoricalStats, computeHistoricalInsight } from './src/services/dataLoader';
-import { HistoricalRecord, HistoricalStats } from './src/types';
+import { validateDocument } from './src/services/geminiValidator';
+import { HistoricalRecord, HistoricalStats, AgentRecommendation, DocumentValidationResult } from './src/types';
 
 // ── Async error wrapper ────────────────────────────────────────────────────────
 function asyncHandler(
@@ -22,6 +23,9 @@ function asyncHandler(
 // ── Historical data (loaded at startup) ────────────────────────────────────────
 let historicalRecords: HistoricalRecord[] = [];
 let historicalStats: HistoricalStats | null = null;
+
+// ── Document validation store (in-memory, per session) ────────────────────────
+const validationStore = new Map<string, DocumentValidationResult[]>();
 
 async function startServer() {
   const app = express();
@@ -70,6 +74,22 @@ async function startServer() {
     res.json(GOVERNANCE);
   });
 
+  // ── Override recommendation when salary mismatch detected ────────────────
+  function applyDocumentOverrides(result: AgentRecommendation, appId: string): AgentRecommendation {
+    const validations = validationStore.get(appId) ?? [];
+    const mismatch = validations.find(v => v.salary_mismatch && v.extracted_salary !== null);
+    if (!mismatch) return result;
+    const declared = (mismatch.declared_salary ?? 0).toLocaleString();
+    const extracted = mismatch.extracted_salary!.toLocaleString();
+    return {
+      ...result,
+      recommendation: 'REFER_TO_EMPLOYEE',
+      application_status: 'REFERRED',
+      reasoning: `Declared salary (${declared} AED) inconsistent with verified records (${extracted} AED). Document validation flagged HIGH RISK with ${mismatch.salary_variance_pct.toFixed(1)}% variance. Case referred for manual review.`,
+      reasoning_ar: 'الراتب المُصرَّح به غير متطابق مع السجلات الموثقة. تم تحويل الطلب للمراجعة اليدوية.',
+    };
+  }
+
   // ── Enrich result with historical precedent ──────────────────────────────
   function enrichWithHistory<T extends { arrears_amount?: number }>(
     result: T,
@@ -102,10 +122,8 @@ async function startServer() {
     }
     const result = assessApplication(application);
     const enriched = enrichWithHistory(result, application.income.current_salary, application.arrears.overdue_amount);
-    res.json({
-      status: "success",
-      data: enriched
-    });
+    const final = applyDocumentOverrides(enriched as AgentRecommendation, req.params.id);
+    res.json({ status: 'success', data: final });
   });
 
   // Agentic LLM assessment (single application) — always returns valid JSON
@@ -118,12 +136,14 @@ async function startServer() {
     try {
       const result = await processWithAgent(application);
       const enriched = enrichWithHistory(result, application.income.current_salary, application.arrears.overdue_amount);
-      res.json({ status: 'success', data: enriched });
+      const final = applyDocumentOverrides(enriched as AgentRecommendation, req.params.id);
+      res.json({ status: 'success', data: final });
     } catch (err) {
       console.warn(`Agent failed for ${req.params.id}, using deterministic fallback:`, (err as Error).message?.substring(0, 80));
       const result = assessApplication(application);
       const enriched = enrichWithHistory(result, application.income.current_salary, application.arrears.overdue_amount);
-      res.json({ status: 'success', data: enriched });
+      const final = applyDocumentOverrides(enriched as AgentRecommendation, req.params.id);
+      res.json({ status: 'success', data: final });
     }
   }));
 
@@ -192,6 +212,29 @@ async function startServer() {
         });
       }
     }
+  });
+
+  // ── Document validation endpoints ───────────────────────────────────────
+
+  app.post('/api/validate-document', asyncHandler(async (req, res) => {
+    const { base64, mimeType, fileName, docType, applicationId, declaredSalary } = req.body as {
+      base64: string; mimeType: string; fileName: string;
+      docType: 'salary_cert' | 'bank_stmt'; applicationId: string; declaredSalary: number;
+    };
+    if (!base64 || !mimeType || !fileName || !docType || !applicationId) {
+      res.status(400).json({ error: 'Missing required fields' });
+      return;
+    }
+    const result = await validateDocument(base64, mimeType, fileName, docType, applicationId, declaredSalary ?? 0);
+    const existing = validationStore.get(applicationId) ?? [];
+    validationStore.set(applicationId, [...existing.filter(v => v.doc_type !== docType), result]);
+    res.json({ status: 'success', data: result });
+  }));
+
+  app.get('/api/document-validations', (_req, res) => {
+    const all: Record<string, DocumentValidationResult[]> = {};
+    validationStore.forEach((vals, appId) => { all[appId] = vals; });
+    res.json(all);
   });
 
   // ── JSON error handler (must be after routes, before Vite) ─────────────

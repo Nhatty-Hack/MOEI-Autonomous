@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
-import { ReschedulingApplication, AgentRecommendation } from '../types';
-import { Zap, ArrowUpDown, ArrowUp, ArrowDown, Search, X, BrainCircuit } from 'lucide-react';
+import { ReschedulingApplication, AgentRecommendation, DocumentValidationResult } from '../types';
+import { Zap, ArrowUpDown, ArrowUp, ArrowDown, Search, X, BrainCircuit, CheckCircle2, AlertTriangle, FileText } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import AssessmentPanel from './AssessmentPanel';
 import ProcessingAnimation from './ProcessingAnimation';
@@ -14,6 +14,90 @@ interface ApplicationsTableProps {
   onAssess: (appId: string) => void;
   onToggleExpand: (appId: string) => void;
   onAssessAll: () => void;
+  documentValidations?: Record<string, DocumentValidationResult[]>;
+}
+
+// ── Document validation section shown in expanded officer rows ─────────────────
+
+function DocCard({ v }: { v: DocumentValidationResult }) {
+  const scoreColor = v.authenticity_score >= 80 ? '#00704A' : v.authenticity_score >= 60 ? '#E8A020' : '#CC3333';
+  const scoreBg   = v.authenticity_score >= 80 ? '#E8F5EE' : v.authenticity_score >= 60 ? '#FEF3E2' : '#FEE8E8';
+  const checks = [
+    { label: 'Letterhead', ok: v.has_letterhead },
+    { label: 'Signature',  ok: v.has_signature  },
+    { label: 'Date',       ok: v.date_ok, detail: v.date_detail },
+    ...(v.extracted_salary !== null ? [{
+      label: 'Salary',
+      ok: !v.salary_mismatch,
+      detail: `AED ${v.extracted_salary.toLocaleString()}`,
+    }] : []),
+  ] as { label: string; ok: boolean; detail?: string }[];
+
+  return (
+    <div style={{ background: '#FFFFFF', border: `1.5px solid ${v.salary_mismatch ? 'rgba(204,51,51,0.35)' : '#E8E0D0'}`, borderRadius: '8px', padding: '12px 14px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px', gap: '6px' }}>
+        <span style={{ fontSize: '11.5px', fontWeight: 700, color: '#1A1A1A' }}>
+          {v.doc_type === 'salary_cert' ? 'Salary Certificate' : 'Bank Statement'}
+        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '5px', flexShrink: 0 }}>
+          {v.gemini_powered && (
+            <span style={{ fontSize: '8.5px', fontWeight: 700, color: '#0057A8', background: '#E8F0FB', padding: '2px 6px', borderRadius: '8px', border: '1px solid rgba(0,87,168,0.2)', whiteSpace: 'nowrap' }}>
+              ✦ Gemini
+            </span>
+          )}
+          <span style={{ fontSize: '11px', fontWeight: 800, fontFamily: 'IBM Plex Mono, monospace', color: scoreColor, background: scoreBg, padding: '2px 8px', borderRadius: '10px' }}>
+            {v.authenticity_score}%
+          </span>
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', marginBottom: v.salary_mismatch ? '9px' : 0 }}>
+        {checks.map((c, i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px' }}>
+            {c.ok
+              ? <CheckCircle2 size={11} color="#00704A" />
+              : <AlertTriangle size={11} color="#CC3333" />
+            }
+            <span style={{ flex: 1, color: '#555555' }}>{c.label}</span>
+            {c.detail && <span style={{ fontFamily: 'IBM Plex Mono, monospace', fontSize: '10px', color: c.ok ? '#00704A' : '#CC3333', fontWeight: 600 }}>{c.detail}</span>}
+          </div>
+        ))}
+      </div>
+
+      {v.salary_mismatch && (
+        <div style={{ padding: '5px 9px', background: '#FEE8E8', border: '1px solid rgba(204,51,51,0.25)', borderRadius: '6px', fontSize: '10px', fontWeight: 700, color: '#CC3333' }}>
+          Salary mismatch: {v.salary_variance_pct.toFixed(1)}% variance — case will be REFERRED
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DocValidationSection({ validations }: { validations: DocumentValidationResult[] }) {
+  const hasMismatch = validations.some(v => v.salary_mismatch);
+  return (
+    <div style={{ padding: '16px 20px', borderBottom: '1px solid #EDE8E0', background: '#FDFCFA' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '7px', marginBottom: '12px' }}>
+        <FileText size={13} color="#C8922A" />
+        <span style={{ fontSize: '10.5px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: '#1A1A1A' }}>
+          المستندات | Documents
+        </span>
+        {hasMismatch && (
+          <span style={{ marginLeft: 'auto', fontSize: '10px', fontWeight: 700, color: '#CC3333', background: '#FEE8E8', padding: '2px 9px', borderRadius: '10px', border: '1px solid rgba(204,51,51,0.3)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <AlertTriangle size={10} /> HIGH RISK
+          </span>
+        )}
+        {!hasMismatch && (
+          <span style={{ marginLeft: 'auto', fontSize: '10px', fontWeight: 700, color: '#00704A', background: '#E8F5EE', padding: '2px 9px', borderRadius: '10px', border: '1px solid rgba(0,112,74,0.25)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <CheckCircle2 size={10} /> Verified
+          </span>
+        )}
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: validations.length > 1 ? '1fr 1fr' : '1fr', gap: '10px' }}>
+        {validations.map(v => <DocCard key={v.doc_type} v={v} />)}
+      </div>
+    </div>
+  );
 }
 
 type SortKey = 'name' | 'arrears' | 'balance' | 'deduction' | 'time' | 'status';
@@ -43,7 +127,7 @@ function SortIcon({ col, sortKey, dir }: { col: string; sortKey: SortKey; dir: '
 
 export default function ApplicationsTable({
   applications, recommendations, processingApps, expandedApp,
-  batchProgress, onAssess, onToggleExpand, onAssessAll,
+  batchProgress, onAssess, onToggleExpand, onAssessAll, documentValidations,
 }: ApplicationsTableProps) {
   const [sortKey, setSortKey] = useState<SortKey>('arrears');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
@@ -263,7 +347,15 @@ export default function ApplicationsTable({
                               transition={{ duration: 0.22 }}
                               style={{ overflow: 'hidden', background: '#FDFAF4' }}
                             >
-                              {isProcessing ? <ProcessingAnimation /> : rec ? <AssessmentPanel recommendation={rec} /> : null}
+                              {isProcessing ? <ProcessingAnimation /> : rec ? (
+                                <>
+                                  {(() => {
+                                    const appVals = documentValidations?.[app.application_id];
+                                    return appVals?.length ? <DocValidationSection validations={appVals} /> : null;
+                                  })()}
+                                  <AssessmentPanel recommendation={rec} />
+                                </>
+                              ) : null}
                             </motion.div>
                           </AnimatePresence>
                         </td>

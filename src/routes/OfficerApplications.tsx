@@ -4,7 +4,7 @@ import ApplicationsTable from '../components/ApplicationsTable';
 export default function OfficerApplications() {
   const {
     applications, recommendations, processingApps,
-    expandedApp, batchProgress,
+    expandedApp, batchProgress, documentValidations,
     handleAssessAgentic, handleToggleExpand, handleAssessAll,
   } = useApp();
 
@@ -18,6 +18,7 @@ export default function OfficerApplications() {
       onAssess={handleAssessAgentic}
       onToggleExpand={handleToggleExpand}
       onAssessAll={handleAssessAll}
+      documentValidations={documentValidations}
     />
   );
 }

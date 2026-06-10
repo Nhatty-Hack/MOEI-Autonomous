@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
-import { AgentRecommendation, ReschedulingApplication } from '../types';
+import { AgentRecommendation, ReschedulingApplication, DocumentValidationResult } from '../types';
 
 interface AppContextValue {
   applications: ReschedulingApplication[];
@@ -9,6 +9,7 @@ interface AppContextValue {
   batchProgress: string | null;
   loading: boolean;
   error: string | null;
+  documentValidations: Record<string, DocumentValidationResult[]>;
   setError: (msg: string | null) => void;
   handleAssessAgentic: (appId: string) => Promise<void>;
   handleAssessAll: () => Promise<void>;
@@ -25,6 +26,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [batchProgress, setBatchProgress] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [documentValidations, setDocumentValidations] = useState<Record<string, DocumentValidationResult[]>>({});
 
   useEffect(() => {
     fetch('/api/applications')
@@ -32,6 +34,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       .then(apps => setApplications(apps))
       .catch(() => setError('Failed to load application data. Please refresh.'))
       .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    fetch('/api/document-validations')
+      .then(r => r.json())
+      .then(data => setDocumentValidations(data as Record<string, DocumentValidationResult[]>))
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -83,7 +92,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   return (
     <AppContext.Provider value={{
       applications, recommendations, processingApps, expandedApp,
-      batchProgress, loading, error, setError,
+      batchProgress, loading, error, documentValidations, setError,
       handleAssessAgentic, handleAssessAll, handleToggleExpand,
     }}>
       {children}

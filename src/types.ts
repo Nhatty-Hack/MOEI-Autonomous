@@ -252,3 +252,24 @@ export interface GovernanceRules {
   MAX_EMI_INCREASE_FACTOR: number;
   SALARY_CERT_VALIDITY_DAYS: number;
 }
+
+// ─── Document Validation Types ────────────────────────────────────────────────
+
+export interface DocumentValidationResult {
+  application_id: string;
+  doc_type: 'salary_cert' | 'bank_stmt';
+  file_name: string;
+  validated_at: string;
+  gemini_powered: boolean;
+  has_letterhead: boolean;
+  has_signature: boolean;
+  date_ok: boolean;
+  date_detail: string;
+  extracted_salary: number | null;
+  declared_salary: number | null;
+  salary_mismatch: boolean;
+  salary_variance_pct: number;
+  authenticity_score: number;
+  risk_level: 'low' | 'medium' | 'high';
+  risk_label: string;
+}
