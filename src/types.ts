@@ -261,14 +261,30 @@ export interface DocumentValidationResult {
   file_name: string;
   validated_at: string;
   gemini_powered: boolean;
+
+  // Structured fields extracted by Gemini Vision
+  company_name: string | null;
+  employee_name: string | null;
+  emirates_id_on_doc: string | null;
+  issue_date: string | null;
+  days_since_issue: number | null;
+  anomalies: string[];
+
+  // Document integrity checks
   has_letterhead: boolean;
   has_signature: boolean;
+  has_stamp: boolean;
   date_ok: boolean;
   date_detail: string;
+  validity_clause: boolean;
+
+  // Salary cross-validation
   extracted_salary: number | null;
   declared_salary: number | null;
   salary_mismatch: boolean;
   salary_variance_pct: number;
+
+  // Overall score and risk
   authenticity_score: number;
   risk_level: 'low' | 'medium' | 'high';
   risk_label: string;

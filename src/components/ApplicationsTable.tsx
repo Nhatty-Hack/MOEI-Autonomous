@@ -22,20 +22,31 @@ interface ApplicationsTableProps {
 function DocCard({ v }: { v: DocumentValidationResult }) {
   const scoreColor = v.authenticity_score >= 80 ? '#00704A' : v.authenticity_score >= 60 ? '#E8A020' : '#CC3333';
   const scoreBg   = v.authenticity_score >= 80 ? '#E8F5EE' : v.authenticity_score >= 60 ? '#FEF3E2' : '#FEE8E8';
-  const checks = [
-    { label: 'Letterhead', ok: v.has_letterhead },
-    { label: 'Signature',  ok: v.has_signature  },
-    { label: 'Date',       ok: v.date_ok, detail: v.date_detail },
-    ...(v.extracted_salary !== null ? [{
+
+  const hasExtracted = v.company_name || v.employee_name || v.extracted_salary !== null || v.issue_date;
+  const extractedRows: { label: string; value: string; color?: string }[] = [];
+  if (v.company_name)        extractedRows.push({ label: 'Company',  value: v.company_name });
+  if (v.employee_name)       extractedRows.push({ label: 'Employee', value: v.employee_name });
+  if (v.extracted_salary !== null) {
+    extractedRows.push({
       label: 'Salary',
-      ok: !v.salary_mismatch,
-      detail: `AED ${v.extracted_salary.toLocaleString()}`,
-    }] : []),
-  ] as { label: string; ok: boolean; detail?: string }[];
+      value: `AED ${v.extracted_salary.toLocaleString()}${v.salary_mismatch ? ` ✗ (${v.salary_variance_pct.toFixed(1)}%)` : ' ✓'}`,
+      color: v.salary_mismatch ? '#CC3333' : '#00704A',
+    });
+  }
+  if (v.issue_date) extractedRows.push({ label: 'Date', value: v.date_detail, color: v.date_ok ? undefined : '#CC3333' });
+
+  const checks = [
+    { label: 'Letterhead',      ok: v.has_letterhead },
+    { label: 'Signature',       ok: v.has_signature  },
+    { label: 'Stamp',           ok: v.has_stamp       },
+    { label: 'Validity Clause', ok: v.validity_clause },
+  ];
 
   return (
     <div style={{ background: '#FFFFFF', border: `1.5px solid ${v.salary_mismatch ? 'rgba(204,51,51,0.35)' : '#E8E0D0'}`, borderRadius: '8px', padding: '12px 14px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px', gap: '6px' }}>
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: hasExtracted ? '9px' : '10px', gap: '6px' }}>
         <span style={{ fontSize: '11.5px', fontWeight: 700, color: '#1A1A1A' }}>
           {v.doc_type === 'salary_cert' ? 'Salary Certificate' : 'Bank Statement'}
         </span>
@@ -51,22 +62,46 @@ function DocCard({ v }: { v: DocumentValidationResult }) {
         </div>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', marginBottom: v.salary_mismatch ? '9px' : 0 }}>
+      {/* Extracted data */}
+      {hasExtracted && (
+        <div style={{ background: '#F8F6F2', borderRadius: '6px', padding: '8px 10px', marginBottom: '9px' }}>
+          <div style={{ fontSize: '7.5px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.09em', color: '#BBBBBB', marginBottom: '5px' }}>EXTRACTED DATA</div>
+          {extractedRows.map((row, i) => (
+            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '6px', marginBottom: i < extractedRows.length - 1 ? '3px' : 0 }}>
+              <span style={{ fontSize: '10px', color: '#888888', flexShrink: 0 }}>{row.label}</span>
+              <span style={{ fontSize: '10px', fontWeight: 600, color: row.color ?? '#1A1A1A', fontFamily: 'IBM Plex Mono, monospace', textAlign: 'right' }}>{row.value}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Integrity checks */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: (v.salary_mismatch || v.anomalies.length > 0) ? '9px' : 0 }}>
         {checks.map((c, i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px' }}>
-            {c.ok
-              ? <CheckCircle2 size={11} color="#00704A" />
-              : <AlertTriangle size={11} color="#CC3333" />
-            }
+            {c.ok ? <CheckCircle2 size={11} color="#00704A" /> : <AlertTriangle size={11} color="#CC3333" />}
             <span style={{ flex: 1, color: '#555555' }}>{c.label}</span>
-            {c.detail && <span style={{ fontFamily: 'IBM Plex Mono, monospace', fontSize: '10px', color: c.ok ? '#00704A' : '#CC3333', fontWeight: 600 }}>{c.detail}</span>}
+            <span style={{ fontSize: '9.5px', fontWeight: 600, color: c.ok ? '#00704A' : '#CC3333' }}>{c.ok ? '✓' : '✗'}</span>
           </div>
         ))}
       </div>
 
+      {/* Anomalies */}
+      {v.anomalies.length > 0 && (
+        <div style={{ marginBottom: '7px', display: 'flex', flexDirection: 'column', gap: '3px' }}>
+          {v.anomalies.map((a, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '5px', padding: '4px 8px', background: '#FEF3E2', borderRadius: '5px' }}>
+              <AlertTriangle size={10} color="#E8A020" style={{ marginTop: '1px', flexShrink: 0 }} />
+              <span style={{ fontSize: '10px', color: '#7A5A00' }}>{a}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Mismatch pill */}
       {v.salary_mismatch && (
         <div style={{ padding: '5px 9px', background: '#FEE8E8', border: '1px solid rgba(204,51,51,0.25)', borderRadius: '6px', fontSize: '10px', fontWeight: 700, color: '#CC3333' }}>
-          Salary mismatch: {v.salary_variance_pct.toFixed(1)}% variance — case will be REFERRED
+          Salary mismatch: {v.salary_variance_pct.toFixed(1)}% variance — case REFERRED
         </div>
       )}
     </div>
