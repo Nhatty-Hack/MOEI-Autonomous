@@ -6,3 +6,19 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# Claude / Playwright tooling
+.playwright-mcp/
+.claude/
+
+# Dev screenshots & demo artefacts
+_ss_*.png
+_browser_demo.mjs
+dashboard-*.png
+flow-*.png
+logo-login.png
+logo-sidebar.png
+moei-*.png
+screenshot-*.png
+UI/
+assess_result.json

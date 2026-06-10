@@ -1,112 +1,37 @@
 <div align="center">
 
-# 🏛️ MOEI Autonomous Arrears Rescheduling Engine
+# MOEI Autonomous Arrears Rescheduling Engine
 
-**AI Agent for Instant Assessment of Housing Arrears Rescheduling Requests**
+**AI-Powered Assessment Portal for Sheikh Zayed Housing Programme**
 
 *Challenge No. 1 — MOEI × 42 Abu Dhabi Hackathon*
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-19-61dafb?logo=react)](https://react.dev/)
-[![Gemini](https://img.shields.io/badge/Gemini_2.5_Flash-Agentic-4285F4?logo=google)](https://ai.google.dev/)
+[![Gemini](https://img.shields.io/badge/Gemini_2.5_Flash-Vision-4285F4?logo=google)](https://ai.google.dev/)
 [![Vite](https://img.shields.io/badge/Vite-6-646CFF?logo=vite)](https://vitejs.dev/)
 
 </div>
 
 ---
 
-## 📋 Problem Statement
+## Problem Statement
 
-The Ministry of Energy and Infrastructure's (MOEI) Finance and Collection Department currently processes housing arrears rescheduling requests through a **5-day manual evaluation cycle** involving:
-
-- Manual identity verification and physical file collation
-- Waiting for external credit reports (AECB)
-- Manual net income extraction and DBR calculations
-- Committee reviews for repayment term optimization
-- Report writing, executive sign-offs, and physical mailout
-
-This project transforms that process into an **instant, AI-powered service** that:
+MOEI's Finance and Collection Department processes housing arrears rescheduling requests through a **5-day manual evaluation cycle**. This project transforms that into an **instant AI-powered service** backed by 1,995 historical case records.
 
 | Before | After |
 |--------|-------|
 | 5 working days | < 5 seconds |
 | Manual, inconsistent | Automated, standardized |
 | Undocumented decisions | Full audit trail |
-| One officer at a time | Parallel batch processing |
-| No governance visibility | Real-time compliance dashboard |
+| No fraud detection | Gemini Vision document validation |
 
 ---
 
-## 🏗️ Architecture
-
-The solution uses a **Hybrid Agentic Architecture** — combining deterministic compliance rules with LLM reasoning:
-
-```
-┌──────────────────────────────────────────────────────────┐
-│                    React Frontend                        │
-│  ┌─────────┐  ┌───────────┐  ┌────────────────────────┐ │
-│  │ App Queue│  │ Dashboard │  │ Governance Rules View │ │
-│  └────┬────┘  └─────┬─────┘  └───────────┬────────────┘ │
-└───────┼─────────────┼────────────────────┼───────────────┘
-        │             │                    │
-┌───────┴─────────────┴────────────────────┴───────────────┐
-│                   Express API Server                      │
-│  /api/agent-assess/:id  │  /api/governance-rules         │
-└──────────┬──────────────┴────────────────────────────────┘
-           │
-┌──────────┴──────────────────────────────────────────────┐
-│              Agentic Processing Pipeline                 │
-│  ┌─────────┐   ┌──────────┐   ┌──────────────────────┐ │
-│  │ Identity │──>│ Document │──>│ Compliance Matrix    │ │
-│  │ Verify   │   │ OCR/Scan │   │ (12-48mo optimizer)  │ │
-│  └─────────┘   └──────────┘   └──────────┬───────────┘ │
-│                                           │              │
-│  ┌──────────────────┐   ┌────────────────┴────────────┐ │
-│  │ Gemini 2.5 Flash │<──│ Function Calling (Tool Use) │ │
-│  │ NLP Reasoning     │──>│ Structured JSON Output      │ │
-│  └──────────────────┘   └─────────────────────────────┘ │
-│                                                          │
-│  Output: Tier Classification + AR/EN Memos + Audit Trace │
-└──────────────────────────────────────────────────────────┘
-```
-
-### Key Components
-
-| Component | File | Purpose |
-|-----------|------|---------|
-| **Compliance Engine** | `src/services/complianceEngine.ts` | Single source of truth: DBR calculations, governance rules, tiered optimization matrix |
-| **AI Agent** | `src/services/agent.ts` | Gemini 2.5 Flash with function-calling for tool-augmented reasoning |
-| **Deterministic Solver** | `src/services/assessment.ts` | Fallback local assessment (no LLM needed) |
-| **Frontend** | `src/App.tsx` + `src/components/` | React UI with tab navigation, batch processing, real-time dashboard |
-
-### Governance Rules (Configurable)
-
-| Rule | Value | Description |
-|------|-------|-------------|
-| DBR Limit (Employed) | 60% | Maximum debt-burden ratio for employed applicants |
-| DBR Limit (Retiree) | 50% | Maximum DBR for retirees and senior citizens |
-| DBR Hard Ceiling (Retiree) | 80% | Absolute cap — RED even for protected categories |
-| Net Income Ceiling | 100,000 AED | Above this, redirected to commercial entities |
-| Term Range | 12–48 months | Optimization search space for repayment schedules |
-| Green Delta Ceiling | 15% | Monthly delta must be ≤ 15% of current installment for auto-approval |
-
----
-
-## 🎯 Tier Classification System
-
-| Tier | Meaning | Action |
-|------|---------|--------|
-| 🟢 **GREEN** | Auto-approved | Standard 24-month schedule satisfies all compliance rules |
-| 🟡 **YELLOW** | Conditionally approved | Extended term (12-48 months) found via optimization loop |
-| 🔴 **RED** | Escalated to human | Over-leveraged or no compliant solution exists |
-| ⬜ **INFORMATION_HOLD** | Pending documents | Unstamped or draft documents detected by OCR validation |
-
----
-
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
-- Node.js ≥ 18 (recommended: 22+)
+- Node.js ≥ 18
 - Gemini API key from [Google AI Studio](https://aistudio.google.com/)
 
 ### Setup
@@ -114,90 +39,131 @@ The solution uses a **Hybrid Agentic Architecture** — combining deterministic 
 ```bash
 # 1. Clone and install
 git clone <repo-url>
-cd Agentera
-npm install
+cd Agentera-main
+npm install --legacy-peer-deps
 
-# 2. Configure your API key
-cp .env.example .env.local
-# Edit .env.local and set GEMINI_API_KEY=your_actual_key
+# 2. Configure API key
+cp .env.example .env
+# Edit .env and set GEMINI_API_KEY=your_key_here
 
-# 3. Run
+# 3. Start dev server
 npm run dev
 ```
 
-Open http://localhost:3000
+Open [http://localhost:3000](http://localhost:3000)
 
-### Production Build
+---
 
-```bash
-npm run build
-npm start
+## Features
+
+### Citizen Portal (`/citizen`)
+- UAE PASS simulated authentication (any 4-digit OTP)
+- **Document upload with Gemini Vision validation**
+  - Photo/selfie/random image → instant red rejection ("Invalid Document")
+  - Valid salary certificate → green PASS with extracted salary & authenticity score
+  - Gemini API failure → amber "Manual Verification Required" (routes to PENDING)
+- Sample documents: [Genuine AED 35,000](/sample-docs/salary_certificate_genuine.html) · [Tampered AED 85,000](/sample-docs/salary_certificate_tampered.html)
+- Fraud detection: >50% salary variance triggers **FRAUD ALERT** badge
+
+### Officer Dashboard (`/officer`)
+- Live assessment queue with 1,995 historical records loaded from `RescheduleArrears.xlsx`
+- Fraud Risk: HIGH badge for flagged applications
+- AI Pipeline trace log with step-by-step reasoning
+
+### AI Pipeline (`/officer/pipeline`)
+- Real-time terminal showing 6-step agentic pipeline
+- Identity → Documents → Compliance → Historical → Gemini LLM → Decision
+
+### Governance (`/officer/governance`)
+- 12 compliance rules with live pass/fail indicators
+- Audit trail for all decisions
+
+---
+
+## Document Validation Flow
+
+```
+Upload file
+    │
+    ▼
+POST /api/validate-document
+    │
+    ├─ Gemini Vision ──────────────────────────────────────┐
+    │   • is_valid_doc: true/false                          │
+    │   • document_type: salary_cert | photo | other | …   │
+    │   • extracted_salary, company_name, issue_date        │
+    │   • authenticity_score 0–100                          │
+    │                                                       │
+    ├─ is_valid_doc = false ──→ rejected (red, 4s clear)   │
+    ├─ Gemini throws (429/503) ─→ manual (amber)           │
+    └─ Salary mismatch >50% ───→ fraud_flagged = true ─────┘
+
+Submit assessment
+    │
+    ├─ Any manual ──→ REQUEST_DOCUMENTS / PENDING_INFO
+    ├─ fraud_flagged ──→ REFER_TO_EMPLOYEE / REFERRED + FRAUD_DETECTION trace
+    └─ Clean docs ──→ Normal 6-step agentic assessment
 ```
 
 ---
 
-## 🧪 Synthetic Test Cases
+## API Routes
 
-The prototype includes 8 diverse applications covering edge cases:
-
-| # | Applicant | Category | Arrears | Expected Tier |
-|---|-----------|----------|---------|---------------|
-| 1 | Saeed Al-Mansoori | Employed | 12,000 AED | 🟢 GREEN |
-| 2 | Fatima Al-Ali | Retiree | 19,200 AED | 🟡 YELLOW |
-| 3 | Maryam Al-Heera | Widow with Custody | 14,400 AED | 🟡 YELLOW |
-| 4 | Hamad Al-Nuaimi | Person of Determination | 36,000 AED | 🔴 RED |
-| 5 | Khalid Al-Shehhi | Employed (unstamped docs) | 9,000 AED | ⬜ HOLD |
-| 6 | Ahmed Al-Dhaheri | Senior Citizen | 7,500 AED | 🟢 GREEN |
-| 7 | Noura Al-Kaabi | Employed (high arrears) | 45,000 AED | 🟡 YELLOW |
-| 8 | Omar Al-Mazrouei | Employed (single miss) | 4,500 AED | 🟢 GREEN |
+| Route | Method | Description |
+|-------|--------|-------------|
+| `/api/health` | GET | Server liveness check |
+| `/api/applications` | GET | All applications (from xlsx) |
+| `/api/document-validations` | GET | Current session validations |
+| `/api/validate-document` | POST | Gemini Vision doc check |
+| `/api/agent-assess/:id` | POST | Full agentic assessment |
+| `/api/governance-rules` | GET | 12 compliance rules |
+| `/` | GET | Officer dashboard |
+| `/citizen` | GET | Citizen portal |
+| `/officer/*` | GET | Officer views |
 
 ---
 
-## 📁 Project Structure
+## Architecture
 
 ```
-Agentera/
-├── server.ts                    # Express API server + Vite middleware
-├── index.html                   # HTML entry point
-├── vite.config.ts               # Vite + TailwindCSS v4 config
-├── src/
-│   ├── App.tsx                  # Root component with tab navigation
-│   ├── main.tsx                 # React entry point
-│   ├── types.ts                 # TypeScript interfaces
-│   ├── data.ts                  # Synthetic test data (8 applications)
-│   ├── index.css                # Global styles + Arabic font support
-│   ├── services/
-│   │   ├── complianceEngine.ts  # Core governance rules + math engine
-│   │   ├── assessment.ts        # Deterministic local solver
-│   │   └── agent.ts             # Gemini AI agentic pipeline
-│   └── components/
-│       ├── Header.tsx           # Hero header with MOEI branding
-│       ├── PipelineComparison.tsx  # 5-day vs 5-second comparison
-│       ├── ApplicationCard.tsx  # Individual application card
-│       ├── AssessmentPanel.tsx   # Assessment deep-dive with trace log
-│       ├── ProcessingAnimation.tsx # Terminal-style processing animation
-│       ├── Dashboard.tsx        # Analytics + governance rules display
-│       └── ErrorBanner.tsx      # Error notification component
-└── .env.example                 # Environment variable template
+src/
+├── services/
+│   ├── geminiValidator.ts    # Gemini Vision — doc type check, salary extraction, fraud
+│   ├── agent.ts              # 6-step agentic pipeline (Gemini 2.5 Flash)
+│   ├── assessment.ts         # Deterministic fallback solver
+│   ├── complianceEngine.ts   # DBR rules, tiered optimization matrix
+│   └── dataLoader.ts         # xlsx → ReschedulingApplication[]
+├── components/
+│   ├── CitizenUploadStep.tsx  # Document upload with Gemini validation UI
+│   ├── ApplicationsTable.tsx  # Officer queue with fraud badges
+│   ├── AssessmentPanel.tsx    # Decision deep-dive + audit trace
+│   ├── BeneficiaryView.tsx    # Citizen result view
+│   └── Dashboard.tsx         # Analytics + KPI gauges
+├── types.ts                   # All TypeScript interfaces
+└── App.tsx                    # Router + sidebar navigation
+server.ts                      # Express + Vite dev server
+public/sample-docs/            # Salary certificate HTML assets (genuine + tampered)
+RescheduleArrears.xlsx         # 1,995 historical records
 ```
 
 ---
 
-## 🔑 Expected Impact
+## Compliance Rules
 
-✅ **Instant service delivery** — From 5 working days to < 5 seconds  
-✅ **Unified rules** — Same governance parameters applied consistently to every case  
-✅ **Full transparency** — Every decision includes audit trace, rationale, and bilingual memos  
-✅ **Human oversight preserved** — RED and INFORMATION_HOLD cases escalate to officers  
-✅ **Bilingual output** — Arabic and English executive memos generated automatically  
-✅ **Scalable** — Batch processing for entire application queues  
+| Rule | Value |
+|------|-------|
+| DBR Limit (Employed) | 60% |
+| DBR Limit (Retiree) | 50% |
+| DBR Hard Ceiling (Retiree) | 80% |
+| Net Income Ceiling | 100,000 AED |
+| Repayment Term Range | 12–48 months |
+| Green Delta Ceiling | 15% of current instalment |
+| Fraud Detection Threshold | >50% salary variance |
 
 ---
 
-## 👥 Team
+## Team
 
 **Agentera** — MOEI × 42 Abu Dhabi Hackathon
 
----
-
-*Built with React, TypeScript, Gemini 2.5 Flash, Express, Vite, and TailwindCSS*
+*Built with React 19, TypeScript 5.8, Gemini 2.5 Flash Vision, Express, Vite 6*
