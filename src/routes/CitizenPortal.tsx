@@ -38,7 +38,6 @@ export default function CitizenPortal() {
     }
   }, [applications, recommendations]);
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleSubmitDocuments = useCallback((_validations: DocumentValidationResult[]) => {
     setStep('processing');
   }, []);

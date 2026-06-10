@@ -243,7 +243,9 @@ export default function CitizenUploadStep({ application: app, onSubmit, onLogout
                     {/* CHECKING — AI Verification in progress */}
                     {doc.phase === 'checking' && (
                       <div style={{ padding: '32px 18px', textAlign: 'center' }}>
-                        <Loader2 size={28} color="#C8922A" className="animate-spin" style={{ display: 'block', margin: '0 auto 12px' }} />
+                        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
+                          <Loader2 size={28} color="#C8922A" className="animate-spin" />
+                        </div>
                         <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#1A1A1A', marginBottom: '4px' }}>Verifying with AI…</div>
                         <div dir="rtl" className="arabic" style={{ fontSize: '11px', color: '#888888', marginBottom: '6px' }}>جارٍ التحقق بالذكاء الاصطناعي</div>
                         <div style={{ fontSize: '9.5px', color: '#AAAAAA', fontFamily: 'IBM Plex Mono, monospace' }}>{doc.file?.name}</div>
