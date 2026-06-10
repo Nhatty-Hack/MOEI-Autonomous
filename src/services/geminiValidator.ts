@@ -1,7 +1,8 @@
 import { DocumentValidationResult } from '../types';
 
-// Full structured payload returned by Gemini Vision
 interface GeminiPayload {
+  is_valid_doc: boolean;
+  document_type: string;
   company_name: string | null;
   employee_name: string | null;
   emirates_id: string | null;
@@ -19,12 +20,19 @@ interface GeminiPayload {
 async function callGeminiVision(
   base64: string,
   mimeType: string,
+  docType: 'salary_cert' | 'bank_stmt',
 ): Promise<GeminiPayload> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new Error('No GEMINI_API_KEY configured');
 
-  const prompt = `You are a UAE government document validator. Analyze this salary certificate image. Return ONLY JSON:
+  const docTypeLabel = docType === 'salary_cert' ? 'salary / income certificate' : 'bank statement';
+
+  const prompt = `You are a UAE government document validator. The user claims to have uploaded a ${docTypeLabel}.
+
+Analyze this image carefully and return ONLY JSON:
 {
+  "is_valid_doc": bool,
+  "document_type": string,
   "company_name": string or null,
   "employee_name": string or null,
   "emirates_id": string or null,
@@ -40,7 +48,9 @@ async function callGeminiVision(
 }
 
 Rules:
-- company_name: issuing company/employer name, or null if not visible
+- is_valid_doc: true ONLY if this image is genuinely a ${docTypeLabel}; set false if this is a photo, selfie, portrait, ID card, passport, invoice, contract, blank page, or ANY document that is NOT a ${docTypeLabel}
+- document_type: classify as exactly one of: 'salary_cert', 'bank_stmt', 'id_card', 'passport', 'invoice', 'contract', 'photo', 'blank', 'other'
+- company_name: issuing company/employer name, or null if not visible or is_valid_doc is false
 - employee_name: full name of employee on document, or null
 - emirates_id: Emirates ID number on document (format 784-xxxx-xxxxxxx-x), or null
 - monthly_salary_aed: net monthly salary as a plain integer (no commas/symbols), or null
@@ -50,8 +60,8 @@ Rules:
 - has_stamp: true if an official company/government stamp or seal is present
 - validity_clause: true if a validity period statement is printed on the document
 - days_since_issue: integer days between issue_date and today, or null
-- anomalies: list of specific concerns (e.g. "salary figure partially obscured", "date stamp smudged")
-- authenticity_score: integer 0–100 overall confidence the document is genuine
+- anomalies: list of specific concerns (e.g. "salary figure partially obscured", "date stamp smudged"); empty array if none or is_valid_doc is false
+- authenticity_score: integer 0-100 overall confidence the document is genuine; set 0 if is_valid_doc is false
 
 Respond ONLY with valid JSON. No markdown, no explanation.`;
 
@@ -89,42 +99,83 @@ Respond ONLY with valid JSON. No markdown, no explanation.`;
   return JSON.parse(cleaned) as GeminiPayload;
 }
 
-// ── Deterministic fallback — demo never breaks ─────────────────────────────────
-function simulateValidation(
-  fileName: string,
-  docType: 'salary_cert' | 'bank_stmt',
-  declaredSalary: number,
+// ── Manual review result — Gemini unavailable (429 / network) ─────────────────
+function buildManualReviewResult(
   applicationId: string,
-): GeminiPayload {
-  const seed = fileName.split('').reduce((a, c) => a + c.charCodeAt(0), 0) + applicationId.length;
-  const daysAgo = 8 + (seed % 18);
-
-  const now = new Date();
-  const d = new Date(now.getTime() - daysAgo * 86400000);
-  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const issueDate = `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
-
-  const GOV_ENTITIES = [
-    'Abu Dhabi Housing Authority',
-    'Dubai Municipality',
-    'Emirates Group',
-    'ADNOC Distribution',
-    'Etisalat (e&)',
-  ];
-
+  docType: 'salary_cert' | 'bank_stmt',
+  fileName: string,
+  declaredSalary: number,
+): DocumentValidationResult {
   return {
-    company_name: docType === 'salary_cert' ? GOV_ENTITIES[seed % GOV_ENTITIES.length] : null,
+    application_id: applicationId,
+    doc_type: docType,
+    file_name: fileName,
+    validated_at: new Date().toISOString(),
+    gemini_powered: false,
+    is_valid_document: true,
+    document_type: docType,
+    needs_manual_review: true,
+    company_name: null,
     employee_name: null,
-    emirates_id: null,
-    monthly_salary_aed: docType === 'salary_cert' ? declaredSalary : null,
-    issue_date: issueDate,
-    has_letterhead: true,
-    has_signature: true,
-    has_stamp: true,
-    validity_clause: docType === 'salary_cert',
-    days_since_issue: daysAgo,
-    anomalies: [],
-    authenticity_score: 88 + (seed % 10),
+    emirates_id_on_doc: null,
+    issue_date: null,
+    days_since_issue: null,
+    anomalies: ['Automated AI verification unavailable — document queued for manual officer review'],
+    has_letterhead: false,
+    has_signature: false,
+    has_stamp: false,
+    date_ok: false,
+    date_detail: 'Unverified — pending manual review',
+    validity_clause: false,
+    extracted_salary: null,
+    declared_salary: declaredSalary,
+    salary_mismatch: false,
+    salary_variance_pct: 0,
+    authenticity_score: 0,
+    risk_level: 'medium',
+    risk_label: 'MANUAL REVIEW — Automated verification unavailable',
+    fraud_flagged: false,
+  };
+}
+
+// ── Invalid document result — photo / wrong type uploaded ─────────────────────
+function buildInvalidDocResult(
+  applicationId: string,
+  docType: 'salary_cert' | 'bank_stmt',
+  fileName: string,
+  declaredSalary: number,
+  detectedType: string,
+): DocumentValidationResult {
+  const label = docType === 'salary_cert' ? 'salary certificate' : 'bank statement';
+  return {
+    application_id: applicationId,
+    doc_type: docType,
+    file_name: fileName,
+    validated_at: new Date().toISOString(),
+    gemini_powered: true,
+    is_valid_document: false,
+    document_type: detectedType,
+    needs_manual_review: false,
+    company_name: null,
+    employee_name: null,
+    emirates_id_on_doc: null,
+    issue_date: null,
+    days_since_issue: null,
+    anomalies: [`Uploaded file is not a ${label} (detected: ${detectedType})`],
+    has_letterhead: false,
+    has_signature: false,
+    has_stamp: false,
+    date_ok: false,
+    date_detail: 'N/A — invalid document',
+    validity_clause: false,
+    extracted_salary: null,
+    declared_salary: declaredSalary,
+    salary_mismatch: false,
+    salary_variance_pct: 0,
+    authenticity_score: 0,
+    risk_level: 'high',
+    risk_label: `INVALID DOCUMENT — Not a ${label}`,
+    fraud_flagged: false,
   };
 }
 
@@ -138,17 +189,23 @@ export async function validateDocument(
   declaredSalary: number,
 ): Promise<DocumentValidationResult> {
   let payload: GeminiPayload;
-  let geminiPowered = false;
 
   try {
-    payload = await callGeminiVision(base64, mimeType);
-    geminiPowered = true;
+    payload = await callGeminiVision(base64, mimeType, docType);
   } catch (err) {
-    console.warn('[geminiValidator] fallback:', (err as Error).message?.slice(0, 80));
-    payload = simulateValidation(fileName, docType, declaredSalary, applicationId);
+    console.warn('[geminiValidator] Gemini unavailable, queuing for manual review:', (err as Error).message?.slice(0, 80));
+    return buildManualReviewResult(applicationId, docType, fileName, declaredSalary);
   }
 
-  // Salary cross-validation
+  // Wrong document type → reject immediately, do not process further
+  if (!payload.is_valid_doc) {
+    const detected = payload.document_type ?? 'unknown';
+    console.log(`[geminiValidator] Invalid document: detected '${detected}' for requested '${docType}'`);
+    return buildInvalidDocResult(applicationId, docType, fileName, declaredSalary, detected);
+  }
+
+  // ── Valid document — run full checks ──────────────────────────────────────
+
   const extracted = typeof payload.monthly_salary_aed === 'number' ? payload.monthly_salary_aed : null;
   const variancePct =
     docType === 'salary_cert' && extracted !== null && declaredSalary > 0
@@ -157,7 +214,6 @@ export async function validateDocument(
   const salaryMismatch = docType === 'salary_cert' && extracted !== null && variancePct > 15;
   const fraudFlagged = salaryMismatch && variancePct > 50;
 
-  // Date validity (salary certs: 30 days; bank stmts: 90 days)
   const maxDays = docType === 'salary_cert' ? 30 : 90;
   const dateOk = payload.days_since_issue !== null
     ? payload.days_since_issue <= maxDays
@@ -169,7 +225,6 @@ export async function validateDocument(
         : payload.issue_date)
     : 'No date found';
 
-  // Score: trust Gemini's score; cap at 45 if salary mismatch
   const rawScore = typeof payload.authenticity_score === 'number'
     && payload.authenticity_score >= 0
     && payload.authenticity_score <= 100
@@ -191,22 +246,25 @@ export async function validateDocument(
     doc_type: docType,
     file_name: fileName,
     validated_at: new Date().toISOString(),
-    gemini_powered: geminiPowered,
-    company_name:      payload.company_name   ?? null,
-    employee_name:     payload.employee_name  ?? null,
-    emirates_id_on_doc: payload.emirates_id   ?? null,
-    issue_date:        payload.issue_date      ?? null,
-    days_since_issue:  payload.days_since_issue ?? null,
-    anomalies:         payload.anomalies        ?? [],
-    has_letterhead:    payload.has_letterhead,
-    has_signature:     payload.has_signature,
-    has_stamp:         payload.has_stamp,
-    date_ok:           dateOk,
-    date_detail:       dateDetail,
-    validity_clause:   payload.validity_clause,
-    extracted_salary:  extracted,
-    declared_salary:   declaredSalary,
-    salary_mismatch:   salaryMismatch,
+    gemini_powered: true,
+    is_valid_document: true,
+    document_type: payload.document_type ?? docType,
+    needs_manual_review: false,
+    company_name:       payload.company_name   ?? null,
+    employee_name:      payload.employee_name  ?? null,
+    emirates_id_on_doc: payload.emirates_id    ?? null,
+    issue_date:         payload.issue_date     ?? null,
+    days_since_issue:   payload.days_since_issue ?? null,
+    anomalies:          payload.anomalies       ?? [],
+    has_letterhead:     payload.has_letterhead,
+    has_signature:      payload.has_signature,
+    has_stamp:          payload.has_stamp,
+    date_ok:            dateOk,
+    date_detail:        dateDetail,
+    validity_clause:    payload.validity_clause,
+    extracted_salary:   extracted,
+    declared_salary:    declaredSalary,
+    salary_mismatch:    salaryMismatch,
     salary_variance_pct: variancePct,
     authenticity_score: score,
     risk_level: riskLevel,

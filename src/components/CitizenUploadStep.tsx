@@ -15,7 +15,7 @@ const DOCS: { id: DocId; label: string; labelAr: string; hint: string }[] = [
 
 interface DocState {
   file: File | null;
-  phase: 'idle' | 'checking' | 'done';
+  phase: 'idle' | 'checking' | 'done' | 'rejected' | 'manual';
   result: DocumentValidationResult | null;
   dragging: boolean;
 }
@@ -59,44 +59,56 @@ export default function CitizenUploadStep({ application: app, onSubmit, onLogout
           declaredSalary: app.income.current_salary,
         }),
       });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = await res.json();
-      setDocs(prev => ({ ...prev, [docId]: { ...prev[docId], phase: 'done', result: json.data as DocumentValidationResult } }));
+      const result = json.data as DocumentValidationResult;
+
+      if (!result.is_valid_document) {
+        // Wrong document type — show red rejection, auto-clear after 4s
+        setDocs(prev => ({ ...prev, [docId]: { file, phase: 'rejected', result, dragging: false } }));
+        setTimeout(() => {
+          setDocs(prev => ({ ...prev, [docId]: idle() }));
+          if (fileRefs.current[docId]) fileRefs.current[docId]!.value = '';
+        }, 4000);
+      } else if (result.needs_manual_review) {
+        // Gemini unavailable — amber manual review state
+        setDocs(prev => ({ ...prev, [docId]: { file, phase: 'manual', result, dragging: false } }));
+      } else {
+        setDocs(prev => ({ ...prev, [docId]: { file, phase: 'done', result, dragging: false } }));
+      }
     } catch {
-      // Client-side fallback — identical UI, demo never breaks
-      const seed = file.name.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
-      const daysAgo = 8 + (seed % 14);
-      const now = new Date();
-      const d = new Date(now.getTime() - daysAgo * 86400000);
-      const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-      const issueDate = `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
-      const fallback: DocumentValidationResult = {
+      // Server unreachable — amber manual review state (officer reviews document)
+      const manualResult: DocumentValidationResult = {
         application_id: app.application_id,
         doc_type: docId,
         file_name: file.name,
         validated_at: new Date().toISOString(),
         gemini_powered: false,
-        company_name: docId === 'salary_cert' ? 'Abu Dhabi Housing Authority' : null,
+        is_valid_document: true,
+        document_type: docId,
+        needs_manual_review: true,
+        company_name: null,
         employee_name: null,
         emirates_id_on_doc: null,
-        issue_date: issueDate,
-        days_since_issue: daysAgo,
-        anomalies: [],
-        has_letterhead: true,
-        has_signature: true,
-        has_stamp: true,
-        date_ok: true,
-        date_detail: `${issueDate} · ${daysAgo}d ago`,
-        validity_clause: docId === 'salary_cert',
-        extracted_salary: docId === 'salary_cert' ? app.income.current_salary : null,
+        issue_date: null,
+        days_since_issue: null,
+        anomalies: ['Automated AI verification unavailable — officer will manually review your document'],
+        has_letterhead: false,
+        has_signature: false,
+        has_stamp: false,
+        date_ok: false,
+        date_detail: 'Unverified',
+        validity_clause: false,
+        extracted_salary: null,
         declared_salary: app.income.current_salary,
         salary_mismatch: false,
         salary_variance_pct: 0,
-        authenticity_score: 88 + (seed % 10),
-        risk_level: 'low',
-        risk_label: 'LOW RISK — Document verified',
+        authenticity_score: 0,
+        risk_level: 'medium',
+        risk_label: 'MANUAL REVIEW — Automated verification unavailable',
         fraud_flagged: false,
       };
-      setDocs(prev => ({ ...prev, [docId]: { ...prev[docId], phase: 'done', result: fallback } }));
+      setDocs(prev => ({ ...prev, [docId]: { file, phase: 'manual', result: manualResult, dragging: false } }));
     }
   }, [app.application_id, app.income.current_salary]);
 
@@ -112,10 +124,13 @@ export default function CitizenUploadStep({ application: app, onSubmit, onLogout
     if (fileRefs.current[docId]) fileRefs.current[docId]!.value = '';
   }, []);
 
-  const bothDone = docs.salary_cert.phase === 'done' && docs.bank_stmt.phase === 'done';
+  const bothReady =
+    (docs.salary_cert.phase === 'done' || docs.salary_cert.phase === 'manual') &&
+    (docs.bank_stmt.phase === 'done' || docs.bank_stmt.phase === 'manual');
+  const hasManual = docs.salary_cert.phase === 'manual' || docs.bank_stmt.phase === 'manual';
   const anyMismatch = Object.values(docs).some(d => d.result?.salary_mismatch);
   const anyFraud = Object.values(docs).some(d => d.result?.fraud_flagged);
-  const canSubmit = bothDone && consent;
+  const canSubmit = bothReady && consent;
 
   const handleSubmit = () => {
     const validations = Object.values(docs)
@@ -240,7 +255,11 @@ export default function CitizenUploadStep({ application: app, onSubmit, onLogout
                 ? '#C8922A'
                 : doc.phase === 'done'
                   ? (r?.salary_mismatch ? 'rgba(204,51,51,0.45)' : '#A7D9BC')
-                  : '#D0C8BC';
+                : doc.phase === 'rejected'
+                  ? 'rgba(204,51,51,0.6)'
+                : doc.phase === 'manual'
+                  ? 'rgba(232,160,32,0.5)'
+                : '#D0C8BC';
               const borderStyle = doc.phase === 'idle' ? 'dashed' : 'solid';
 
               return (
@@ -286,6 +305,64 @@ export default function CitizenUploadStep({ application: app, onSubmit, onLogout
                         <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#1A1A1A', marginBottom: '4px' }}>Verifying with Gemini AI…</div>
                         <div dir="rtl" className="arabic" style={{ fontSize: '11px', color: '#888888', marginBottom: '6px' }}>جارٍ التحقق بالذكاء الاصطناعي</div>
                         <div style={{ fontSize: '9.5px', color: '#AAAAAA', fontFamily: 'IBM Plex Mono, monospace', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%' }}>{doc.file?.name}</div>
+                      </div>
+                    )}
+
+                    {/* ── REJECTED — wrong document type ── */}
+                    {doc.phase === 'rejected' && (
+                      <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }}
+                        style={{ padding: '28px 18px', textAlign: 'center', background: '#FFF5F5' }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
+                          <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: '#FEE8E8', border: '2px solid rgba(204,51,51,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <X size={22} color="#CC3333" />
+                          </div>
+                        </div>
+                        <div style={{ fontSize: '13px', fontWeight: 800, color: '#CC3333', marginBottom: '5px' }}>
+                          المستند غير صالح | Invalid Document
+                        </div>
+                        <div style={{ fontSize: '11px', color: '#883333', lineHeight: 1.6, marginBottom: '8px' }}>
+                          This is not a {docConf.id === 'salary_cert' ? 'salary certificate' : 'bank statement'}.<br />
+                          Please upload the correct document type.
+                        </div>
+                        <div style={{ fontSize: '9.5px', color: '#BBBBBB', fontFamily: 'IBM Plex Mono, monospace' }}>
+                          Clearing slot…
+                        </div>
+                      </motion.div>
+                    )}
+
+                    {/* ── MANUAL — Gemini unavailable, amber hold ── */}
+                    {doc.phase === 'manual' && (
+                      <div style={{ padding: '14px 16px' }}>
+                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', padding: '10px 12px', background: '#FEF3E2', border: '1px solid rgba(232,160,32,0.45)', borderRadius: '8px', marginBottom: '10px' }}>
+                          <AlertTriangle size={15} color="#E8A020" style={{ flexShrink: 0, marginTop: '1px' }} />
+                          <div>
+                            <div style={{ fontSize: '12px', fontWeight: 700, color: '#7A5A00', marginBottom: '3px' }}>
+                              Manual Verification Required
+                            </div>
+                            <div dir="rtl" className="arabic" style={{ fontSize: '11px', color: '#7A5A00', lineHeight: 1.6, marginBottom: '2px' }}>
+                              مطلوب مراجعة يدوية
+                            </div>
+                            <div style={{ fontSize: '10.5px', color: '#7A5A00', lineHeight: 1.5 }}>
+                              AI check unavailable. An officer will review your document manually and your case will be routed for manual processing.
+                            </div>
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1, minWidth: 0 }}>
+                            <div style={{ width: '26px', height: '26px', borderRadius: '6px', background: '#FEF3E2', border: '1px solid rgba(232,160,32,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                              <Shield size={12} color="#E8A020" />
+                            </div>
+                            <span style={{ fontSize: '10px', color: '#888888', fontFamily: 'IBM Plex Mono, monospace', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {doc.file?.name}
+                            </span>
+                          </div>
+                          <button onClick={() => handleRemove(docConf.id)}
+                            style={{ width: '22px', height: '22px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #E8E0D0', borderRadius: '4px', background: 'transparent', cursor: 'pointer', color: '#999999', padding: 0, flexShrink: 0, transition: 'all 0.12s' }}
+                            onMouseEnter={e => { e.currentTarget.style.borderColor = '#CC3333'; e.currentTarget.style.color = '#CC3333'; e.currentTarget.style.background = '#FEE8E8'; }}
+                            onMouseLeave={e => { e.currentTarget.style.borderColor = '#E8E0D0'; e.currentTarget.style.color = '#999999'; e.currentTarget.style.background = 'transparent'; }}
+                          ><X size={11} /></button>
+                        </div>
                       </div>
                     )}
 
@@ -517,8 +594,9 @@ export default function CitizenUploadStep({ application: app, onSubmit, onLogout
                 تقديم الطلب | Submit Request
               </button>
 
-              {!bothDone && <p style={{ fontSize: '11px', color: '#AAAAAA', textAlign: 'center', margin: 0 }}>Upload both documents to continue</p>}
-              {bothDone && !consent && <p style={{ fontSize: '11px', color: '#C8922A', textAlign: 'center', margin: 0 }}>Check the consent declaration above to proceed</p>}
+              {!bothReady && <p style={{ fontSize: '11px', color: '#AAAAAA', textAlign: 'center', margin: 0 }}>Upload both documents to continue</p>}
+              {bothReady && !consent && <p style={{ fontSize: '11px', color: '#C8922A', textAlign: 'center', margin: 0 }}>Check the consent declaration above to proceed</p>}
+              {hasManual && bothReady && <p style={{ fontSize: '10.5px', color: '#E8A020', textAlign: 'center', margin: 0, fontWeight: 600 }}>⚠ Submitting with manual verification — case will be routed to PENDING status</p>}
             </motion.div>
           )}
         </AnimatePresence>

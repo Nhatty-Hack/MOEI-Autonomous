@@ -77,6 +77,16 @@ async function startServer() {
   // ── Override recommendation when salary mismatch detected ────────────────
   function applyDocumentOverrides(result: AgentRecommendation, appId: string): AgentRecommendation {
     const validations = validationStore.get(appId) ?? [];
+    // Manual review (Gemini unavailable) takes highest priority
+    if (validations.some(v => v.needs_manual_review)) {
+      return {
+        ...result,
+        recommendation: 'REQUEST_DOCUMENTS',
+        application_status: 'PENDING_INFO',
+        reasoning: 'Document verification could not be completed automatically. A human officer will manually review your submitted documents and contact you within 2 working days.',
+        reasoning_ar: 'لم يتمكن النظام من التحقق من المستندات آلياً. سيقوم موظف بمراجعة مستنداتك يدوياً والتواصل معك خلال يومي عمل.',
+      };
+    }
     const mismatch = validations.find(v => v.salary_mismatch && v.extracted_salary !== null);
     if (!mismatch) return result;
     const declared = (mismatch.declared_salary ?? 0).toLocaleString();

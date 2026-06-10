@@ -262,6 +262,11 @@ export interface DocumentValidationResult {
   validated_at: string;
   gemini_powered: boolean;
 
+  // Document validity
+  is_valid_document: boolean;
+  document_type: string;
+  needs_manual_review: boolean;
+
   // Structured fields extracted by Gemini Vision
   company_name: string | null;
   employee_name: string | null;
