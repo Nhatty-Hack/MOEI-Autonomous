@@ -1,0 +1,78 @@
+=== MOEI HACKATHON AUDIT REPORT ===
+
+
+=== PART 1: ROUTE HTTP STATUS ===
+  200  /
+  200  /citizen
+  200  /officer
+  200  /officer/applications
+  200  /officer/pipeline
+  200  /officer/governance
+  200  /sample-docs/bank_statement_mansoori.html
+  200  /sample-docs/salary_certificate_genuine.html
+  200  /sample-docs/salary_certificate_tampered.html
+
+=== PART 2: OFFICER DASHBOARD (/) ===
+  Numbers on dashboard: 10, 2., 98
+
+=== PART 3: OFFICER APPLICATIONS (/officer/applications) ===
+  Table rows visible: 10
+  Assess buttons found: 11
+
+=== PART 4: OFFICER PIPELINE (/officer/pipeline) ===
+  Pipeline content length: 1489 chars
+
+=== PART 5: OFFICER GOVERNANCE (/officer/governance) ===
+  Governance content: وزارة الطاقة والبنية التحتية MINISTRY OF ENERGY & INFRASTRUCTURE ARREARS PORTAL · v2.0 MAIN MENU لوحة المعلومات Dashboard الطلبات Applications مسار المعالجة AI Pipeline الحوكمة Governance بوابة المستفيد Beneficiary Portal مباشر System Live MOEI › Governance · الحوكمة 10 CASES EN AR Governance & Comp
+
+=== PART 6: API ASSESSMENTS ===
+  First 5 app IDs: MSZHP_100201, MSZHP_100302, MSZHP_100403, MSZHP_100504, MSZHP_100605
+  MSZHP_100201: rec=REQUEST_DOCUMENTS status=PENDING_INFO insight=true traceSteps=7
+    insight: "Based on 147 similar historical cases (salary ~35K AED, arrears ~34% of salary), this profile shows
+  MSZHP_100302: rec=APPROVE status=APPROVED insight=true traceSteps=5
+    insight: "Based on 30 similar historical cases (salary ~12K AED, arrears ~160% of salary), this profile shows
+  MSZHP_100403: rec=REFER_TO_EMPLOYEE status=REFERRED insight=true traceSteps=5
+    insight: "Based on 98 similar historical cases (salary ~16K AED, arrears ~212% of salary), this profile shows
+  ✓ Decisions vary: REQUEST_DOCUMENTS, APPROVE, REFER_TO_EMPLOYEE
+
+=== PART 7: CITIZEN JOURNEY ===
+  Login page text snippet: وزارة الطاقة والبنية التحتية ARREARS PORTAL Sheikh Zayed Housing Programme  برنامج الشيخ زايد للإسكان  2.7 seconds avg processing time 98% compliance governance score AI-powered 6-step agent pipeline 
+  ⚠ LOGIN has "demo"
+  Post-login text: وزارة الطاقة والبنية التحتية MINISTRY OF ENERGY & INFRASTRUCTURE Login Upload Documents AI Decision Saeed Mohammad Al-Mansoori 784-1985-4521458-1 Logout Profile auto-loaded via UAE PASS المستفيد · BEN
+  ✓ Reached upload step
+  ✓ Sample docs bar present
+  Bank statement link: ✓ present
+
+=== PART 8: NON-EXISTENT EMIRATES ID ===
+  ✓ Not-found state shown for unknown Emirates ID
+
+=== PART 9: SESSION ISOLATION (second user) ===
+  ✓ No obvious state leak for different Emirates ID
+
+=== PART 10: BANK STATEMENT DOCUMENT ===
+  HTTP status: 200
+  ✓ AED 35,000 salary visible
+  ✓ Employer name correct
+  ✓ Closing balance correct (92,239.50)
+
+=== PART 11: ASSESS PANEL IN BROWSER ===
+  ⚠ No clear decision visible in panel
+  ⚠ No historical insight visible in panel
+  Trace/pipeline elements: 0
+
+=== PART 12: CONSOLE ERRORS ===
+  ⚠ 5 console error(s):
+    - Failed to load resource: the server responded with a status of 404 (Not Found)
+    - Failed to load resource: the server responded with a status of 404 (Not Found)
+    - Each child in a list should have a unique "key" prop.%s%s See https://react.dev/link/warning-keys for more information. 
+    - Each child in a list should have a unique "key" prop.%s%s See https://react.dev/link/warning-keys for more information. 
+    - Each child in a list should have a unique "key" prop.%s%s See https://react.dev/link/warning-keys for more information. 
+  ✓ No page errors
+
+=== PART 13: SUSPICIOUS TEXT SWEEP ===
+  ⚠ "NaN" on /officer/applications
+  ⚠ "NaN" on /officer/pipeline
+  ⚠ "NaN" on /officer/governance
+  Text sweep complete
+
+=== AUDIT COMPLETE ===
