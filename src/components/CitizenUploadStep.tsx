@@ -244,6 +244,13 @@ export default function CitizenUploadStep({ application: app, onSubmit, onLogout
               >
                 <AlertTriangle size={11} /> Tampered (AED 85,000)
               </a>
+              <a href="/sample-docs/bank_statement_mansoori.html" target="_blank" rel="noopener noreferrer"
+                style={{ fontSize: '11px', color: '#0057A8', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.textDecoration = 'underline'; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.textDecoration = 'none'; }}
+              >
+                <FileText size={11} /> Bank Statement
+              </a>
             </div>
           </div>
 

@@ -1,660 +1,351 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bank Statement — Emirates NBD — Saeed Al-Mansoori</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: 'Inter', 'Arial', sans-serif;
-      background: #1A1A2E;
-      min-height: 100vh;
-      padding: 30px 20px;
-      print-color-adjust: exact;
-      -webkit-print-color-adjust: exact;
-    }
-    .print-tip {
-      text-align: center;
-      background: #003169;
-      color: white;
-      padding: 10px;
-      border-radius: 6px;
-      font-size: 12px;
-      margin-bottom: 20px;
-      max-width: 794px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    .page {
-      width: 794px;
-      min-height: 1123px;
-      background: #FFFFFF;
-      margin: 0 auto;
-      position: relative;
-      box-shadow: 0 8px 40px rgba(0,0,0,0.4);
-      overflow: hidden;
-    }
-
-    /* Emirates NBD yellow top bar */
-    .page::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 7px;
-      background: linear-gradient(90deg, #F5BC00, #FFD44A, #F5BC00);
-    }
-
-    .content { padding: 28px 40px; }
-
-    /* ── Bank Header ── */
-    .bank-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      padding-bottom: 16px;
-      border-bottom: 3px solid #003169;
-      margin-bottom: 18px;
-    }
-
-    .bank-logo-area {}
-    .bank-name-primary {
-      font-size: 22px;
-      font-weight: 700;
-      color: #003169;
-      letter-spacing: 1px;
-    }
-    .bank-name-accent {
-      color: #F5BC00;
-      font-size: 22px;
-      font-weight: 700;
-    }
-    .bank-name-ar {
-      font-family: 'Cairo', sans-serif;
-      font-size: 14px;
-      font-weight: 600;
-      color: #003169;
-      direction: rtl;
-      margin-top: 3px;
-    }
-    .bank-sub {
-      font-size: 9px;
-      color: #888;
-      margin-top: 4px;
-      letter-spacing: 0.5px;
-    }
-
-    .bank-header-right { text-align: right; }
-    .statement-title {
-      font-size: 16px;
-      font-weight: 700;
-      color: #003169;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-    }
-    .statement-title-ar {
-      font-family: 'Cairo', sans-serif;
-      font-size: 14px;
-      color: #003169;
-      direction: rtl;
-      margin-top: 3px;
-    }
-    .statement-period {
-      font-size: 11px;
-      color: #555;
-      margin-top: 6px;
-    }
-    .statement-period span { font-weight: 600; color: #003169; }
-
-    /* ── Account Info ── */
-    .account-info-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 18px;
-    }
-    .account-card {
-      background: #F0F4FF;
-      border: 1px solid #D0DAF0;
-      border-radius: 6px;
-      padding: 12px 14px;
-      border-top: 3px solid #003169;
-    }
-    .account-card.highlight {
-      background: #003169;
-      border-top: 3px solid #F5BC00;
-    }
-    .ac-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; color: #888; font-weight: 600; }
-    .account-card.highlight .ac-label { color: rgba(255,255,255,0.65); }
-    .ac-value { font-size: 14px; font-weight: 700; color: #003169; margin-top: 3px; font-family: monospace; }
-    .account-card.highlight .ac-value { color: #F5BC00; }
-    .ac-sub { font-size: 9px; color: #888; margin-top: 2px; }
-    .account-card.highlight .ac-sub { color: rgba(255,255,255,0.5); }
-
-    /* ── Section header ── */
-    .section-label {
-      font-size: 10px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: #003169;
-      padding: 0 0 6px;
-      border-bottom: 1px solid #E0E8F0;
-      margin-bottom: 10px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .section-label::before {
-      content: '';
-      display: inline-block;
-      width: 4px;
-      height: 14px;
-      background: #F5BC00;
-      border-radius: 2px;
-    }
-
-    /* ── Transaction table ── */
-    .txn-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 11px;
-      margin-bottom: 20px;
-    }
-    .txn-table thead tr {
-      background: #003169;
-      color: white;
-    }
-    .txn-table thead th {
-      padding: 9px 10px;
-      text-align: left;
-      font-size: 9.5px;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-    }
-    .txn-table thead th:last-child { text-align: right; }
-    .txn-table thead th:nth-child(4),
-    .txn-table thead th:nth-child(5) { text-align: right; }
-    .txn-table tbody tr { border-bottom: 1px solid #F0EBE0; }
-    .txn-table tbody tr:nth-child(even) { background: #F8FAFF; }
-    .txn-table tbody tr:hover { background: #F0F6FF; }
-    .txn-table td { padding: 7px 10px; vertical-align: middle; }
-    .txn-date { font-family: monospace; color: #555; font-size: 10.5px; }
-    .txn-ref { font-family: monospace; font-size: 9.5px; color: #999; }
-    .txn-desc { color: #333; }
-    .txn-desc strong { color: #003169; font-weight: 600; }
-    .txn-debit { text-align: right; color: #CC3333; font-weight: 500; font-family: monospace; }
-    .txn-credit { text-align: right; color: #008844; font-weight: 600; font-family: monospace; }
-    .txn-balance { text-align: right; font-weight: 600; font-family: monospace; color: #003169; }
-
-    /* Month separator */
-    .month-separator td {
-      background: #EEF2FF;
-      color: #003169;
-      font-weight: 700;
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      padding: 5px 10px;
-      border-top: 2px solid #D0DAF0;
-    }
-
-    /* ── Summary cards ── */
-    .summary-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr 1fr;
-      gap: 10px;
-      margin-top: 18px;
-      margin-bottom: 18px;
-    }
-    .sum-card {
-      border: 1px solid #E0E8F0;
-      border-radius: 6px;
-      padding: 10px 12px;
-      text-align: center;
-    }
-    .sum-label { font-size: 8.5px; text-transform: uppercase; letter-spacing: 0.5px; color: #888; font-weight: 600; }
-    .sum-value { font-size: 13px; font-weight: 700; font-family: monospace; margin-top: 4px; }
-    .sum-value.income { color: #008844; }
-    .sum-value.expense { color: #CC3333; }
-    .sum-value.balance { color: #003169; }
-    .sum-value.count { color: #C8922A; }
-
-    /* ── Notice block ── */
-    .notice-block {
-      background: #FFFBE8;
-      border: 1px solid #E8D870;
-      border-left: 3px solid #F5BC00;
-      border-radius: 0 4px 4px 0;
-      padding: 10px 14px;
-      font-size: 10.5px;
-      color: #5A4A10;
-      margin-bottom: 18px;
-      line-height: 1.6;
-    }
-    .notice-block .ar { font-family: 'Cairo', sans-serif; direction: rtl; margin-top: 5px; font-size: 11px; }
-
-    /* ── Footer ── */
-    .bank-footer {
-      border-top: 2px solid #003169;
-      padding-top: 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      font-size: 8.5px;
-      color: #888;
-    }
-    .bank-footer-left { line-height: 1.7; }
-    .bank-footer-right { text-align: right; line-height: 1.7; }
-
-    /* ── Security microprint strip ── */
-    .security-strip {
-      background: repeating-linear-gradient(
-        45deg,
-        #003169 0px, #003169 4px,
-        #004499 4px, #004499 8px
-      );
-      height: 6px;
-      margin: 12px -40px 0;
-      opacity: 0.85;
-    }
-
-    @media print {
-      body { background: white; padding: 0; }
-      .print-tip { display: none; }
-      .page { box-shadow: none; width: 100%; }
-    }
-  </style>
+<meta charset="UTF-8">
+<title>Account Statement — Saeed Mohammad Al-Mansoori | كشف الحساب</title>
+<style>
+@page { size: A4; margin: 12mm 14mm; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Segoe UI', 'Arial Unicode MS', Arial, sans-serif;
+  font-size: 8.5pt;
+  color: #1A1A1A;
+  background: #fff;
+  width: 210mm;
+}
+.conf-band {
+  background: linear-gradient(90deg, #003366 0%, #00704A 100%);
+  color: rgba(255,255,255,0.92);
+  padding: 3px 10px;
+  font-size: 6.5pt;
+  text-align: center;
+  letter-spacing: 1.8px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+.bank-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-bottom: 8px;
+  border-bottom: 3px solid #00A651;
+  margin-bottom: 11px;
+}
+.logo-area { display: flex; align-items: center; gap: 10px; }
+.logo-svg { width: 52px; height: 52px; flex-shrink: 0; }
+.bank-name .en { font-size: 20pt; font-weight: 800; color: #003366; letter-spacing: -0.5px; line-height: 1; }
+.bank-name .ar { font-size: 10pt; color: #00A651; font-weight: 600; direction: rtl; margin-top: 2px; }
+.bank-name .tag { font-size: 6.5pt; color: #888; margin-top: 2px; }
+.stmt-title { text-align: right; }
+.stmt-title .en { font-size: 15pt; font-weight: 700; color: #003366; }
+.stmt-title .ar { font-size: 10pt; color: #00A651; font-weight: 600; direction: rtl; }
+.stmt-title .ref { font-size: 7pt; color: #666; margin-top: 4px; }
+.acct-box {
+  display: grid;
+  grid-template-columns: 190px 1fr;
+  border: 1px solid #C8D8C8;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 9px;
+  font-size: 8pt;
+}
+.acct-box .lbl {
+  background: #EAF4EE;
+  padding: 4.5px 9px;
+  border-bottom: 1px solid #D4E8D8;
+  font-weight: 600;
+  color: #003366;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.acct-box .lbl .ar { font-size: 7pt; color: #00704A; direction: rtl; }
+.acct-box .val {
+  background: #fff;
+  padding: 4.5px 9px;
+  border-bottom: 1px solid #EBEBEB;
+  color: #1A1A1A;
+}
+.acct-box .val.bold { font-weight: 700; color: #003366; font-size: 8.5pt; }
+.notice {
+  background: #003366;
+  color: #fff;
+  padding: 5px 10px;
+  font-size: 7.5pt;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 3px;
+  margin-bottom: 8px;
+}
+.notice .ar { direction: rtl; font-size: 7pt; color: #a8d4f8; }
+.tbl { width: 100%; border-collapse: collapse; margin-bottom: 11px; font-size: 7.5pt; }
+.tbl thead tr { background: #003366; color: #fff; }
+.tbl thead th {
+  padding: 5px 5px;
+  font-weight: 600;
+  border: 1px solid #1a4a8a;
+  white-space: nowrap;
+  text-align: center;
+}
+.tbl thead th .ar { display: block; font-size: 6.5pt; color: #88c8a8; direction: rtl; }
+.tbl tbody tr { border-bottom: 1px solid #EBEBEB; }
+.tbl tbody tr:nth-child(even) { background: #FAFAFA; }
+.tbl tbody tr.salary { background: #E6F4EC !important; }
+.tbl tbody tr.mhdr { background: #EBF0F8 !important; }
+.tbl tbody tr.mhdr td {
+  padding: 3px 7px;
+  font-size: 7pt;
+  font-weight: 700;
+  color: #003366;
+  border-top: 1px solid #C8D8E8;
+}
+.tbl td { padding: 3.5px 5px; border-right: 1px solid #EBEBEB; }
+td.dt { white-space: nowrap; text-align: center; color: #444; width: 72px; }
+td.desc .m { font-weight: 500; color: #111; }
+td.desc .a { direction: rtl; font-size: 6.5pt; color: #666; margin-top: 1px; }
+td.ref { font-family: 'Courier New', monospace; font-size: 6.5pt; color: #999; text-align: center; width: 82px; }
+td.dr { text-align: right; color: #B82020; font-family: monospace; width: 78px; }
+td.cr { text-align: right; color: #006B3C; font-family: monospace; font-weight: 600; width: 78px; }
+td.bal { text-align: right; font-family: monospace; font-weight: 700; color: #003366; width: 88px; }
+.nil { color: #CCC; }
+.sum-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 7px;
+  margin-bottom: 10px;
+}
+.sum-card {
+  border: 1px solid #D0D0D0;
+  border-radius: 4px;
+  padding: 8px 7px;
+  text-align: center;
+}
+.sum-card .lbl { font-size: 6.5pt; color: #666; line-height: 1.4; }
+.sum-card .lbl .ar { direction: rtl; display: block; color: #00A651; font-size: 6pt; }
+.sum-card .v { font-size: 10.5pt; font-weight: 800; font-family: monospace; margin-top: 3px; }
+.t-green { border-top: 3px solid #00A651; }
+.t-red   { border-top: 3px solid #B82020; }
+.t-blue  { border-top: 3px solid #003366; }
+.sal-box {
+  border: 1.5px solid #00A651;
+  border-radius: 4px;
+  padding: 9px 11px;
+  margin-bottom: 10px;
+  background: #EDF8F2;
+}
+.sal-box .hd { font-weight: 700; color: #003366; font-size: 8.5pt; margin-bottom: 6px; }
+.sal-box .hd .ar { direction: rtl; font-size: 7.5pt; color: #00704A; }
+.sal-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px 10px; font-size: 7.5pt; }
+.sal-grid .k { color: #555; }
+.sal-grid .v { font-weight: 600; color: #003366; }
+.sal-grid .v.ok { color: #006B3C; }
+.footer { border-top: 2px solid #00A651; padding-top: 7px; font-size: 6.5pt; color: #888; }
+.footer .warn {
+  background: #FFFBEF;
+  border: 1px solid #DFC880;
+  padding: 5px 8px;
+  border-radius: 3px;
+  margin-bottom: 6px;
+  color: #7A5800;
+  font-size: 6.5pt;
+}
+.footer-cols { display: flex; justify-content: space-between; }
+.footer-cols .ar-col { text-align: right; direction: rtl; }
+@media print {
+  body { width: 100%; }
+  .tbl thead { display: table-header-group; }
+}
+</style>
 </head>
 <body>
 
-<div class="print-tip">
-  📄 Press <strong>Ctrl+P</strong> (or Cmd+P on Mac) → Save as PDF to generate the document file
+<div class="conf-band">CONFIDENTIAL — FOR ADDRESSEE ONLY &nbsp;·&nbsp; سري للمرسل إليه فقط</div>
+
+<div class="bank-header">
+  <div class="logo-area">
+    <svg class="logo-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="50" cy="50" r="50" fill="#003366"/>
+      <path d="M8 66 Q20 44 36 56 Q52 68 66 50 Q78 34 92 46 L92 86 L8 86 Z" fill="#00A651"/>
+      <path d="M8 74 Q24 58 42 68 Q60 78 76 62 L92 70 L92 92 L8 92 Z" fill="#00A651" opacity="0.5"/>
+      <circle cx="28" cy="34" r="2.8" fill="#C8922A"/>
+      <circle cx="50" cy="24" r="2" fill="#C8922A" opacity="0.75"/>
+      <circle cx="72" cy="31" r="2.4" fill="#C8922A" opacity="0.85"/>
+      <text x="50" y="46" text-anchor="middle" fill="white" font-size="15" font-weight="800" font-family="Arial">ENBD</text>
+    </svg>
+    <div class="bank-name">
+      <div class="en">Emirates NBD</div>
+      <div class="ar">بنك الإمارات دبي الوطني</div>
+      <div class="tag">Simply Banking · مصرفية بلا تعقيد</div>
+    </div>
+  </div>
+  <div class="stmt-title">
+    <div class="en">Account Statement</div>
+    <div class="ar">كشف الحساب</div>
+    <div class="ref">Ref: ENBD-STM-2026-4521-H &nbsp;|&nbsp; تاريخ الإصدار: ٣٠ يونيو ٢٠٢٦</div>
+    <div class="ref">Generated: 30 June 2026 at 08:14 GST</div>
+  </div>
 </div>
 
-<div class="page">
-  <div class="content">
+<div class="acct-box">
+  <div class="lbl">Account Holder <span class="ar">صاحب الحساب</span></div>
+  <div class="val bold">SAEED MOHAMMAD AL-MANSOORI &nbsp;/&nbsp; سعيد محمد المنصوري</div>
+  <div class="lbl">Emirates ID <span class="ar">رقم الهوية الإماراتية</span></div>
+  <div class="val">784-1985-4521458-1</div>
+  <div class="lbl">Account Number <span class="ar">رقم الحساب</span></div>
+  <div class="val bold">AE07 0260 0000 0000 0004521 &nbsp;—&nbsp; Current Account ****4521</div>
+  <div class="lbl">Statement Period <span class="ar">فترة الكشف</span></div>
+  <div class="val">01 January 2026 — 30 June 2026 &nbsp;|&nbsp; ١ يناير ٢٠٢٦ — ٣٠ يونيو ٢٠٢٦</div>
+  <div class="lbl">Branch <span class="ar">الفرع</span></div>
+  <div class="val">Mirdif City Centre Branch, Dubai &nbsp;|&nbsp; فرع مردف سيتي سنتر، دبي</div>
+  <div class="lbl">Currency <span class="ar">العملة</span></div>
+  <div class="val">UAE Dirham (AED) &nbsp;—&nbsp; درهم إماراتي</div>
+</div>
 
-    <!-- ═══ BANK HEADER ═══ -->
-    <div class="bank-header">
-      <div class="bank-logo-area">
-        <div>
-          <span class="bank-name-primary">Emirates </span><span class="bank-name-accent">NBD</span>
-        </div>
-        <div class="bank-name-ar">بنك الإمارات دبي الوطني</div>
-        <div class="bank-sub">SWIFT: EBILAEAD · www.emiratesnbd.com · UAE Licensed Bank No. 2</div>
-      </div>
-      <div class="bank-header-right">
-        <div class="statement-title">Account Statement</div>
-        <div class="statement-title-ar">كشف الحساب البنكي</div>
-        <div class="statement-period">Period: <span>01 January 2026 – 31 May 2026</span></div>
-        <div class="statement-period">Generated: <span>01 June 2026</span>&nbsp;·&nbsp;Page 1 of 1</div>
-        <div class="statement-period">Ref No: <span style="font-family:monospace">ENBD-ST-2026-0088421</span></div>
-      </div>
+<div class="notice">
+  <span>Opening Balance (01 Jan 2026): &nbsp;<strong>AED 8,200.00</strong></span>
+  <span class="ar">الرصيد الافتتاحي (١ يناير ٢٠٢٦): &nbsp;<strong>٨٬٢٠٠٫٠٠ درهم</strong></span>
+</div>
+
+<table class="tbl">
+  <thead>
+    <tr>
+      <th>Date<br><span class="ar">التاريخ</span></th>
+      <th>Transaction Description<br><span class="ar">بيان المعاملة</span></th>
+      <th>Reference No.<br><span class="ar">رقم المرجع</span></th>
+      <th>Debit (AED)<br><span class="ar">مدين</span></th>
+      <th>Credit (AED)<br><span class="ar">دائن</span></th>
+      <th>Balance (AED)<br><span class="ar">الرصيد</span></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr class="mhdr"><td colspan="6">▸&nbsp; January 2026 / يناير ٢٠٢٦</td></tr>
+    <tr><td class="dt">02 Jan 2026</td><td class="desc"><div class="m">ETISALAT AUTO PMT</div><div class="a">اتصالات - سداد تلقائي</div></td><td class="ref">ENB260100001</td><td class="dr">349.00</td><td class="cr nil">—</td><td class="bal">7,851.00</td></tr>
+    <tr><td class="dt">05 Jan 2026</td><td class="desc"><div class="m">CARREFOUR HYPERMARKET MIRDIF</div><div class="a">كارفور هايبرماركت - مردف</div></td><td class="ref">ENB260100002</td><td class="dr">1,234.50</td><td class="cr nil">—</td><td class="bal">6,616.50</td></tr>
+    <tr><td class="dt">07 Jan 2026</td><td class="desc"><div class="m">DEWA AUTO DEBIT — JAN-2026</div><div class="a">هيئة كهرباء ومياه دبي - سداد تلقائي</div></td><td class="ref">ENB260100003</td><td class="dr">418.00</td><td class="cr nil">—</td><td class="bal">6,198.50</td></tr>
+    <tr><td class="dt">10 Jan 2026</td><td class="desc"><div class="m">ADIB CREDIT CARD PAYMENT</div><div class="a">سداد بطاقة ADIB الائتمانية</div></td><td class="ref">ENB260100004</td><td class="dr">2,500.00</td><td class="cr nil">—</td><td class="bal">3,698.50</td></tr>
+    <tr class="salary"><td class="dt">15 Jan 2026</td><td class="desc"><div class="m">SALARY CR — EMIRATES STEEL INDUSTRIES PJSC</div><div class="a">راتب - شركة الإمارات للصلب (ش.م.ع.)</div></td><td class="ref">ENB260100005</td><td class="dr nil">—</td><td class="cr">35,000.00</td><td class="bal">38,698.50</td></tr>
+    <tr><td class="dt">16 Jan 2026</td><td class="desc"><div class="m">SZH HOUSING LOAN INSTALLMENT</div><div class="a">قسط القرض العقاري - برنامج الشيخ زايد للإسكان</div></td><td class="ref">ENB260100006</td><td class="dr">4,200.00</td><td class="cr nil">—</td><td class="bal">34,498.50</td></tr>
+    <tr><td class="dt">18 Jan 2026</td><td class="desc"><div class="m">ENOC FUEL STATION — MIRDIF</div><div class="a">محطة وقود إينوك - مردف</div></td><td class="ref">ENB260100007</td><td class="dr">280.00</td><td class="cr nil">—</td><td class="bal">34,218.50</td></tr>
+    <tr><td class="dt">22 Jan 2026</td><td class="desc"><div class="m">SALIK AUTO RECHARGE</div><div class="a">سالك - إعادة شحن تلقائي</div></td><td class="ref">ENB260100008</td><td class="dr">200.00</td><td class="cr nil">—</td><td class="bal">34,018.50</td></tr>
+    <tr><td class="dt">24 Jan 2026</td><td class="desc"><div class="m">LULU HYPERMARKET — MIRDIF</div><div class="a">لولو هايبرماركت - مردف</div></td><td class="ref">ENB260100009</td><td class="dr">876.00</td><td class="cr nil">—</td><td class="bal">33,142.50</td></tr>
+    <tr><td class="dt">28 Jan 2026</td><td class="desc"><div class="m">ATM WITHDRAWAL — ITTIHAD RD BRANCH</div><div class="a">سحب نقدي من الصراف الآلي</div></td><td class="ref">ENB260100010</td><td class="dr">1,000.00</td><td class="cr nil">—</td><td class="bal">32,142.50</td></tr>
+
+    <tr class="mhdr"><td colspan="6">▸&nbsp; February 2026 / فبراير ٢٠٢٦</td></tr>
+    <tr><td class="dt">02 Feb 2026</td><td class="desc"><div class="m">ETISALAT AUTO PMT</div><div class="a">اتصالات - سداد تلقائي</div></td><td class="ref">ENB260200001</td><td class="dr">349.00</td><td class="cr nil">—</td><td class="bal">31,793.50</td></tr>
+    <tr><td class="dt">05 Feb 2026</td><td class="desc"><div class="m">CARREFOUR HYPERMARKET MIRDIF</div><div class="a">كارفور هايبرماركت - مردف</div></td><td class="ref">ENB260200002</td><td class="dr">987.00</td><td class="cr nil">—</td><td class="bal">30,806.50</td></tr>
+    <tr><td class="dt">07 Feb 2026</td><td class="desc"><div class="m">DEWA AUTO DEBIT — FEB-2026</div><div class="a">هيئة كهرباء ومياه دبي - سداد تلقائي</div></td><td class="ref">ENB260200003</td><td class="dr">392.00</td><td class="cr nil">—</td><td class="bal">30,414.50</td></tr>
+    <tr><td class="dt">10 Feb 2026</td><td class="desc"><div class="m">ADIB CREDIT CARD PAYMENT</div><div class="a">سداد بطاقة ADIB الائتمانية</div></td><td class="ref">ENB260200004</td><td class="dr">2,500.00</td><td class="cr nil">—</td><td class="bal">27,914.50</td></tr>
+    <tr class="salary"><td class="dt">15 Feb 2026</td><td class="desc"><div class="m">SALARY CR — EMIRATES STEEL INDUSTRIES PJSC</div><div class="a">راتب - شركة الإمارات للصلب (ش.م.ع.)</div></td><td class="ref">ENB260200005</td><td class="dr nil">—</td><td class="cr">35,000.00</td><td class="bal">62,914.50</td></tr>
+    <tr><td class="dt">16 Feb 2026</td><td class="desc"><div class="m">SZH HOUSING LOAN INSTALLMENT</div><div class="a">قسط القرض العقاري - برنامج الشيخ زايد للإسكان</div></td><td class="ref">ENB260200006</td><td class="dr">4,200.00</td><td class="cr nil">—</td><td class="bal">58,714.50</td></tr>
+    <tr><td class="dt">18 Feb 2026</td><td class="desc"><div class="m">ENOC FUEL STATION — AL RASHIDIYA</div><div class="a">محطة وقود إينوك - الراشدية</div></td><td class="ref">ENB260200007</td><td class="dr">260.00</td><td class="cr nil">—</td><td class="bal">58,454.50</td></tr>
+    <tr><td class="dt">21 Feb 2026</td><td class="desc"><div class="m">LULU HYPERMARKET — MIRDIF</div><div class="a">لولو هايبرماركت - مردف</div></td><td class="ref">ENB260200008</td><td class="dr">920.00</td><td class="cr nil">—</td><td class="bal">57,534.50</td></tr>
+    <tr><td class="dt">25 Feb 2026</td><td class="desc"><div class="m">TRANSFER TO SAVINGS ACCOUNT **7890</div><div class="a">تحويل إلى حساب التوفير **٧٨٩٠</div></td><td class="ref">ENB260200009</td><td class="dr">5,000.00</td><td class="cr nil">—</td><td class="bal">52,534.50</td></tr>
+    <tr><td class="dt">28 Feb 2026</td><td class="desc"><div class="m">AMAZON.AE ONLINE PURCHASE</div><div class="a">أمازون الإمارات - تسوق إلكتروني</div></td><td class="ref">ENB260200010</td><td class="dr">456.00</td><td class="cr nil">—</td><td class="bal">52,078.50</td></tr>
+
+    <tr class="mhdr"><td colspan="6">▸&nbsp; March 2026 / مارس ٢٠٢٦</td></tr>
+    <tr><td class="dt">02 Mar 2026</td><td class="desc"><div class="m">ETISALAT AUTO PMT</div><div class="a">اتصالات - سداد تلقائي</div></td><td class="ref">ENB260300001</td><td class="dr">349.00</td><td class="cr nil">—</td><td class="bal">51,729.50</td></tr>
+    <tr><td class="dt">04 Mar 2026</td><td class="desc"><div class="m">CARREFOUR HYPERMARKET MIRDIF</div><div class="a">كارفور هايبرماركت - مردف</div></td><td class="ref">ENB260300002</td><td class="dr">1,150.00</td><td class="cr nil">—</td><td class="bal">50,579.50</td></tr>
+    <tr><td class="dt">06 Mar 2026</td><td class="desc"><div class="m">AXA INSURANCE RENEWAL — VEHICLE</div><div class="a">AXA للتأمين - تجديد تأمين المركبة</div></td><td class="ref">ENB260300003</td><td class="dr">3,200.00</td><td class="cr nil">—</td><td class="bal">47,379.50</td></tr>
+    <tr><td class="dt">07 Mar 2026</td><td class="desc"><div class="m">DEWA AUTO DEBIT — MAR-2026</div><div class="a">هيئة كهرباء ومياه دبي - سداد تلقائي</div></td><td class="ref">ENB260300004</td><td class="dr">445.00</td><td class="cr nil">—</td><td class="bal">46,934.50</td></tr>
+    <tr><td class="dt">10 Mar 2026</td><td class="desc"><div class="m">ADIB CREDIT CARD PAYMENT</div><div class="a">سداد بطاقة ADIB الائتمانية</div></td><td class="ref">ENB260300005</td><td class="dr">2,500.00</td><td class="cr nil">—</td><td class="bal">44,434.50</td></tr>
+    <tr class="salary"><td class="dt">15 Mar 2026</td><td class="desc"><div class="m">SALARY CR — EMIRATES STEEL INDUSTRIES PJSC</div><div class="a">راتب - شركة الإمارات للصلب (ش.م.ع.)</div></td><td class="ref">ENB260300006</td><td class="dr nil">—</td><td class="cr">35,000.00</td><td class="bal">79,434.50</td></tr>
+    <tr><td class="dt">16 Mar 2026</td><td class="desc"><div class="m">SZH HOUSING LOAN INSTALLMENT</div><div class="a">قسط القرض العقاري - برنامج الشيخ زايد للإسكان</div></td><td class="ref">ENB260300007</td><td class="dr">4,200.00</td><td class="cr nil">—</td><td class="bal">75,234.50</td></tr>
+    <tr><td class="dt">20 Mar 2026</td><td class="desc"><div class="m">NOON.COM E-COMMERCE PURCHASE</div><div class="a">نون - تسوق إلكتروني</div></td><td class="ref">ENB260300008</td><td class="dr">1,200.00</td><td class="cr nil">—</td><td class="bal">74,034.50</td></tr>
+    <tr><td class="dt">24 Mar 2026</td><td class="desc"><div class="m">LULU HYPERMARKET — MIRDIF</div><div class="a">لولو هايبرماركت - مردف</div></td><td class="ref">ENB260300009</td><td class="dr">834.00</td><td class="cr nil">—</td><td class="bal">73,200.50</td></tr>
+    <tr><td class="dt">28 Mar 2026</td><td class="desc"><div class="m">TRANSFER TO SAVINGS ACCOUNT **7890</div><div class="a">تحويل إلى حساب التوفير **٧٨٩٠</div></td><td class="ref">ENB260300010</td><td class="dr">8,000.00</td><td class="cr nil">—</td><td class="bal">65,200.50</td></tr>
+
+    <tr class="mhdr"><td colspan="6">▸&nbsp; April 2026 / أبريل ٢٠٢٦</td></tr>
+    <tr><td class="dt">02 Apr 2026</td><td class="desc"><div class="m">ETISALAT AUTO PMT</div><div class="a">اتصالات - سداد تلقائي</div></td><td class="ref">ENB260400001</td><td class="dr">349.00</td><td class="cr nil">—</td><td class="bal">64,851.50</td></tr>
+    <tr><td class="dt">04 Apr 2026</td><td class="desc"><div class="m">CARREFOUR HYPERMARKET MIRDIF</div><div class="a">كارفور هايبرماركت - مردف</div></td><td class="ref">ENB260400002</td><td class="dr">1,089.00</td><td class="cr nil">—</td><td class="bal">63,762.50</td></tr>
+    <tr><td class="dt">05 Apr 2026</td><td class="desc"><div class="m">ITTIHAD NATIONAL SCHOOL — FEES Q2-2026</div><div class="a">مدرسة الاتحاد الوطنية - رسوم الفصل الثاني</div></td><td class="ref">ENB260400003</td><td class="dr">8,500.00</td><td class="cr nil">—</td><td class="bal">55,262.50</td></tr>
+    <tr><td class="dt">07 Apr 2026</td><td class="desc"><div class="m">DEWA AUTO DEBIT — APR-2026</div><div class="a">هيئة كهرباء ومياه دبي - سداد تلقائي</div></td><td class="ref">ENB260400004</td><td class="dr">520.00</td><td class="cr nil">—</td><td class="bal">54,742.50</td></tr>
+    <tr><td class="dt">10 Apr 2026</td><td class="desc"><div class="m">ADIB CREDIT CARD PAYMENT</div><div class="a">سداد بطاقة ADIB الائتمانية</div></td><td class="ref">ENB260400005</td><td class="dr">2,500.00</td><td class="cr nil">—</td><td class="bal">52,242.50</td></tr>
+    <tr class="salary"><td class="dt">15 Apr 2026</td><td class="desc"><div class="m">SALARY CR — EMIRATES STEEL INDUSTRIES PJSC</div><div class="a">راتب - شركة الإمارات للصلب (ش.م.ع.)</div></td><td class="ref">ENB260400006</td><td class="dr nil">—</td><td class="cr">35,000.00</td><td class="bal">87,242.50</td></tr>
+    <tr><td class="dt">16 Apr 2026</td><td class="desc"><div class="m">SZH HOUSING LOAN INSTALLMENT</div><div class="a">قسط القرض العقاري - برنامج الشيخ زايد للإسكان</div></td><td class="ref">ENB260400007</td><td class="dr">4,200.00</td><td class="cr nil">—</td><td class="bal">83,042.50</td></tr>
+    <tr><td class="dt">18 Apr 2026</td><td class="desc"><div class="m">ENOC FUEL STATION — MIRDIF</div><div class="a">محطة وقود إينوك - مردف</div></td><td class="ref">ENB260400008</td><td class="dr">315.00</td><td class="cr nil">—</td><td class="bal">82,727.50</td></tr>
+    <tr><td class="dt">22 Apr 2026</td><td class="desc"><div class="m">SALIK AUTO RECHARGE</div><div class="a">سالك - إعادة شحن تلقائي</div></td><td class="ref">ENB260400009</td><td class="dr">200.00</td><td class="cr nil">—</td><td class="bal">82,527.50</td></tr>
+    <tr><td class="dt">26 Apr 2026</td><td class="desc"><div class="m">TRANSFER TO SAVINGS ACCOUNT **7890</div><div class="a">تحويل إلى حساب التوفير **٧٨٩٠</div></td><td class="ref">ENB260400010</td><td class="dr">10,000.00</td><td class="cr nil">—</td><td class="bal">72,527.50</td></tr>
+
+    <tr class="mhdr"><td colspan="6">▸&nbsp; May 2026 / مايو ٢٠٢٦</td></tr>
+    <tr><td class="dt">02 May 2026</td><td class="desc"><div class="m">ETISALAT AUTO PMT</div><div class="a">اتصالات - سداد تلقائي</div></td><td class="ref">ENB260500001</td><td class="dr">349.00</td><td class="cr nil">—</td><td class="bal">72,178.50</td></tr>
+    <tr><td class="dt">05 May 2026</td><td class="desc"><div class="m">CARREFOUR HYPERMARKET MIRDIF</div><div class="a">كارفور هايبرماركت - مردف</div></td><td class="ref">ENB260500002</td><td class="dr">1,234.00</td><td class="cr nil">—</td><td class="bal">70,944.50</td></tr>
+    <tr><td class="dt">07 May 2026</td><td class="desc"><div class="m">DEWA AUTO DEBIT — MAY-2026</div><div class="a">هيئة كهرباء ومياه دبي - سداد تلقائي</div></td><td class="ref">ENB260500003</td><td class="dr">612.00</td><td class="cr nil">—</td><td class="bal">70,332.50</td></tr>
+    <tr><td class="dt">10 May 2026</td><td class="desc"><div class="m">ADIB CREDIT CARD PAYMENT</div><div class="a">سداد بطاقة ADIB الائتمانية</div></td><td class="ref">ENB260500004</td><td class="dr">2,500.00</td><td class="cr nil">—</td><td class="bal">67,832.50</td></tr>
+    <tr class="salary"><td class="dt">15 May 2026</td><td class="desc"><div class="m">SALARY CR — EMIRATES STEEL INDUSTRIES PJSC</div><div class="a">راتب - شركة الإمارات للصلب (ش.م.ع.)</div></td><td class="ref">ENB260500005</td><td class="dr nil">—</td><td class="cr">35,000.00</td><td class="bal">102,832.50</td></tr>
+    <tr><td class="dt">16 May 2026</td><td class="desc"><div class="m">SZH HOUSING LOAN INSTALLMENT</div><div class="a">قسط القرض العقاري - برنامج الشيخ زايد للإسكان</div></td><td class="ref">ENB260500006</td><td class="dr">4,200.00</td><td class="cr nil">—</td><td class="bal">98,632.50</td></tr>
+    <tr><td class="dt">18 May 2026</td><td class="desc"><div class="m">ENOC FUEL STATION — MIRDIF</div><div class="a">محطة وقود إينوك - مردف</div></td><td class="ref">ENB260500007</td><td class="dr">290.00</td><td class="cr nil">—</td><td class="bal">98,342.50</td></tr>
+    <tr><td class="dt">22 May 2026</td><td class="desc"><div class="m">LULU HYPERMARKET — MIRDIF</div><div class="a">لولو هايبرماركت - مردف</div></td><td class="ref">ENB260500008</td><td class="dr">1,120.00</td><td class="cr nil">—</td><td class="bal">97,222.50</td></tr>
+    <tr><td class="dt">26 May 2026</td><td class="desc"><div class="m">TRANSFER TO SAVINGS ACCOUNT **7890</div><div class="a">تحويل إلى حساب التوفير **٧٨٩٠</div></td><td class="ref">ENB260500009</td><td class="dr">12,000.00</td><td class="cr nil">—</td><td class="bal">85,222.50</td></tr>
+    <tr><td class="dt">30 May 2026</td><td class="desc"><div class="m">ATM WITHDRAWAL — ITTIHAD RD BRANCH</div><div class="a">سحب نقدي من الصراف الآلي</div></td><td class="ref">ENB260500010</td><td class="dr">1,000.00</td><td class="cr nil">—</td><td class="bal">84,222.50</td></tr>
+
+    <tr class="mhdr"><td colspan="6">▸&nbsp; June 2026 / يونيو ٢٠٢٦</td></tr>
+    <tr><td class="dt">02 Jun 2026</td><td class="desc"><div class="m">ETISALAT AUTO PMT</div><div class="a">اتصالات - سداد تلقائي</div></td><td class="ref">ENB260600001</td><td class="dr">349.00</td><td class="cr nil">—</td><td class="bal">83,873.50</td></tr>
+    <tr><td class="dt">04 Jun 2026</td><td class="desc"><div class="m">CARREFOUR HYPERMARKET MIRDIF</div><div class="a">كارفور هايبرماركت - مردف</div></td><td class="ref">ENB260600002</td><td class="dr">1,456.00</td><td class="cr nil">—</td><td class="bal">82,417.50</td></tr>
+    <tr><td class="dt">07 Jun 2026</td><td class="desc"><div class="m">DEWA AUTO DEBIT — JUN-2026</div><div class="a">هيئة كهرباء ومياه دبي - سداد تلقائي</div></td><td class="ref">ENB260600003</td><td class="dr">734.00</td><td class="cr nil">—</td><td class="bal">81,683.50</td></tr>
+    <tr><td class="dt">09 Jun 2026</td><td class="desc"><div class="m">ADIB CREDIT CARD PAYMENT</div><div class="a">سداد بطاقة ADIB الائتمانية</div></td><td class="ref">ENB260600004</td><td class="dr">2,500.00</td><td class="cr nil">—</td><td class="bal">79,183.50</td></tr>
+    <tr class="salary"><td class="dt">15 Jun 2026</td><td class="desc"><div class="m">SALARY CR — EMIRATES STEEL INDUSTRIES PJSC</div><div class="a">راتب - شركة الإمارات للصلب (ش.م.ع.)</div></td><td class="ref">ENB260600005</td><td class="dr nil">—</td><td class="cr">35,000.00</td><td class="bal">114,183.50</td></tr>
+    <tr><td class="dt">16 Jun 2026</td><td class="desc"><div class="m">SZH HOUSING LOAN INSTALLMENT</div><div class="a">قسط القرض العقاري - برنامج الشيخ زايد للإسكان</div></td><td class="ref">ENB260600006</td><td class="dr">4,200.00</td><td class="cr nil">—</td><td class="bal">109,983.50</td></tr>
+    <tr><td class="dt">18 Jun 2026</td><td class="desc"><div class="m">ENOC FUEL STATION — MIRDIF</div><div class="a">محطة وقود إينوك - مردف</div></td><td class="ref">ENB260600007</td><td class="dr">310.00</td><td class="cr nil">—</td><td class="bal">109,673.50</td></tr>
+    <tr><td class="dt">20 Jun 2026</td><td class="desc"><div class="m">SALIK AUTO RECHARGE</div><div class="a">سالك - إعادة شحن تلقائي</div></td><td class="ref">ENB260600008</td><td class="dr">200.00</td><td class="cr nil">—</td><td class="bal">109,473.50</td></tr>
+    <tr><td class="dt">25 Jun 2026</td><td class="desc"><div class="m">LULU HYPERMARKET — MIRDIF</div><div class="a">لولو هايبرماركت - مردف</div></td><td class="ref">ENB260600009</td><td class="dr">1,234.00</td><td class="cr nil">—</td><td class="bal">108,239.50</td></tr>
+    <tr><td class="dt">28 Jun 2026</td><td class="desc"><div class="m">TRANSFER TO SAVINGS ACCOUNT **7890</div><div class="a">تحويل إلى حساب التوفير **٧٨٩٠</div></td><td class="ref">ENB260600010</td><td class="dr">15,000.00</td><td class="cr nil">—</td><td class="bal">93,239.50</td></tr>
+    <tr><td class="dt">30 Jun 2026</td><td class="desc"><div class="m">ATM WITHDRAWAL — DEIRA BRANCH</div><div class="a">سحب نقدي من الصراف الآلي - ديرة</div></td><td class="ref">ENB260600011</td><td class="dr">1,000.00</td><td class="cr nil">—</td><td class="bal">92,239.50</td></tr>
+  </tbody>
+</table>
+
+<!-- SUMMARY -->
+<div class="sum-grid">
+  <div class="sum-card t-blue">
+    <div class="lbl">Opening Balance<br><span class="ar">الرصيد الافتتاحي</span></div>
+    <div class="v" style="color:#003366">8,200.00</div>
+  </div>
+  <div class="sum-card t-red">
+    <div class="lbl">Total Debits<br><span class="ar">إجمالي المدينات</span></div>
+    <div class="v" style="color:#B82020">125,960.50</div>
+  </div>
+  <div class="sum-card t-green">
+    <div class="lbl">Total Credits<br><span class="ar">إجمالي الدائنات</span></div>
+    <div class="v" style="color:#006B3C">210,000.00</div>
+  </div>
+  <div class="sum-card t-green">
+    <div class="lbl">Closing Balance — 30 Jun 2026<br><span class="ar">الرصيد الختامي — ٣٠ يونيو ٢٠٢٦</span></div>
+    <div class="v" style="color:#003366">92,239.50</div>
+  </div>
+</div>
+
+<!-- SALARY VERIFICATION -->
+<div class="sal-box">
+  <div class="hd">✓ &nbsp;Salary Income Verification Summary &nbsp;|&nbsp; <span class="ar">ملخص التحقق من دخل الراتب</span></div>
+  <div class="sal-grid">
+    <div><span class="k">Employer: </span><span class="v">Emirates Steel Industries PJSC</span></div>
+    <div><span class="k">Monthly Salary: </span><span class="v">AED 35,000.00</span></div>
+    <div><span class="k">Credit Day: </span><span class="v">15th of each month</span></div>
+    <div><span class="k">Months Verified: </span><span class="v">6 (Jan – Jun 2026)</span></div>
+    <div><span class="k">Total Salary Received: </span><span class="v">AED 210,000.00</span></div>
+    <div><span class="k">Income Status: </span><span class="v ok">✓ VERIFIED — Regular Stable Income</span></div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div class="warn">
+    ⚠ This statement is computer-generated and valid without signature or stamp. For discrepancies contact Emirates NBD within 30 days of the statement date. &nbsp;|&nbsp;
+    هذا الكشف صادر آلياً وصالح بدون توقيع أو ختم. للاستفسار يرجى التواصل خلال ٣٠ يوماً من تاريخ الكشف.
+  </div>
+  <div class="footer-cols">
+    <div>
+      <strong>Emirates NBD Bank PJSC</strong> &nbsp;—&nbsp; P.O. Box 777, Dubai, UAE<br>
+      SWIFT: EBILAEAD &nbsp;|&nbsp; Central Bank Lic. No. 00002 &nbsp;|&nbsp; 600 54 0000 &nbsp;|&nbsp; emiratesnbd.com<br>
+      Licensed and regulated by the Central Bank of the UAE
     </div>
-
-    <!-- ═══ ACCOUNT INFO ═══ -->
-    <div class="account-info-grid">
-      <div class="account-card">
-        <div class="ac-label">Account Holder</div>
-        <div class="ac-value" style="font-family:'Inter',sans-serif;font-size:12px">Saeed M. Al-Mansoori</div>
-        <div class="ac-sub" style="font-family:'Cairo',sans-serif;direction:rtl">سعيد محمد المنصوري</div>
-      </div>
-      <div class="account-card">
-        <div class="ac-label">Account Number</div>
-        <div class="ac-value">1014 4488 9911 XXX</div>
-        <div class="ac-label" style="margin-top:6px">Emirates ID</div>
-        <div class="ac-value" style="font-size:11px">784-1985-4521458-1</div>
-      </div>
-      <div class="account-card highlight">
-        <div class="ac-label">Current Balance</div>
-        <div class="ac-value" style="font-size:18px">AED 12,450.00</div>
-        <div class="ac-sub">As of 01 June 2026</div>
-      </div>
+    <div class="ar-col">
+      <strong>بنك الإمارات دبي الوطني ش.م.ع.</strong><br>
+      مرخص من مصرف الإمارات العربية المتحدة المركزي<br>
+      Ref: ENBD-STM-2026-4521-H
     </div>
-
-    <!-- ═══ TRANSACTION HISTORY ═══ -->
-    <div class="section-label">Transaction History — سجل المعاملات</div>
-
-    <table class="txn-table">
-      <thead>
-        <tr>
-          <th style="width:90px">Date</th>
-          <th style="width:110px">Reference</th>
-          <th>Description</th>
-          <th style="width:95px">Debit (AED)</th>
-          <th style="width:95px">Credit (AED)</th>
-          <th style="width:95px">Balance (AED)</th>
-        </tr>
-      </thead>
-      <tbody>
-
-        <!-- JANUARY 2026 -->
-        <tr class="month-separator"><td colspan="6">◈ January 2026 — يناير 2026 &nbsp;|&nbsp; Opening Balance: AED 8,200.00</td></tr>
-        <tr>
-          <td class="txn-date">05/01/2026</td>
-          <td class="txn-ref">FT-9812-J01</td>
-          <td class="txn-desc">Emirates NBD Credit Card Payment</td>
-          <td class="txn-debit">3,200.00</td>
-          <td class="txn-credit"></td>
-          <td class="txn-balance">5,000.00</td>
-        </tr>
-        <tr>
-          <td class="txn-date">15/01/2026</td>
-          <td class="txn-ref">DD-4521-J03</td>
-          <td class="txn-desc">ADNOC Fuel Station — Al Mushrif</td>
-          <td class="txn-debit">850.00</td>
-          <td class="txn-credit"></td>
-          <td class="txn-balance">4,150.00</td>
-        </tr>
-        <tr>
-          <td class="txn-date">20/01/2026</td>
-          <td class="txn-ref">POS-7834-J05</td>
-          <td class="txn-desc">Lulu Hypermarket — Mussafah</td>
-          <td class="txn-debit">1,320.00</td>
-          <td class="txn-credit"></td>
-          <td class="txn-balance">2,830.00</td>
-        </tr>
-        <tr>
-          <td class="txn-date">25/01/2026</td>
-          <td class="txn-ref">DD-0044-J08</td>
-          <td class="txn-desc">ADDC — Abu Dhabi Distribution Utility</td>
-          <td class="txn-debit">780.00</td>
-          <td class="txn-credit"></td>
-          <td class="txn-balance">2,050.00</td>
-        </tr>
-        <tr>
-          <td class="txn-date">28/01/2026</td>
-          <td class="txn-ref">DD-5582-J10</td>
-          <td class="txn-desc">SZHP — Sheikh Zayed Housing Programme EMI</td>
-          <td class="txn-debit">4,500.00</td>
-          <td class="txn-credit"></td>
-          <td class="txn-balance">-2,450.00</td>
-        </tr>
-        <tr>
-          <td class="txn-date">31/01/2026</td>
-          <td class="txn-ref">SAL-001-J31</td>
-          <td class="txn-desc"><strong>ESI — Emirates Steel Industries Salary</strong></td>
-          <td class="txn-debit"></td>
-          <td class="txn-credit">35,000.00</td>
-          <td class="txn-balance">32,550.00</td>
-        </tr>
-
-        <!-- FEBRUARY 2026 -->
-        <tr class="month-separator"><td colspan="6">◈ February 2026 — فبراير 2026</td></tr>
-        <tr>
-          <td class="txn-date">04/02/2026</td>
-          <td class="txn-ref">FT-1102-F01</td>
-          <td class="txn-desc">Emirates NBD Credit Card Payment</td>
-          <td class="txn-debit">3,200.00</td>
-          <td class="txn-credit"></td>
-          <td class="txn-balance">29,350.00</td>
-        </tr>
-        <tr>
-          <td class="txn-date">10/02/2026</td>
-          <td class="txn-ref">POS-8831-F04</td>
-          <td class="txn-desc">GEMS Education — School Fees Q1</td>
-          <td class="txn-debit">7,500.00</td>
-          <td class="txn-credit"></td>
-          <td class="txn-balance">21,850.00</td>
-        </tr>
-        <tr>
-          <td class="txn-date">18/02/2026</td>
-          <td class="txn-ref">POS-2245-F06</td>
-          <td class="txn-desc">Carrefour Market — Mussafah Mall</td>
-          <td class="txn-debit">1,480.00</td>
-          <td class="txn-credit"></td>
-          <td class="txn-balance">20,370.00</td>
-        </tr>
-        <tr>
-          <td class="txn-date">25/02/2026</td>
-          <td class="txn-ref">DD-0045-F09</td>
-          <td class="txn-desc">ADDC — Abu Dhabi Distribution Utility</td>
-          <td class="txn-debit">720.00</td>
-          <td class="txn-credit"></td>
-          <td class="txn-balance">19,650.00</td>
-        </tr>
-        <tr>
-          <td class="txn-date">26/02/2026</td>
-          <td class="txn-ref">DD-5582-F10</td>
-          <td class="txn-desc">SZHP — Sheikh Zayed Housing Programme EMI</td>
-          <td class="txn-debit">4,500.00</td>
-          <td class="txn-credit"></td>
-          <td class="txn-balance">15,150.00</td>
-        </tr>
-        <tr>
-          <td class="txn-date">28/02/2026</td>
-          <td class="txn-ref">SAL-001-F28</td>
-          <td class="txn-desc"><strong>ESI — Emirates Steel Industries Salary</strong></td>
-          <td class="txn-debit"></td>
-          <td class="txn-credit">35,000.00</td>
-          <td class="txn-balance">50,150.00</td>
-        </tr>
-
-        <!-- MARCH 2026 -->
-        <tr class="month-separator"><td colspan="6">◈ March 2026 — مارس 2026</td></tr>
-        <tr>
-          <td class="txn-date">03/03/2026</td>
-          <td class="txn-ref">FT-3301-M01</td>
-          <td class="txn-desc">Emirates NBD Credit Card Payment</td>
-          <td class="txn-debit">3,200.00</td>
-          <td class="txn-credit"></td>
-          <td class="txn-balance">46,950.00</td>
-        </tr>
-        <tr>
-          <td class="txn-date">12/03/2026</td>
-          <td class="txn-ref">ATM-9923-M05</td>
-          <td class="txn-desc">ATM Withdrawal — Hamdan Street Branch</td>
-          <td class="txn-debit">2,000.00</td>
-          <td class="txn-credit"></td>
-          <td class="txn-balance">44,950.00</td>
-        </tr>
-        <tr>
-          <td class="txn-date">15/03/2026</td>
-          <td class="txn-ref">POS-5512-M06</td>
-          <td class="txn-desc">Sheikh Khalifa Medical City — Consultation</td>
-          <td class="txn-debit">850.00</td>
-          <td class="txn-credit"></td>
-          <td class="txn-balance">44,100.00</td>
-        </tr>
-        <tr>
-          <td class="txn-date">20/03/2026</td>
-          <td class="txn-ref">POS-7712-M09</td>
-          <td class="txn-desc">Carrefour Market — Khalidiyah</td>
-          <td class="txn-debit">1,210.00</td>
-          <td class="txn-credit"></td>
-          <td class="txn-balance">42,890.00</td>
-        </tr>
-        <tr>
-          <td class="txn-date">25/03/2026</td>
-          <td class="txn-ref">DD-0046-M11</td>
-          <td class="txn-desc">ADDC — Abu Dhabi Distribution Utility</td>
-          <td class="txn-debit">810.00</td>
-          <td class="txn-credit"></td>
-          <td class="txn-balance">42,080.00</td>
-        </tr>
-        <tr>
-          <td class="txn-date">27/03/2026</td>
-          <td class="txn-ref">MED-8872-M12</td>
-          <td class="txn-desc">Abu Dhabi Health Authority — Medical Leave</td>
-          <td class="txn-debit">5,200.00</td>
-          <td class="txn-credit"></td>
-          <td class="txn-balance">36,880.00</td>
-        </tr>
-        <tr>
-          <td class="txn-date">31/03/2026</td>
-          <td class="txn-ref">SAL-001-M31</td>
-          <td class="txn-desc"><strong>ESI — Emirates Steel Industries Salary (Partial — Medical Leave)</strong></td>
-          <td class="txn-debit"></td>
-          <td class="txn-credit">35,000.00</td>
-          <td class="txn-balance">71,880.00</td>
-        </tr>
-
-        <!-- APRIL 2026 -->
-        <tr class="month-separator"><td colspan="6">◈ April 2026 — أبريل 2026</td></tr>
-        <tr>
-          <td class="txn-date">03/04/2026</td>
-          <td class="txn-ref">FT-4401-A01</td>
-          <td class="txn-desc">Emirates NBD Credit Card Payment</td>
-          <td class="txn-debit">3,200.00</td>
-          <td class="txn-credit"></td>
-          <td class="txn-balance">68,680.00</td>
-        </tr>
-        <tr>
-          <td class="txn-date">08/04/2026</td>
-          <td class="txn-ref">MED-9901-A03</td>
-          <td class="txn-desc">Sheikh Khalifa Medical City — Treatment</td>
-          <td class="txn-debit">12,500.00</td>
-          <td class="txn-credit"></td>
-          <td class="txn-balance">56,180.00</td>
-        </tr>
-        <tr>
-          <td class="txn-date">14/04/2026</td>
-          <td class="txn-ref">POS-3341-A06</td>
-          <td class="txn-desc">Pharmacy Al Nahda — Medications</td>
-          <td class="txn-debit">2,840.00</td>
-          <td class="txn-credit"></td>
-          <td class="txn-balance">53,340.00</td>
-        </tr>
-        <tr>
-          <td class="txn-date">22/04/2026</td>
-          <td class="txn-ref">POS-6612-A10</td>
-          <td class="txn-desc">Lulu Hypermarket — Mussafah</td>
-          <td class="txn-debit">1,560.00</td>
-          <td class="txn-credit"></td>
-          <td class="txn-balance">51,780.00</td>
-        </tr>
-        <tr>
-          <td class="txn-date">30/04/2026</td>
-          <td class="txn-ref">SAL-001-A30</td>
-          <td class="txn-desc"><strong>ESI — Emirates Steel Industries Salary</strong></td>
-          <td class="txn-debit"></td>
-          <td class="txn-credit">35,000.00</td>
-          <td class="txn-balance">86,780.00</td>
-        </tr>
-
-        <!-- MAY 2026 -->
-        <tr class="month-separator"><td colspan="6">◈ May 2026 — مايو 2026</td></tr>
-        <tr>
-          <td class="txn-date">04/05/2026</td>
-          <td class="txn-ref">FT-5501-Y01</td>
-          <td class="txn-desc">Emirates NBD Credit Card Payment</td>
-          <td class="txn-debit">3,200.00</td>
-          <td class="txn-credit"></td>
-          <td class="txn-balance">83,580.00</td>
-        </tr>
-        <tr>
-          <td class="txn-date">10/05/2026</td>
-          <td class="txn-ref">POS-9121-Y04</td>
-          <td class="txn-desc">GEMS Education — School Fees Q2</td>
-          <td class="txn-debit">7,500.00</td>
-          <td class="txn-credit"></td>
-          <td class="txn-balance">76,080.00</td>
-        </tr>
-        <tr>
-          <td class="txn-date">16/05/2026</td>
-          <td class="txn-ref">ATM-2234-Y07</td>
-          <td class="txn-desc">ATM Withdrawal — Khalidiyah Branch</td>
-          <td class="txn-debit">3,000.00</td>
-          <td class="txn-credit"></td>
-          <td class="txn-balance">73,080.00</td>
-        </tr>
-        <tr>
-          <td class="txn-date">22/05/2026</td>
-          <td class="txn-ref">POS-4418-Y10</td>
-          <td class="txn-desc">Carrefour — Khalidiyah Mall</td>
-          <td class="txn-debit">1,680.00</td>
-          <td class="txn-credit"></td>
-          <td class="txn-balance">71,400.00</td>
-        </tr>
-        <tr>
-          <td class="txn-date">24/05/2026</td>
-          <td class="txn-ref">DD-0048-Y11</td>
-          <td class="txn-desc">ADDC — Abu Dhabi Distribution Utility</td>
-          <td class="txn-debit">950.00</td>
-          <td class="txn-credit"></td>
-          <td class="txn-balance">70,450.00</td>
-        </tr>
-        <tr>
-          <td class="txn-date">28/05/2026</td>
-          <td class="txn-ref">TRF-8831-Y14</td>
-          <td class="txn-desc">Bank Transfer — Family Support</td>
-          <td class="txn-debit">28,000.00</td>
-          <td class="txn-credit"></td>
-          <td class="txn-balance">42,450.00</td>
-        </tr>
-        <tr>
-          <td class="txn-date">31/05/2026</td>
-          <td class="txn-ref">SAL-001-Y31</td>
-          <td class="txn-desc"><strong>ESI — Emirates Steel Industries Salary</strong></td>
-          <td class="txn-debit"></td>
-          <td class="txn-credit">35,000.00</td>
-          <td class="txn-balance">77,450.00</td>
-        </tr>
-        <tr>
-          <td class="txn-date">31/05/2026</td>
-          <td class="txn-ref">TRF-9901-Y15</td>
-          <td class="txn-desc">Transfer to Savings — Fixed Deposit</td>
-          <td class="txn-debit">65,000.00</td>
-          <td class="txn-credit"></td>
-          <td class="txn-balance">12,450.00</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <!-- ═══ PERIOD SUMMARY ═══ -->
-    <div class="section-label">Period Summary (Jan–May 2026) — ملخص الفترة</div>
-    <div class="summary-grid">
-      <div class="sum-card">
-        <div class="sum-label">Total Credits</div>
-        <div class="sum-value income">175,000.00</div>
-        <div class="sum-label" style="margin-top:3px">AED</div>
-      </div>
-      <div class="sum-card">
-        <div class="sum-label">Total Debits</div>
-        <div class="sum-value expense">171,320.00</div>
-        <div class="sum-label" style="margin-top:3px">AED</div>
-      </div>
-      <div class="sum-card">
-        <div class="sum-label">Salary Credits</div>
-        <div class="sum-value count">5 × 35,000</div>
-        <div class="sum-label" style="margin-top:3px">AED 175,000 total</div>
-      </div>
-      <div class="sum-card" style="border-top: 3px solid #003169;">
-        <div class="sum-label">Closing Balance</div>
-        <div class="sum-value balance">12,450.00</div>
-        <div class="sum-label" style="margin-top:3px">AED · 01 Jun 2026</div>
-      </div>
-    </div>
-
-    <!-- ═══ NOTICE ═══ -->
-    <div class="notice-block">
-      <strong>IMPORTANT NOTICE:</strong> This statement is generated electronically and is valid without a signature or stamp. For any queries, please contact Emirates NBD Customer Care: 600 54 0000 or visit your nearest branch.
-      <div class="ar" style="font-family:'Cairo',sans-serif;direction:rtl">ملاحظة هامة: هذا الكشف صادر إلكترونياً ويُعدّ رسمياً دون الحاجة إلى توقيع أو ختم. للاستفسار: 0000 54 600</div>
-    </div>
-
-    <!-- ═══ BANK FOOTER ═══ -->
-    <div class="bank-footer">
-      <div class="bank-footer-left">
-        Emirates NBD Bank P.J.S.C. · Licensed by the UAE Central Bank<br>
-        Registered in the UAE: Commercial License No. 78423 · P.O. Box 777, Dubai<br>
-        SWIFT: EBILAEAD · www.emiratesnbd.com
-      </div>
-      <div class="bank-footer-right">
-        Statement Ref: ENBD-ST-2026-0088421<br>
-        Generated: 01 June 2026, 09:14:32 GST<br>
-        Page: 1 of 1
-      </div>
-    </div>
-
-    <div class="security-strip"></div>
-
-  </div><!-- end .content -->
-</div><!-- end .page -->
+  </div>
+</div>
 
 </body>
 </html>
